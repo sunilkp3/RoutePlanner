@@ -3,17 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bangalore Metro - Yometro Replica</title>
+  <title>Bangalore Metro Route Finder</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     .bg-purple-line { background-color: #8b5cf6; }
     .text-purple-line { color: #8b5cf6; }
     .border-purple-line { border-color: #8b5cf6; }
-    
+
     .bg-green-line { background-color: #10b981; }
     .text-green-line { color: #10b981; }
     .border-green-line { border-color: #10b981; }
+
+    .bg-yellow-line { background-color: #fbbf24; }
+    .text-yellow-line { color: #d97706; }
+    .border-yellow-line { border-color: #fbbf24; }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
@@ -27,7 +31,6 @@
         </div>
         <div>
           <h1 class="text-xl font-bold tracking-wide">Namma Metro Route Finder</h1>
-          <p class="text-xs text-slate-400">Yometro Replica for Bangalore</p>
         </div>
       </div>
       <span class="text-xs bg-indigo-900/60 text-indigo-300 px-3 py-1 rounded-full border border-indigo-700">
@@ -49,23 +52,33 @@
         <!-- From Station -->
         <div>
           <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">From Station</label>
-          <select id="fromStation" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="">Select Origin Station</option>
-          </select>
+          <input id="fromStation" type="text" list="stationOptions" placeholder="Type or select origin station" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" autocomplete="off" />
         </div>
 
         <!-- To Station -->
         <div>
           <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">To Station</label>
-          <select id="toStation" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="">Select Destination Station</option>
-          </select>
+          <input id="toStation" type="text" list="stationOptions" placeholder="Type or select destination station" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" autocomplete="off" />
         </div>
       </div>
+
+      <datalist id="stationOptions"></datalist>
 
       <button id="findRouteBtn" onclick="findRoute()" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-magnifying-glass"></i> Find Route & Fare
       </button>
+
+      <p class="mt-4 text-sm text-slate-600">
+        Yellow Line service is now included for the route from RV Road to Boomasandra via Electronic City.
+      </p>
+    </div>
+
+    <!-- Network Overview -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-map text-indigo-600"></i> Network Overview
+      </h3>
+      <div id="networkMap" class="rounded-xl border border-slate-200 bg-slate-50 p-3"></div>
     </div>
 
     <!-- Error Alert -->
@@ -94,6 +107,33 @@
         </div>
       </div>
 
+      <!-- Route Map -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-map-location-dot text-indigo-600"></i> Free Route Map
+        </h3>
+        <p class="text-sm text-slate-500 mb-4">A simple schematic view of the selected metro route.</p>
+        <div id="routeMap" class="rounded-xl border border-slate-200 bg-slate-50 p-3"></div>
+      </div>
+
+      <!-- Google Map Preview -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-location-dot text-indigo-600"></i> Live Google Map Preview
+        </h3>
+        <div class="rounded-xl border border-slate-200 overflow-hidden">
+          <iframe id="googleMapFrame" class="w-full h-72" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Map Preview"></iframe>
+        </div>
+      </div>
+
+      <!-- Journey Guidance -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-arrows-turn-right text-indigo-600"></i> Line Switch Guidance
+        </h3>
+        <div id="routeGuide" class="space-y-3"></div>
+      </div>
+
       <!-- Detailed Route List -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
         <h3 class="text-md font-semibold text-slate-700 mb-6 flex items-center gap-2">
@@ -109,7 +149,7 @@
   </main>
 
   <script>
-    // Bangalore Metro Network Data (Purple Line & Green Line)
+    // Bangalore Metro Network Data (Purple Line, Green Line, and Yellow Line)
     const purpleLine = [
       "Whitefield (Kadugodi)", "Hopefarm Channasandra", "Kadugodi Tree Park", 
       "Pattandur Agrahara", "Sri Sathya Sai Hospital", "Nallurhalli", 
@@ -137,6 +177,12 @@
       "Thalaghattapura", "Silk Institute"
     ];
 
+    const yellowLine = [
+      "RV Road", "Jayadeva", "Central Silk Board", "Bommanahalli",
+      "Kudlu Gate", "Electronic City", "Electronic City Phase 1",
+      "Electronic City Phase 2", "Boomasandra"
+    ];
+
     // Build Graph Adjancency List
     const graph = {};
     const stationLines = {};
@@ -160,22 +206,104 @@
     for (let i = 0; i < greenLine.length - 1; i++) {
       addEdge(greenLine[i], greenLine[i+1], "Green");
     }
+    for (let i = 0; i < yellowLine.length - 1; i++) {
+      addEdge(yellowLine[i], yellowLine[i+1], "Yellow");
+    }
 
-    // Populate Select Dropdowns
-    const allStations = Array.from(new Set([...purpleLine, ...greenLine])).sort();
-    const fromSelect = document.getElementById("fromStation");
-    const toSelect = document.getElementById("toStation");
+    // Interchange connections
+    const interchangeConnections = [
+      { from: "RV Road", to: "South End Circle", line: "Green" }
+    ];
 
-    allStations.forEach(st => {
-      const opt1 = document.createElement("option");
-      opt1.value = st;
-      opt1.textContent = st;
-      fromSelect.appendChild(opt1);
+    interchangeConnections.forEach(({ from, to, line }) => {
+      addEdge(from, to, line);
+    });
 
-      const opt2 = document.createElement("option");
-      opt2.value = st;
-      opt2.textContent = st;
-      toSelect.appendChild(opt2);
+    // Populate Search Suggestions
+    const allStations = Array.from(new Set([...purpleLine, ...greenLine, ...yellowLine])).sort();
+    const fromInput = document.getElementById("fromStation");
+    const toInput = document.getElementById("toStation");
+    const stationOptions = document.getElementById("stationOptions");
+
+    function populateStationSuggestions() {
+      stationOptions.innerHTML = "";
+      allStations.forEach(st => {
+        const opt = document.createElement("option");
+        opt.value = st;
+        stationOptions.appendChild(opt);
+      });
+    }
+
+    function resolveStationName(inputValue) {
+      const typedValue = (inputValue || "").trim();
+      if (!typedValue) return "";
+
+      const exactMatch = allStations.find(st => st.toLowerCase() === typedValue.toLowerCase());
+      if (exactMatch) return exactMatch;
+
+      const partialMatch = allStations.find(st => st.toLowerCase().includes(typedValue.toLowerCase()));
+      return partialMatch || "";
+    }
+
+    function updateMapPreview(from, to) {
+      const frame = document.getElementById("googleMapFrame");
+      const fromQuery = encodeURIComponent(from || "Bangalore Metro");
+      const toQuery = encodeURIComponent(to || "Bangalore Metro");
+      frame.src = `https://www.google.com/maps?q=${fromQuery}+to+${toQuery}&output=embed`;
+    }
+
+    function buildNetworkOverview() {
+      const container = document.getElementById("networkMap");
+      const lines = [
+        { name: "Purple", stations: purpleLine },
+        { name: "Yellow", stations: yellowLine },
+        { name: "Green", stations: greenLine }
+      ];
+
+      const width = 620;
+      const height = 220;
+      const padding = 40;
+      const laneY = { Purple: 70, Yellow: 110, Green: 150 };
+      const lineColors = { Purple: "#8b5cf6", Yellow: "#fbbf24", Green: "#10b981" };
+
+      const svg = lines.map(line => {
+        const stations = line.stations;
+        const step = (width - padding * 2) / Math.max(1, stations.length - 1);
+        const points = stations.map((station, index) => {
+          const x = padding + step * index;
+          const y = laneY[line.name];
+          return `<circle cx="${x}" cy="${y}" r="5" fill="${lineColors[line.name]}" />`;
+        }).join("");
+        return points;
+      }).join("");
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-52 rounded-lg bg-white">
+          <rect x="0" y="0" width="${width}" height="${height}" rx="16" fill="#f8fafc"></rect>
+          <line x1="${padding}" y1="70" x2="${width - padding}" y2="70" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
+          <line x1="${padding}" y1="110" x2="${width - padding}" y2="110" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
+          <line x1="${padding}" y1="150" x2="${width - padding}" y2="150" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
+          ${svg}
+        </svg>
+        <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-600">
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span> Purple Line</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Yellow Line</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Green Line</span>
+        </div>
+      `;
+    }
+
+    populateStationSuggestions();
+    buildNetworkOverview();
+    updateMapPreview("Bangalore Metro", "Bangalore Metro");
+
+    [fromInput, toInput].forEach(input => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          findRoute();
+        }
+      });
     });
 
     // Shortest Path Algorithm (BFS)
@@ -214,17 +342,120 @@
       return 60; // Max slab limit approx.
     }
 
+    function buildLineInstructions(path) {
+      if (!path || path.length < 2) return [];
+
+      const instructions = [];
+      let segmentStart = path[0].node;
+      let currentLine = path[1].line;
+
+      for (let i = 1; i < path.length; i++) {
+        const edgeLine = path[i].line;
+
+        if (i > 1 && edgeLine !== currentLine) {
+          instructions.push({
+            line: currentLine,
+            from: segmentStart,
+            to: path[i - 1].node,
+            switchAt: path[i - 1].node,
+            switchTo: edgeLine
+          });
+          segmentStart = path[i - 1].node;
+          currentLine = edgeLine;
+        }
+      }
+
+      instructions.push({
+        line: currentLine,
+        from: segmentStart,
+        to: path[path.length - 1].node,
+        switchAt: null,
+        switchTo: null
+      });
+
+      return instructions;
+    }
+
+    function buildMapVisualization(path) {
+      const container = document.getElementById("routeMap");
+      if (!path || path.length < 2) {
+        container.innerHTML = `
+          <div class="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+            Choose two stations to view a simple free-form metro map.
+          </div>
+        `;
+        return;
+      }
+
+      const width = 620;
+      const height = 220;
+      const padding = 32;
+      const lineColors = {
+        Purple: "#8b5cf6",
+        Yellow: "#fbbf24",
+        Green: "#10b981"
+      };
+      const laneY = {
+        Purple: 80,
+        Yellow: 120,
+        Green: 160
+      };
+
+      const points = path.map((step, idx) => {
+        const line = idx === 0 ? path[1].line : step.line;
+        const x = padding + (idx / Math.max(1, path.length - 1)) * (width - padding * 2);
+        const y = laneY[line] || 120;
+        return { x, y, line, station: step.node };
+      });
+
+      const segments = points.slice(1).map((point, idx) => {
+        const prev = points[idx];
+        return `<line x1="${prev.x}" y1="${prev.y}" x2="${point.x}" y2="${point.y}" stroke="${lineColors[prev.line] || '#64748b'}" stroke-width="6" stroke-linecap="round" />`;
+      }).join("");
+
+      const nodes = points.map((point) => `
+        <circle cx="${point.x}" cy="${point.y}" r="8" fill="${lineColors[point.line] || '#64748b'}" stroke="#fff" stroke-width="3" />
+      `).join("");
+
+      const stationList = `
+        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
+          ${points.map((point) => `<div class="rounded-md bg-white px-2 py-1 border border-slate-200">${point.station}</div>`).join("")}
+        </div>
+      `;
+
+      const legend = `
+        <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-600">
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span> Purple Line</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Yellow Line</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Green Line</span>
+        </div>
+      `;
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-56 rounded-lg bg-white">
+          <rect x="0" y="0" width="${width}" height="${height}" rx="16" fill="#f8fafc"></rect>
+          <line x1="${padding}" y1="80" x2="${width - padding}" y2="80" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
+          <line x1="${padding}" y1="120" x2="${width - padding}" y2="120" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
+          <line x1="${padding}" y1="160" x2="${width - padding}" y2="160" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
+          ${segments}
+          ${nodes}
+        </svg>
+        ${legend}
+        ${stationList}
+      `;
+    }
+
     // Handle Search Button Click
     function findRoute() {
-      const from = fromSelect.value;
-      const to = toSelect.value;
+      const from = resolveStationName(fromInput.value);
+      const to = resolveStationName(toInput.value);
       const errorAlert = document.getElementById("errorAlert");
       const resultCard = document.getElementById("resultCard");
 
       errorAlert.classList.add("hidden");
 
       if (!from || !to) {
-        errorAlert.textContent = "Please select both origin and destination stations.";
+        errorAlert.textContent = "Please type or choose valid origin and destination stations.";
         errorAlert.classList.remove("hidden");
         return;
       }
@@ -264,6 +495,36 @@
       document.getElementById("resCount").textContent = stationCount;
       document.getElementById("resInterchange").textContent = interchangeCount;
 
+      updateMapPreview(from, to);
+
+      const instructions = buildLineInstructions(path);
+      const routeGuide = document.getElementById("routeGuide");
+      routeGuide.innerHTML = "";
+
+      instructions.forEach((step, idx) => {
+        const card = document.createElement("div");
+        card.className = "rounded-lg border border-slate-200 bg-slate-50 p-3";
+
+        const lineLabel = step.line === "Purple" ? "Purple Line" : step.line === "Yellow" ? "Yellow Line" : "Green Line";
+        const lineColor = step.line === "Purple" ? "text-purple-line" : step.line === "Yellow" ? "text-yellow-line" : "text-green-line";
+
+        if (step.switchAt) {
+          card.innerHTML = `
+            <p class="font-semibold text-slate-800">${idx + 1}. Take ${lineLabel} from ${step.from} to ${step.to}</p>
+            <p class="text-sm ${lineColor} mt-1">Switch to ${step.switchTo === "Purple" ? "Purple Line" : step.switchTo === "Yellow" ? "Yellow Line" : "Green Line"} at ${step.switchAt}</p>
+          `;
+        } else {
+          card.innerHTML = `
+            <p class="font-semibold text-slate-800">${idx + 1}. Continue on ${lineLabel} from ${step.from} to ${step.to}</p>
+            <p class="text-sm ${lineColor} mt-1">No further line change required for the rest of the trip.</p>
+          `;
+        }
+
+        routeGuide.appendChild(card);
+      });
+
+      buildMapVisualization(path);
+
       // Build Timeline HTML
       const timeline = document.getElementById("routeTimeline");
       timeline.innerHTML = "";
@@ -278,8 +539,8 @@
           isInterchange = true;
         }
 
-        const lineBg = line === "Purple" ? "bg-purple-line" : "bg-green-line";
-        const lineText = line === "Purple" ? "text-purple-line" : "text-green-line";
+        const lineBg = line === "Purple" ? "bg-purple-line" : line === "Yellow" ? "bg-yellow-line" : "bg-green-line";
+        const lineText = line === "Purple" ? "text-purple-line" : line === "Yellow" ? "text-yellow-line" : "text-green-line";
 
         const node = document.createElement("div");
         node.className = "relative flex items-start gap-4";
