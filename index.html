@@ -3,7 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Namma Metro - Live GPS Route & Platform Navigator</title>
+  
+  <!-- SEO & Search Engine Optimization -->
+  <title>Namma Metro Route Finder - Real-Time Bengaluru GPS & Train Navigator</title>
+  <meta name="description" content="Live GPS-enabled Namma Metro route finder for Bengaluru. Search stations, view bi-directional schedules, fare estimates, and station-by-station live train arrival times." />
+  <meta name="keywords" content="Namma Metro, Bengaluru Metro Route, Purple Line, Green Line, Yellow Line, Majestic Interchange, Metro Fares, Live Metro Schedule" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Namma Metro Navigator" />
+  
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Namma Metro Live GPS Route Finder & Platform Navigator" />
+  <meta property="og:description" content="Calculate metro routes, view bi-directional train schedules, platform directions, and real-time station arrival times in Bengaluru." />
+
+  <!-- Schema.org Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Namma Metro Navigator",
+    "applicationCategory": "TravelApplication",
+    "operatingSystem": "All",
+    "description": "Live GPS route finder, schedule tracker, and platform navigator for Namma Metro Bengaluru."
+  }
+  </script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -48,7 +72,6 @@
     .header h1 { font-size: 1.35rem; color: var(--accent); }
     .header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
 
-    /* Live Digital Clock Header Banner */
     .clock-banner {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border);
@@ -82,10 +105,7 @@
 
     label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
 
-    .input-wrapper {
-      position: relative;
-      width: 100%;
-    }
+    .input-wrapper { position: relative; width: 100%; }
 
     input, button {
       width: 100%;
@@ -99,11 +119,7 @@
     }
 
     input:focus { border-color: var(--accent); }
-    input:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background: #1e293b;
-    }
+    input:disabled { opacity: 0.6; cursor: not-allowed; background: #1e293b; }
 
     .autocomplete-results {
       position: absolute;
@@ -134,44 +150,18 @@
     }
 
     .autocomplete-item:last-child { border-bottom: none; }
-    .autocomplete-item:hover {
-      background: #1e293b;
-      color: var(--accent);
-    }
+    .autocomplete-item:hover { background: #1e293b; color: var(--accent); }
 
-    .line-badge-sm {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
+    .line-badge-sm { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
     .line-badge-sm.Purple { background: var(--purple-line); color: #fff; }
     .line-badge-sm.Green { background: var(--green-line); color: #fff; }
     .line-badge-sm.Yellow { background: var(--yellow-line); color: #000; }
     .line-badge-sm.Interchange { background: #f59e0b; color: #000; }
 
-    .btn-group {
-      display: flex;
-      gap: 10px;
-    }
+    .btn-group { display: flex; gap: 10px; }
 
-    button.primary-btn {
-      background: var(--accent);
-      color: #0f172a;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: opacity 0.2s;
-    }
-
-    button.secondary-btn {
-      background: #334155;
-      color: var(--text);
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-    }
-
+    button.primary-btn { background: var(--accent); color: #0f172a; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.2s; }
+    button.secondary-btn { background: #334155; color: var(--text); font-weight: 600; cursor: pointer; border: 1px solid var(--border); }
     button.primary-btn:hover, button.secondary-btn:hover { opacity: 0.9; }
 
     .gps-btn {
@@ -189,12 +179,7 @@
       margin-top: 6px;
     }
 
-    .gps-status {
-      font-size: 0.8rem;
-      color: var(--accent);
-      margin-top: 6px;
-      line-height: 1.3;
-    }
+    .gps-status { font-size: 0.8rem; color: var(--accent); margin-top: 6px; line-height: 1.3; }
 
     .metrics-grid {
       display: grid;
@@ -214,27 +199,36 @@
     .metric-card .val { font-size: 1.1rem; font-weight: bold; color: var(--accent); }
     .metric-card .lbl { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
 
+    /* Dual / Direction Train Box Styles */
+    .dual-train-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
     .next-train-box {
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
       padding: 10px 12px;
       border-radius: 8px;
-      margin-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
     }
 
-    .next-train-box .time-title { font-size: 0.8rem; color: var(--text-muted); }
-    .next-train-box .time-val { font-size: 1rem; font-weight: 700; color: #38bdf8; white-space: nowrap; }
-
-    .route-timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      position: relative;
+    .next-train-box.active-route-dir {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.16);
     }
+
+    .next-train-box .time-title { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .next-train-box .time-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .next-train-box .time-val { font-size: 0.95rem; font-weight: 700; color: #38bdf8; white-space: nowrap; text-align: right; }
+    .next-train-box .time-val.no-service { color: var(--highlight); }
+
+    .route-timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
 
     .step {
       display: flex;
@@ -246,7 +240,6 @@
     }
 
     .step:last-child { padding-bottom: 0; }
-
     .step::before {
       content: '';
       position: absolute;
@@ -279,15 +272,9 @@
     .badge.interchange { background: #f59e0b; color: black; }
 
     .step-content { flex: 1; min-width: 0; }
-    
-    .step-header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
+    .step-header-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .step-title { font-weight: 600; font-size: 0.9rem; word-break: break-word; }
+    
     .arrival-time-tag {
       font-size: 0.75rem;
       font-weight: 700;
@@ -297,6 +284,12 @@
       border-radius: 4px;
       border: 1px solid rgba(56, 189, 248, 0.2);
       white-space: nowrap;
+    }
+
+    .arrival-time-tag.no-service-tag {
+      color: var(--highlight);
+      background: rgba(244, 63, 94, 0.1);
+      border-color: rgba(244, 63, 94, 0.3);
     }
 
     .step-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
@@ -309,10 +302,7 @@
       border-radius: 8px;
     }
 
-    .step.live-location-active .badge {
-      box-shadow: 0 0 10px var(--highlight);
-      border: 2px solid #ffffff;
-    }
+    .step.live-location-active .badge { box-shadow: 0 0 10px var(--highlight); border: 2px solid #ffffff; }
 
     .live-tag {
       display: inline-block;
@@ -327,11 +317,7 @@
       animation: pulse 1.5s infinite;
     }
 
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
     .platform-tag {
       display: inline-block;
@@ -355,7 +341,13 @@
       margin-top: 6px;
     }
 
-    /* Footer & Terms */
+    .alert.danger {
+      background: rgba(244, 63, 94, 0.1);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fda4af;
+      margin-bottom: 12px;
+    }
+
     footer {
       width: 100%;
       max-width: 680px;
@@ -368,15 +360,8 @@
       line-height: 1.5;
     }
 
-    footer p.disclaimer {
-      margin-bottom: 8px;
-      color: #64748b;
-    }
-
-    footer p.copyright {
-      font-weight: 600;
-      color: var(--text-muted);
-    }
+    footer p.disclaimer { margin-bottom: 8px; color: #64748b; }
+    footer p.copyright { font-weight: 600; color: var(--text-muted); }
 
     @media (max-width: 480px) {
       body { padding: 10px; }
@@ -391,31 +376,31 @@
 <body>
 
 <div class="container">
-  <div class="header">
+  <header class="header">
     <h1>Namma Metro Route Finder</h1>
     <p>Bengaluru Metro • Live Schedule & Platform Switch Navigator</p>
     <div class="clock-banner">
       🕒 Current Location Time: <span id="live-clock">--:--:-- --</span>
     </div>
-  </div>
+  </header>
 
-  <div class="card">
+  <main class="card">
     <div class="form-group">
       <label for="from-input">From (Boarding Station)</label>
       <div class="input-wrapper">
-        <input type="text" id="from-input" placeholder="Search boarding station..." autocomplete="off" />
+        <input type="text" id="from-input" placeholder="Detecting nearest station via GPS..." autocomplete="off" />
         <div id="from-results" class="autocomplete-results"></div>
       </div>
       <button type="button" id="tracking-btn" class="gps-btn" onclick="toggleLiveTracking()">
-        📡 Enable Continuous Live Tracking
+        🛑 Stop Live Tracking
       </button>
-      <div id="gps-status" class="gps-status">GPS Tracking is disabled.</div>
+      <div id="gps-status" class="gps-status">Connecting to live GPS positioning...</div>
     </div>
 
     <div class="form-group">
       <label for="to-input">To (Destination Station)</label>
       <div class="input-wrapper">
-        <input type="text" id="to-input" placeholder="Search destination station..." autocomplete="off" />
+        <input type="text" id="to-input" placeholder="Search destination station to calculate route..." autocomplete="off" />
         <div id="to-results" class="autocomplete-results"></div>
       </div>
     </div>
@@ -424,9 +409,21 @@
       <button class="primary-btn" id="calc-btn" onclick="calculateRoute()">Calculate Route</button>
       <button class="secondary-btn" id="edit-btn" onclick="unlockInputs()" style="display: none;">Edit Route</button>
     </div>
-  </div>
+  </main>
 
-  <div id="result-card" class="card" style="display: none;">
+  <!-- Unselected Mode Card: Shows Dual-Direction Live Schedules -->
+  <section id="unselected-card" class="card" style="display: block;">
+    <h3 style="margin-bottom: 10px; font-size: 0.85rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;">
+      📍 BOARDING STATION: BOTH UPCOMING DIRECTIONS
+    </h3>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+      Select a destination above to see your exact single journey route and live station timetable.
+    </p>
+    <div class="dual-train-container" id="unselected-dual-container"></div>
+  </section>
+
+  <!-- Selected Mode Card: Shows Single Journey Path, Next Train, and Live Station Times -->
+  <section id="result-card" class="card" style="display: none;">
     <div class="metrics-grid">
       <div class="metric-card">
         <div class="val" id="metric-fare">₹0</div>
@@ -442,22 +439,25 @@
       </div>
     </div>
 
-    <div class="next-train-box">
-      <div>
-        <div class="time-title">Next Boarding Train</div>
-        <div id="next-train-dir" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;"></div>
-      </div>
-      <div class="time-val" id="metric-next-train">-- mins</div>
+    <h3 style="margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">
+      NEXT TRAIN FOR YOUR SELECTED ROUTE
+    </h3>
+    <div class="dual-train-container" id="single-route-train-container"></div>
+
+    <div id="no-service-banner" class="alert danger" style="display: none;">
+      <strong>⚠️ Metro Services Closed:</strong> Train operations are closed for the night (05:00 AM – 11:05 PM). Timestamps along the route are unavailable during non-operational hours.
     </div>
 
-    <h3 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">LIVE JOURNEY DIRECTIONS & ARRIVAL SCHEDULE</h3>
+    <h3 style="margin: 16px 0 12px 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+      LIVE JOURNEY PATH & STATION ARRIVAL TIMES
+    </h3>
     <div class="route-timeline" id="timeline"></div>
-  </div>
+  </section>
 </div>
 
 <footer>
   <p class="disclaimer">
-    <strong>Terms & Conditions:</strong> Train schedules, platform directions, fares, and arrival times are approximately calculated based on standard train speeds and schedules. Data is subjected to change due to operational delays or BMRCL adjustments.
+    <strong>Terms & Conditions:</strong> Train schedules, platform directions, fares, and arrival times are calculated based on live time and standard BMRCL operational parameters.
   </p>
   <p class="copyright">
     &copy; <span id="year"></span> Namma Metro Navigator. All rights reserved.
@@ -468,11 +468,8 @@
   let watchId = null;
   let isTracking = false;
   let currentNearestStation = null;
-  let hasAutoSelectedFrom = false;
   let isLocked = false;
-  let nextTrainDepartureTime = null;
 
-  // Station Coordinates
   const STATIONS = {
     // PURPLE LINE
     "Challaghatta": { line: "Purple Line", order: 1, lat: 12.9090, lng: 77.4640 },
@@ -656,7 +653,6 @@
 
   const stationNames = Object.keys(STATIONS).sort();
 
-  // 1. Live Clock Functionality
   function updateLiveClock() {
     const now = new Date();
     document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -666,7 +662,6 @@
 
   document.getElementById('year').innerText = new Date().getFullYear();
 
-  // 2. Setup Custom Autocomplete Dropdown Attached Beneath Fields
   function setupAutocomplete(inputId, resultsId) {
     const input = document.getElementById(inputId);
     const results = document.getElementById(resultsId);
@@ -695,6 +690,10 @@
           e.preventDefault();
           input.value = st;
           results.style.display = 'none';
+          
+          if (inputId === 'from-input' && !isLocked) {
+            renderUnselectedDualDirections(st);
+          }
         });
 
         results.appendChild(item);
@@ -703,24 +702,20 @@
       results.style.display = 'block';
     }
 
-    input.addEventListener('focus', () => {
-      if (!input.disabled) renderResults(input.value);
+    input.addEventListener('focus', () => { if (!input.disabled) renderResults(input.value); });
+    input.addEventListener('input', () => { 
+      if (!input.disabled) {
+        renderResults(input.value);
+        if (inputId === 'from-input' && STATIONS[input.value.trim()]) {
+          renderUnselectedDualDirections(input.value.trim());
+        }
+      }
     });
-
-    input.addEventListener('input', () => {
-      if (!input.disabled) renderResults(input.value);
-    });
-
-    input.addEventListener('blur', () => {
-      setTimeout(() => { results.style.display = 'none'; }, 150);
-    });
+    input.addEventListener('blur', () => { setTimeout(() => { results.style.display = 'none'; }, 150); });
   }
 
   setupAutocomplete('from-input', 'from-results');
   setupAutocomplete('to-input', 'to-results');
-
-  document.getElementById('from-input').value = "Indiranagar";
-  document.getElementById('to-input').value = "Electronic City";
 
   function getDistanceInKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -733,28 +728,20 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  function toggleLiveTracking() {
+  function startGPSLiveTracking() {
     const statusDiv = document.getElementById('gps-status');
     const btn = document.getElementById('tracking-btn');
 
-    if (isTracking) {
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      isTracking = false;
-      currentNearestStation = null;
-      btn.innerText = "📡 Enable Continuous Live Tracking";
-      statusDiv.innerText = "GPS Tracking is disabled.";
-      if (isLocked) calculateRoute(true);
-      return;
-    }
-
     if (!("geolocation" in navigator)) {
-      statusDiv.innerText = "Geolocation not supported by browser.";
+      statusDiv.innerText = "Geolocation not supported by your browser.";
+      document.getElementById('from-input').value = "Indiranagar";
+      renderUnselectedDualDirections("Indiranagar");
       return;
     }
 
     isTracking = true;
     btn.innerText = "🛑 Stop Live Tracking";
-    statusDiv.innerText = "Connecting to GPS signals...";
+    statusDiv.innerText = "Connecting to live GPS positioning...";
 
     watchId = navigator.geolocation.watchPosition(
       (position) => {
@@ -777,9 +764,9 @@
           currentNearestStation = nearestStation;
           const distInMeters = (minDistance * 1000).toFixed(0);
 
-          if (!hasAutoSelectedFrom && !isLocked) {
+          if (!isLocked) {
             document.getElementById('from-input').value = nearestStation;
-            hasAutoSelectedFrom = true;
+            renderUnselectedDualDirections(nearestStation);
           }
 
           statusDiv.innerHTML = `📡 Live GPS: Nearest to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
@@ -790,10 +777,30 @@
         }
       },
       (err) => {
-        statusDiv.innerText = "GPS signal lost or permission denied.";
+        statusDiv.innerText = "GPS signal unavailable. Please select station manually.";
+        if (!document.getElementById('from-input').value) {
+          document.getElementById('from-input').value = "Indiranagar";
+          renderUnselectedDualDirections("Indiranagar");
+        }
       },
       { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 }
     );
+  }
+
+  function toggleLiveTracking() {
+    const statusDiv = document.getElementById('gps-status');
+    const btn = document.getElementById('tracking-btn');
+
+    if (isTracking) {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      isTracking = false;
+      currentNearestStation = null;
+      btn.innerText = "📡 Enable Continuous Live Tracking";
+      statusDiv.innerText = "GPS Tracking is disabled.";
+      if (isLocked) calculateRoute(true);
+    } else {
+      startGPSLiveTracking();
+    }
   }
 
   function findShortestPath(start, goal) {
@@ -868,14 +875,15 @@
     }
   }
 
-  function getNextTrainArrival(platformInfo) {
+  function getNextTrainArrival(directionText, offsetMinutes = 0) {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const totalMins = hours * 60 + minutes;
 
+    // Metro Operating Hours: 05:00 AM (300 mins) to 11:05 PM (1385 mins)
     if (totalMins < 300 || totalMins > 1385) {
-      return { mins: "No Service", detail: "Metros operate 05:00 AM - 11:05 PM", dateObj: null };
+      return { mins: "No Service", detail: "Metros operate 05:00 AM - 11:05 PM", dateObj: null, isAvailable: false };
     }
 
     let headway = 8;
@@ -885,11 +893,74 @@
       headway = 12;
     }
 
-    const nextMins = headway - (minutes % headway);
+    let nextMins = (headway - ((minutes + offsetMinutes) % headway));
+    if (nextMins <= 0) nextMins += headway;
+
     const depTime = new Date(now.getTime() + nextMins * 60000);
     const depTimeString = depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    return { mins: `${nextMins} min${nextMins > 1 ? 's' : ''}`, detail: `Expected at ${depTimeString} (${platformInfo.direction})`, dateObj: depTime };
+    return { mins: `${nextMins} min${nextMins > 1 ? 's' : ''}`, detail: `Expected at ${depTimeString} (${directionText})`, dateObj: depTime, isAvailable: true };
+  }
+
+  // Renders Both Directions when Destination is NOT selected yet
+  function renderUnselectedDualDirections(boardingStation) {
+    const container = document.getElementById('unselected-dual-container');
+    container.innerHTML = '';
+
+    if (!STATIONS[boardingStation]) return;
+
+    const line = STATIONS[boardingStation]?.line === "Interchange" ? "Purple Line" : STATIONS[boardingStation]?.line;
+    let directions = [];
+
+    if (line === "Purple Line") {
+      directions = [
+        { label: "Platform 1", dir: "Towards Whitefield (Kadugodi)", offset: 0 },
+        { label: "Platform 2", dir: "Towards Challaghatta", offset: 3 }
+      ];
+    } else if (line === "Green Line") {
+      directions = [
+        { label: "Platform 1", dir: "Towards Silk Institute", offset: 0 },
+        { label: "Platform 2", dir: "Towards Madavara", offset: 4 }
+      ];
+    } else {
+      directions = [
+        { label: "Platform 1", dir: "Towards Delta Electronics Bommasandra", offset: 0 },
+        { label: "Platform 2", dir: "Towards RV Road", offset: 3 }
+      ];
+    }
+
+    directions.forEach(d => {
+      const schedule = getNextTrainArrival(d.dir, d.offset);
+      const box = document.createElement('div');
+      box.className = 'next-train-box';
+      box.innerHTML = `
+        <div>
+          <div class="time-title">${d.label} • ${d.dir}</div>
+          <div class="time-sub">${schedule.detail}</div>
+        </div>
+        <div class="time-val ${!schedule.isAvailable ? 'no-service' : ''}">${schedule.mins}</div>
+      `;
+      container.appendChild(box);
+    });
+  }
+
+  // Renders ONLY the Selected Single Route Next Train
+  function renderSingleSelectedRouteTrain(platInfo) {
+    const container = document.getElementById('single-route-train-container');
+    container.innerHTML = '';
+
+    const schedule = getNextTrainArrival(platInfo.direction, 0);
+    const box = document.createElement('div');
+    box.className = 'next-train-box active-route-dir';
+    box.innerHTML = `
+      <div>
+        <div class="time-title">${platInfo.platform} • ${platInfo.direction} <span class="live-tag">YOUR ROUTE</span></div>
+        <div class="time-sub">${schedule.detail}</div>
+      </div>
+      <div class="time-val ${!schedule.isAvailable ? 'no-service' : ''}">${schedule.mins}</div>
+    `;
+    container.appendChild(box);
+    return schedule;
   }
 
   function freezeInputs() {
@@ -904,7 +975,12 @@
     document.getElementById('from-input').disabled = false;
     document.getElementById('to-input').disabled = false;
     document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('unselected-card').style.display = 'block';
     isLocked = false;
+
+    const currentFrom = document.getElementById('from-input').value.trim();
+    if (currentFrom) renderUnselectedDualDirections(currentFrom);
   }
 
   function calculateRoute(isGpsUpdate = false) {
@@ -912,17 +988,17 @@
     const end = document.getElementById('to-input').value.trim();
 
     if (!STATIONS[start]) {
-      alert("Please select a valid boarding station from the search dropdown!");
+      if (!isGpsUpdate) alert("Please select a valid boarding station from the search dropdown!");
       return;
     }
 
-    if (!STATIONS[end]) {
-      alert("Please select a valid destination station from the search dropdown!");
+    if (!end || !STATIONS[end]) {
+      if (!isGpsUpdate) alert("Please select a valid destination station to calculate your journey!");
       return;
     }
 
     if (start === end) {
-      alert("Source and Destination cannot be the same!");
+      if (!isGpsUpdate) alert("Source and Destination cannot be the same!");
       return;
     }
 
@@ -932,6 +1008,10 @@
     if (!isGpsUpdate) {
       freezeInputs();
     }
+
+    // Switch view from Unselected (Dual) to Selected (Single Path)
+    document.getElementById('unselected-card').style.display = 'none';
+    document.getElementById('result-card').style.display = 'block';
 
     const totalStops = path.length - 1;
     const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("RV Road");
@@ -943,11 +1023,15 @@
     document.getElementById('metric-stops').innerText = totalStops;
 
     const firstPlatInfo = getPlatformDetails(path[0], path[1]);
-    const trainArrival = getNextTrainArrival(firstPlatInfo);
-    document.getElementById('metric-next-train').innerText = trainArrival.mins;
-    document.getElementById('next-train-dir').innerText = trainArrival.detail;
+    const trainArrival = renderSingleSelectedRouteTrain(firstPlatInfo);
 
-    // Base departure time calculation for station-by-station arrival estimation
+    const noServiceBanner = document.getElementById('no-service-banner');
+    if (!trainArrival.isAvailable) {
+      noServiceBanner.style.display = 'block';
+    } else {
+      noServiceBanner.style.display = 'none';
+    }
+
     let runningTime = trainArrival.dateObj ? new Date(trainArrival.dateObj.getTime()) : new Date();
 
     const timeline = document.getElementById('timeline');
@@ -962,7 +1046,6 @@
       const nextStation = path[i + 1];
       const isLivePos = (currentNearestStation === station);
 
-      // Increment arrival time per station stop (2.5 mins per segment, +5 mins if interchange)
       if (i > 0) {
         const prevStation = path[i - 1];
         const isPrevInterchange = STATIONS[prevStation]?.line === "Interchange";
@@ -970,7 +1053,10 @@
         runningTime = new Date(runningTime.getTime() + extraMins * 60000);
       }
 
-      const formattedArrivalTime = runningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      // Display live timestamp ONLY if service is currently available
+      const timeTagHTML = trainArrival.isAvailable 
+        ? `<span class="arrival-time-tag">${isStart ? 'Dep:' : 'Arr:'} ${runningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`
+        : `<span class="arrival-time-tag no-service-tag">No Service</span>`;
 
       let stepDiv = document.createElement('div');
       stepDiv.className = 'step' + (isLivePos ? ' live-location-active' : '');
@@ -988,7 +1074,7 @@
                 Boarding at ${station}
                 ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
               </div>
-              <span class="arrival-time-tag">Dep: ${formattedArrivalTime}</span>
+              ${timeTagHTML}
             </div>
             <div class="step-desc">Board the <strong>${currentLine}</strong> train.</div>
             <div class="platform-tag">${platInfo.platform} • ${platInfo.direction}</div>
@@ -1004,7 +1090,7 @@
                 Arrive at ${station}
                 ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
               </div>
-              <span class="arrival-time-tag">Arr: ${formattedArrivalTime}</span>
+              ${timeTagHTML}
             </div>
             <div class="step-desc">Exit through fare gates. Journey complete.</div>
           </div>
@@ -1022,7 +1108,7 @@
                 Interchange at ${station}
                 ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
               </div>
-              <span class="arrival-time-tag">Arr: ${formattedArrivalTime}</span>
+              ${timeTagHTML}
             </div>
             ${lineChanged ? `<div class="alert"><strong>Line Switch:</strong> Transfer to <strong>${nextPlat.line}</strong> using concourse walkway/stairs.</div>` : ''}
             <div class="platform-tag">${nextPlat.platform} • ${nextPlat.direction}</div>
@@ -1038,7 +1124,7 @@
                 ${station}
                 ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
               </div>
-              <span class="arrival-time-tag">Arr: ${formattedArrivalTime}</span>
+              ${timeTagHTML}
             </div>
             <div class="step-desc">En-route station</div>
           </div>
@@ -1047,12 +1133,10 @@
 
       timeline.appendChild(stepDiv);
     }
-
-    document.getElementById('result-card').style.display = 'block';
   }
 
   window.onload = function() {
-    calculateRoute();
+    startGPSLiveTracking();
   };
 </script>
 </body>
