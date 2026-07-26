@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bangalore Metro - Yometro Replica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    .bg-purple-line { background-color: #8b5cf6; }
+    .text-purple-line { color: #8b5cf6; }
+    .border-purple-line { border-color: #8b5cf6; }
+    
+    .bg-green-line { background-color: #10b981; }
+    .text-green-line { color: #10b981; }
+    .border-green-line { border-color: #10b981; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-slate-900 text-white py-4 px-6 shadow-md">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 text-white p-2 rounded-lg text-xl font-bold">
+          <i class="fa-solid fa-train-subway"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide">Namma Metro Route Finder</h1>
+          <p class="text-xs text-slate-400">Yometro Replica for Bangalore</p>
+        </div>
+      </div>
+      <span class="text-xs bg-indigo-900/60 text-indigo-300 px-3 py-1 rounded-full border border-indigo-700">
+        Live Network
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
+
+    <!-- Search Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <h2 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-route text-indigo-600"></i> Plan Your Journey
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- From Station -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">From Station</label>
+          <select id="fromStation" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Select Origin Station</option>
+          </select>
+        </div>
+
+        <!-- To Station -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">To Station</label>
+          <select id="toStation" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Select Destination Station</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="findRouteBtn" onclick="findRoute()" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-magnifying-glass"></i> Find Route & Fare
+      </button>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="errorAlert" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"></div>
+
+    <!-- Result Card -->
+    <div id="resultCard" class="hidden space-y-6">
+      
+      <!-- Summary Box -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
+          <p class="text-xs text-slate-500 font-medium">Estimated Fare</p>
+          <p id="resFare" class="text-2xl font-extrabold text-emerald-600 mt-1">₹0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
+          <p class="text-xs text-slate-500 font-medium">Travel Time</p>
+          <p id="resTime" class="text-2xl font-extrabold text-indigo-600 mt-1">0 mins</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
+          <p class="text-xs text-slate-500 font-medium">Stations</p>
+          <p id="resCount" class="text-2xl font-extrabold text-slate-700 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
+          <p class="text-xs text-slate-500 font-medium">Interchanges</p>
+          <p id="resInterchange" class="text-2xl font-extrabold text-amber-600 mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Detailed Route List -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-md font-semibold text-slate-700 mb-6 flex items-center gap-2">
+          <i class="fa-solid fa-list-ol text-indigo-600"></i> Step-by-Step Route
+        </h3>
+        
+        <div id="routeTimeline" class="relative border-l-4 border-slate-200 ml-4 space-y-6 pl-6">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Bangalore Metro Network Data (Purple Line & Green Line)
+    const purpleLine = [
+      "Whitefield (Kadugodi)", "Hopefarm Channasandra", "Kadugodi Tree Park", 
+      "Pattandur Agrahara", "Sri Sathya Sai Hospital", "Nallurhalli", 
+      "Kundalahalli", "Seetharampalya", "Hoodi", "Garudacharpalya", 
+      "Singayyanapalya", "KR Pura", "Benniganahalli", "Baiyappanahalli", 
+      "Swami Vivekananda Road", "Indiranagar", "Halasuru", "Trinity", 
+      "MG Road", "Cubbon Park", "Dr. B.R. Ambedkar Stn (Vidhana Soudha)", 
+      "Sir M. Visvesvaraya", "Nadaprabhu Kempegowda Station (Majestic)", 
+      "KSR Bengaluru City Railway Station", "Magadi Road", "Hosahalli", 
+      "Vijayanagar", "Attiguppe", "Deepanjali Nagar", "Mysore Road", 
+      "Nayandahalli", "Rajarajeshwari Nagar", "Jnanabharathi", "Pattanagere", 
+      "Kengeri Bus Terminal", "Kengeri", "Challaghatta"
+    ];
+
+    const greenLine = [
+      "Madavara", "Chikkabanavara", "Nagasandra", "Dasarahalli", 
+      "Jalahalli", "Peenya Industry", "Peenya", "Goraguntepalya", 
+      "Yeshwanthpur", "Sandal Soap Factory", "Mahalakshmi", "Rajajinagar", 
+      "Kuwempu Road", "Srirampura", "Mantri Square Sampige Road", 
+      "Nadaprabhu Kempegowda Station (Majestic)", "Chickpet", 
+      "Krishna Rajendra Market", "National College", "Lalbagh", 
+      "South End Circle", "Jayanagar", "Rashtriya Vidyalaya Road", 
+      "Banashankari", "Jaya Prakash Nagar", "Yelachenahalli", 
+      "Konanakunte Cross", "Doddakallasandra", "Vajarahalli", 
+      "Thalaghattapura", "Silk Institute"
+    ];
+
+    // Build Graph Adjancency List
+    const graph = {};
+    const stationLines = {};
+
+    function addEdge(u, v, line) {
+      if (!graph[u]) graph[u] = [];
+      if (!graph[v]) graph[v] = [];
+      graph[u].push({ node: v, line });
+      graph[v].push({ node: u, line });
+
+      if (!stationLines[u]) stationLines[u] = new Set();
+      if (!stationLines[v]) stationLines[v] = new Set();
+      stationLines[u].add(line);
+      stationLines[v].add(line);
+    }
+
+    // Populate lines into Graph
+    for (let i = 0; i < purpleLine.length - 1; i++) {
+      addEdge(purpleLine[i], purpleLine[i+1], "Purple");
+    }
+    for (let i = 0; i < greenLine.length - 1; i++) {
+      addEdge(greenLine[i], greenLine[i+1], "Green");
+    }
+
+    // Populate Select Dropdowns
+    const allStations = Array.from(new Set([...purpleLine, ...greenLine])).sort();
+    const fromSelect = document.getElementById("fromStation");
+    const toSelect = document.getElementById("toStation");
+
+    allStations.forEach(st => {
+      const opt1 = document.createElement("option");
+      opt1.value = st;
+      opt1.textContent = st;
+      fromSelect.appendChild(opt1);
+
+      const opt2 = document.createElement("option");
+      opt2.value = st;
+      opt2.textContent = st;
+      toSelect.appendChild(opt2);
+    });
+
+    // Shortest Path Algorithm (BFS)
+    function findShortestPath(start, end) {
+      if (start === end) return null;
+
+      const queue = [[{ node: start, line: null }]];
+      const visited = new Set([start]);
+
+      while (queue.length > 0) {
+        const path = queue.shift();
+        const current = path[path.length - 1].node;
+
+        if (current === end) {
+          return path;
+        }
+
+        for (const neighbor of graph[current] || []) {
+          if (!visited.has(neighbor.node)) {
+            visited.add(neighbor.node);
+            queue.push([...path, { node: neighbor.node, line: neighbor.line }]);
+          }
+        }
+      }
+      return null;
+    }
+
+    // Calculate Fare Strategy based on station count
+    function calculateFare(stationCount) {
+      if (stationCount <= 1) return 10;
+      if (stationCount <= 3) return 15;
+      if (stationCount <= 6) return 25;
+      if (stationCount <= 10) return 35;
+      if (stationCount <= 15) return 45;
+      if (stationCount <= 20) return 55;
+      return 60; // Max slab limit approx.
+    }
+
+    // Handle Search Button Click
+    function findRoute() {
+      const from = fromSelect.value;
+      const to = toSelect.value;
+      const errorAlert = document.getElementById("errorAlert");
+      const resultCard = document.getElementById("resultCard");
+
+      errorAlert.classList.add("hidden");
+
+      if (!from || !to) {
+        errorAlert.textContent = "Please select both origin and destination stations.";
+        errorAlert.classList.remove("hidden");
+        return;
+      }
+
+      if (from === to) {
+        errorAlert.textContent = "Source and destination stations cannot be the same.";
+        errorAlert.classList.remove("hidden");
+        return;
+      }
+
+      const path = findShortestPath(from, to);
+      if (!path) {
+        errorAlert.textContent = "No valid metro route found between the selected stations.";
+        errorAlert.classList.remove("hidden");
+        return;
+      }
+
+      // Calculate Metrics
+      const stationCount = path.length;
+      const fare = calculateFare(stationCount - 1);
+      
+      let interchangeCount = 0;
+      let currentLine = path[1].line;
+      
+      for (let i = 1; i < path.length; i++) {
+        if (path[i].line !== currentLine) {
+          interchangeCount++;
+          currentLine = path[i].line;
+        }
+      }
+
+      const travelTimeMinutes = Math.round((stationCount - 1) * 2.2 + (interchangeCount * 5));
+
+      // Update UI Stats
+      document.getElementById("resFare").textContent = `₹${fare}`;
+      document.getElementById("resTime").textContent = `${travelTimeMinutes} mins`;
+      document.getElementById("resCount").textContent = stationCount;
+      document.getElementById("resInterchange").textContent = interchangeCount;
+
+      // Build Timeline HTML
+      const timeline = document.getElementById("routeTimeline");
+      timeline.innerHTML = "";
+
+      path.forEach((step, idx) => {
+        const isStart = idx === 0;
+        const isEnd = idx === path.length - 1;
+        const line = isStart ? path[1].line : step.line;
+        
+        let isInterchange = false;
+        if (!isStart && !isEnd && path[idx + 1] && path[idx + 1].line !== line) {
+          isInterchange = true;
+        }
+
+        const lineBg = line === "Purple" ? "bg-purple-line" : "bg-green-line";
+        const lineText = line === "Purple" ? "text-purple-line" : "text-green-line";
+
+        const node = document.createElement("div");
+        node.className = "relative flex items-start gap-4";
+
+        node.innerHTML = `
+          <div class="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full ${lineBg} border-2 border-white shadow"></div>
+          <div class="flex-1">
+            <p class="font-semibold text-slate-800 text-sm">
+              ${step.node}
+              ${isStart ? '<span class="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Start</span>' : ''}
+              ${isEnd ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Destination</span>' : ''}
+            </p>
+            <p class="text-xs ${lineText} font-medium mt-0.5">
+              ${isInterchange ? ` Interchange: Change to ${path[idx+1].line} Line` : `${line} Line`}
+            </p>
+          </div>
+        `;
+
+        timeline.appendChild(node);
+      });
+
+      resultCard.classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
