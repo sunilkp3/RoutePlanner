@@ -2,568 +2,575 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bangalore Metro Route Finder</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Namma Metro - Live GPS Route & Platform Navigator</title>
   <style>
-    .bg-purple-line { background-color: #8b5cf6; }
-    .text-purple-line { color: #8b5cf6; }
-    .border-purple-line { border-color: #8b5cf6; }
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --purple-line: #a855f7;
+      --green-line: #22c55e;
+      --yellow-line: #eab308;
+      --border: #334155;
+      --accent: #38bdf8;
+    }
 
-    .bg-green-line { background-color: #10b981; }
-    .text-green-line { color: #10b981; }
-    .border-green-line { border-color: #10b981; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
 
-    .bg-yellow-line { background-color: #fbbf24; }
-    .text-yellow-line { color: #d97706; }
-    .border-yellow-line { border-color: #fbbf24; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 { font-size: 1.5rem; color: var(--accent); }
+    .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    label { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+
+    select:focus { border-color: var(--accent); }
+
+    button {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.9; }
+
+    .gps-btn {
+      background: #334155;
+      color: var(--text);
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      margin-top: 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .gps-status {
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .metric-card .val { font-size: 1.25rem; font-weight: bold; color: var(--accent); }
+    .metric-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    .route-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      padding-bottom: 24px;
+    }
+
+    .step:last-child { padding-bottom: 0; }
+
+    .step::before {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 24px;
+      bottom: 0;
+      width: 3px;
+      background: var(--border);
+    }
+
+    .step:last-child::before { display: none; }
+
+    .badge {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .badge.purple { background: var(--purple-line); color: white; }
+    .badge.green { background: var(--green-line); color: white; }
+    .badge.yellow { background: var(--yellow-line); color: black; }
+    .badge.interchange { background: #f59e0b; color: black; }
+
+    .step-content { flex: 1; }
+    .step-title { font-weight: 600; font-size: 1rem; }
+    .step-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+    .platform-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 6px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .alert {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
+<body>
 
-  <!-- Header -->
-  <header class="bg-slate-900 text-white py-4 px-6 shadow-md">
-    <div class="max-w-4xl mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="bg-indigo-600 text-white p-2 rounded-lg text-xl font-bold">
-          <i class="fa-solid fa-train-subway"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold tracking-wide">Namma Metro Route Finder</h1>
-        </div>
-      </div>
-      <span class="text-xs bg-indigo-900/60 text-indigo-300 px-3 py-1 rounded-full border border-indigo-700">
-        Live Network
-      </span>
-    </div>
-  </header>
+<div class="container">
+  <div class="header">
+    <h1>Namma Metro Route Finder</h1>
+    <p>Bengaluru Metro • Network Route & Platform Switch Calculator</p>
+  </div>
 
-  <!-- Main Container -->
-  <main class="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
-
-    <!-- Search Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-      <h2 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
-        <i class="fa-solid fa-route text-indigo-600"></i> Plan Your Journey
-      </h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- From Station -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">From Station</label>
-          <input id="fromStation" type="text" list="stationOptions" placeholder="Type or select origin station" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" autocomplete="off" />
-        </div>
-
-        <!-- To Station -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">To Station</label>
-          <input id="toStation" type="text" list="stationOptions" placeholder="Type or select destination station" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" autocomplete="off" />
-        </div>
-      </div>
-
-      <datalist id="stationOptions"></datalist>
-
-      <button id="findRouteBtn" onclick="findRoute()" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-magnifying-glass"></i> Find Route & Fare
+  <div class="card">
+    <div class="form-group">
+      <label for="from">From (Current Station)</label>
+      <select id="from" onchange="calculateRoute()"></select>
+      <button type="button" id="tracking-btn" class="gps-btn" onclick="toggleLiveTracking()">
+        📡 Enable Continuous Live Tracking
       </button>
-
-      <p class="mt-4 text-sm text-slate-600">
-        Yellow Line service is now included for the route from RV Road to Boomasandra via Electronic City.
-      </p>
+      <div id="gps-status" class="gps-status"></div>
     </div>
 
-    <!-- Network Overview -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-      <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
-        <i class="fa-solid fa-map text-indigo-600"></i> Network Overview
-      </h3>
-      <div id="networkMap" class="rounded-xl border border-slate-200 bg-slate-50 p-3"></div>
+    <div class="form-group">
+      <label for="to">To (Destination Station)</label>
+      <select id="to" onchange="calculateRoute()"></select>
     </div>
 
-    <!-- Error Alert -->
-    <div id="errorAlert" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"></div>
+    <button onclick="calculateRoute()">Recalculate Route</button>
+  </div>
 
-    <!-- Result Card -->
-    <div id="resultCard" class="hidden space-y-6">
-      
-      <!-- Summary Box -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
-          <p class="text-xs text-slate-500 font-medium">Estimated Fare</p>
-          <p id="resFare" class="text-2xl font-extrabold text-emerald-600 mt-1">₹0</p>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
-          <p class="text-xs text-slate-500 font-medium">Travel Time</p>
-          <p id="resTime" class="text-2xl font-extrabold text-indigo-600 mt-1">0 mins</p>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
-          <p class="text-xs text-slate-500 font-medium">Stations</p>
-          <p id="resCount" class="text-2xl font-extrabold text-slate-700 mt-1">0</p>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-center">
-          <p class="text-xs text-slate-500 font-medium">Interchanges</p>
-          <p id="resInterchange" class="text-2xl font-extrabold text-amber-600 mt-1">0</p>
-        </div>
+  <div id="result-card" class="card" style="display: none;">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="val" id="metric-fare">₹0</div>
+        <div class="lbl">Estimated Fare</div>
       </div>
-
-      <!-- Route Map -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-map-location-dot text-indigo-600"></i> Free Route Map
-        </h3>
-        <p class="text-sm text-slate-500 mb-4">A simple schematic view of the selected metro route.</p>
-        <div id="routeMap" class="rounded-xl border border-slate-200 bg-slate-50 p-3"></div>
+      <div class="metric-card">
+        <div class="val" id="metric-time">0 min</div>
+        <div class="lbl">Remaining Time</div>
       </div>
-
-      <!-- Google Map Preview -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-location-dot text-indigo-600"></i> Live Google Map Preview
-        </h3>
-        <div class="rounded-xl border border-slate-200 overflow-hidden">
-          <iframe id="googleMapFrame" class="w-full h-72" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Map Preview"></iframe>
-        </div>
-      </div>
-
-      <!-- Journey Guidance -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h3 class="text-md font-semibold text-slate-700 mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-arrows-turn-right text-indigo-600"></i> Line Switch Guidance
-        </h3>
-        <div id="routeGuide" class="space-y-3"></div>
-      </div>
-
-      <!-- Detailed Route List -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h3 class="text-md font-semibold text-slate-700 mb-6 flex items-center gap-2">
-          <i class="fa-solid fa-list-ol text-indigo-600"></i> Step-by-Step Route
-        </h3>
-        
-        <div id="routeTimeline" class="relative border-l-4 border-slate-200 ml-4 space-y-6 pl-6">
-          <!-- Dynamically populated -->
-        </div>
+      <div class="metric-card">
+        <div class="val" id="metric-stops">0</div>
+        <div class="lbl">Stops Left</div>
       </div>
     </div>
 
-  </main>
+    <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-muted);">LIVE JOURNEY DIRECTIONS</h3>
+    <div class="route-timeline" id="timeline"></div>
+  </div>
+</div>
 
-  <script>
-    // Bangalore Metro Network Data (Purple Line, Green Line, and Yellow Line)
-    const purpleLine = [
-      "Whitefield (Kadugodi)", "Hopefarm Channasandra", "Kadugodi Tree Park", 
-      "Pattandur Agrahara", "Sri Sathya Sai Hospital", "Nallurhalli", 
-      "Kundalahalli", "Seetharampalya", "Hoodi", "Garudacharpalya", 
-      "Singayyanapalya", "KR Pura", "Benniganahalli", "Baiyappanahalli", 
-      "Swami Vivekananda Road", "Indiranagar", "Halasuru", "Trinity", 
-      "MG Road", "Cubbon Park", "Dr. B.R. Ambedkar Stn (Vidhana Soudha)", 
-      "Sir M. Visvesvaraya", "Nadaprabhu Kempegowda Station (Majestic)", 
-      "KSR Bengaluru City Railway Station", "Magadi Road", "Hosahalli", 
-      "Vijayanagar", "Attiguppe", "Deepanjali Nagar", "Mysore Road", 
-      "Nayandahalli", "Rajarajeshwari Nagar", "Jnanabharathi", "Pattanagere", 
-      "Kengeri Bus Terminal", "Kengeri", "Challaghatta"
-    ];
+<script>
+  let watchId = null;
+  let isTracking = false;
 
-    const greenLine = [
-      "Madavara", "Chikkabanavara", "Nagasandra", "Dasarahalli", 
-      "Jalahalli", "Peenya Industry", "Peenya", "Goraguntepalya", 
-      "Yeshwanthpur", "Sandal Soap Factory", "Mahalakshmi", "Rajajinagar", 
-      "Kuwempu Road", "Srirampura", "Mantri Square Sampige Road", 
-      "Nadaprabhu Kempegowda Station (Majestic)", "Chickpet", 
-      "Krishna Rajendra Market", "National College", "Lalbagh", 
-      "South End Circle", "Jayanagar", "Rashtriya Vidyalaya Road", 
-      "Banashankari", "Jaya Prakash Nagar", "Yelachenahalli", 
-      "Konanakunte Cross", "Doddakallasandra", "Vajarahalli", 
-      "Thalaghattapura", "Silk Institute"
-    ];
+  // Station Coordinates
+  const STATIONS = {
+    "Challaghatta": { line: "Purple Line", order: 1, lat: 12.9090, lng: 77.4640 },
+    "Kengeri": { line: "Purple Line", order: 2, lat: 12.9075, lng: 77.4789 },
+    "Mysore Road": { line: "Purple Line", order: 3, lat: 12.9463, lng: 77.5300 },
+    "Vijayanagar": { line: "Purple Line", order: 4, lat: 12.9702, lng: 77.5372 },
+    "Nadaprabhu Kempegowda (Majestic)": { line: "Interchange", order: 5, lat: 12.9781, lng: 77.5723 },
+    "MG Road": { line: "Purple Line", order: 6, lat: 12.9756, lng: 77.6067 },
+    "Indiranagar": { line: "Purple Line", order: 7, lat: 12.9783, lng: 77.6408 },
+    "KR Puram": { line: "Purple Line", order: 8, lat: 13.0012, lng: 77.6765 },
+    "ITPL": { line: "Purple Line", order: 9, lat: 12.9882, lng: 77.7318 },
+    "Whitefield (Kadugodi)": { line: "Purple Line", order: 10, lat: 12.9961, lng: 77.7601 },
 
-    const yellowLine = [
-      "RV Road", "Jayadeva", "Central Silk Board", "Bommanahalli",
-      "Kudlu Gate", "Electronic City", "Electronic City Phase 1",
-      "Electronic City Phase 2", "Boomasandra"
-    ];
+    "Madavara": { line: "Green Line", order: 1, lat: 13.0623, lng: 77.4761 },
+    "Nagasandra": { line: "Green Line", order: 2, lat: 13.0478, lng: 77.4996 },
+    "Yeshwanthpur": { line: "Green Line", order: 3, lat: 13.0236, lng: 77.5498 },
+    "Sampige Road": { line: "Green Line", order: 4, lat: 12.9906, lng: 77.5711 },
+    "Chickpet": { line: "Green Line", order: 6, lat: 12.9663, lng: 77.5750 },
+    "Jayanagar": { line: "Green Line", order: 7, lat: 12.9298, lng: 77.5824 },
+    "RV Road": { line: "Interchange", order: 8, lat: 12.9216, lng: 77.5802 },
+    "Silk Institute": { line: "Green Line", order: 9, lat: 12.8623, lng: 77.5480 },
 
-    // Build Graph Adjancency List
-    const graph = {};
-    const stationLines = {};
+    "Ragigudda": { line: "Yellow Line", order: 2, lat: 12.9175, lng: 77.5912 },
+    "Jayadeva Hospital": { line: "Yellow Line", order: 3, lat: 12.9170, lng: 77.6015 },
+    "BTM Layout": { line: "Yellow Line", order: 4, lat: 12.9161, lng: 77.6101 },
+    "Central Silk Board": { line: "Yellow Line", order: 5, lat: 12.9173, lng: 77.6228 },
+    "Bommanahalli": { line: "Yellow Line", order: 6, lat: 12.9088, lng: 77.6280 },
+    "Hongasandra": { line: "Yellow Line", order: 7, lat: 12.8980, lng: 77.6360 },
+    "Kudlu Gate": { line: "Yellow Line", order: 8, lat: 12.8885, lng: 77.6432 },
+    "Singasandra": { line: "Yellow Line", order: 9, lat: 12.8782, lng: 77.6508 },
+    "Hosa Road": { line: "Yellow Line", order: 10, lat: 12.8675, lng: 77.6582 },
+    "Beratena Agrahara": { line: "Yellow Line", order: 11, lat: 12.8569, lng: 77.6625 },
+    "Electronic City": { line: "Yellow Line", order: 12, lat: 12.8452, lng: 77.6602 },
+    "Konappana Agrahara": { line: "Yellow Line", order: 13, lat: 12.8361, lng: 77.6680 },
+    "Huskur Road": { line: "Yellow Line", order: 14, lat: 12.8250, lng: 77.6740 },
+    "Hebbagodi": { line: "Yellow Line", order: 15, lat: 12.8120, lng: 77.6830 },
+    "Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8020, lng: 77.6920 }
+  };
 
-    function addEdge(u, v, line) {
-      if (!graph[u]) graph[u] = [];
-      if (!graph[v]) graph[v] = [];
-      graph[u].push({ node: v, line });
-      graph[v].push({ node: u, line });
+  const ADJACENCY = {
+    "Challaghatta": ["Kengeri"],
+    "Kengeri": ["Challaghatta", "Mysore Road"],
+    "Mysore Road": ["Kengeri", "Vijayanagar"],
+    "Vijayanagar": ["Mysore Road", "Nadaprabhu Kempegowda (Majestic)"],
+    "Nadaprabhu Kempegowda (Majestic)": ["Vijayanagar", "MG Road", "Sampige Road", "Chickpet"],
+    "MG Road": ["Nadaprabhu Kempegowda (Majestic)", "Indiranagar"],
+    "Indiranagar": ["MG Road", "KR Puram"],
+    "KR Puram": ["Indiranagar", "ITPL"],
+    "ITPL": ["KR Puram", "Whitefield (Kadugodi)"],
+    "Whitefield (Kadugodi)": ["ITPL"],
 
-      if (!stationLines[u]) stationLines[u] = new Set();
-      if (!stationLines[v]) stationLines[v] = new Set();
-      stationLines[u].add(line);
-      stationLines[v].add(line);
+    "Madavara": ["Nagasandra"],
+    "Nagasandra": ["Madavara", "Yeshwanthpur"],
+    "Yeshwanthpur": ["Nagasandra", "Sampige Road"],
+    "Sampige Road": ["Yeshwanthpur", "Nadaprabhu Kempegowda (Majestic)"],
+    "Chickpet": ["Nadaprabhu Kempegowda (Majestic)", "Jayanagar"],
+    "Jayanagar": ["Chickpet", "RV Road"],
+    "RV Road": ["Jayanagar", "Silk Institute", "Ragigudda"],
+    "Silk Institute": ["RV Road"],
+
+    "Ragigudda": ["RV Road", "Jayadeva Hospital"],
+    "Jayadeva Hospital": ["Ragigudda", "BTM Layout"],
+    "BTM Layout": ["Jayadeva Hospital", "Central Silk Board"],
+    "Central Silk Board": ["BTM Layout", "Bommanahalli"],
+    "Bommanahalli": ["Central Silk Board", "Hongasandra"],
+    "Hongasandra": ["Bommanahalli", "Kudlu Gate"],
+    "Kudlu Gate": ["Hongasandra", "Singasandra"],
+    "Singasandra": ["Kudlu Gate", "Hosa Road"],
+    "Hosa Road": ["Singasandra", "Beratena Agrahara"],
+    "Beratena Agrahara": ["Hosa Road", "Electronic City"],
+    "Electronic City": ["Beratena Agrahara", "Konappana Agrahara"],
+    "Konappana Agrahara": ["Electronic City", "Huskur Road"],
+    "Huskur Road": ["Konappana Agrahara", "Hebbagodi"],
+    "Hebbagodi": ["Huskur Road", "Bommasandra"],
+    "Bommasandra": ["Hebbagodi"]
+  };
+
+  const fromSelect = document.getElementById('from');
+  const toSelect = document.getElementById('to');
+
+  Object.keys(STATIONS).sort().forEach(st => {
+    fromSelect.add(new Option(st, st));
+    toSelect.add(new Option(st, st));
+  });
+
+  fromSelect.value = "Indiranagar";
+  toSelect.value = "Electronic City";
+
+  function getDistanceInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  // Continuous tracking using watchPosition
+  function toggleLiveTracking() {
+    const statusDiv = document.getElementById('gps-status');
+    const btn = document.getElementById('tracking-btn');
+
+    if (isTracking) {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      isTracking = false;
+      btn.innerText = "📡 Enable Continuous Live Tracking";
+      statusDiv.innerText = "Tracking stopped.";
+      return;
     }
 
-    // Populate lines into Graph
-    for (let i = 0; i < purpleLine.length - 1; i++) {
-      addEdge(purpleLine[i], purpleLine[i+1], "Purple");
-    }
-    for (let i = 0; i < greenLine.length - 1; i++) {
-      addEdge(greenLine[i], greenLine[i+1], "Green");
-    }
-    for (let i = 0; i < yellowLine.length - 1; i++) {
-      addEdge(yellowLine[i], yellowLine[i+1], "Yellow");
+    if (!("geolocation" in navigator)) {
+      statusDiv.innerText = "Geolocation not supported.";
+      return;
     }
 
-    // Interchange connections
-    const interchangeConnections = [
-      { from: "RV Road", to: "South End Circle", line: "Green" }
-    ];
+    isTracking = true;
+    btn.innerText = "🛑 Stop Live Tracking";
+    statusDiv.innerText = "Connecting to GPS...";
 
-    interchangeConnections.forEach(({ from, to, line }) => {
-      addEdge(from, to, line);
-    });
+    watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
 
-    // Populate Search Suggestions
-    const allStations = Array.from(new Set([...purpleLine, ...greenLine, ...yellowLine])).sort();
-    const fromInput = document.getElementById("fromStation");
-    const toInput = document.getElementById("toStation");
-    const stationOptions = document.getElementById("stationOptions");
+        let nearestStation = null;
+        let minDistance = Infinity;
 
-    function populateStationSuggestions() {
-      stationOptions.innerHTML = "";
-      allStations.forEach(st => {
-        const opt = document.createElement("option");
-        opt.value = st;
-        stationOptions.appendChild(opt);
-      });
-    }
-
-    function resolveStationName(inputValue) {
-      const typedValue = (inputValue || "").trim();
-      if (!typedValue) return "";
-
-      const exactMatch = allStations.find(st => st.toLowerCase() === typedValue.toLowerCase());
-      if (exactMatch) return exactMatch;
-
-      const partialMatch = allStations.find(st => st.toLowerCase().includes(typedValue.toLowerCase()));
-      return partialMatch || "";
-    }
-
-    function updateMapPreview(from, to) {
-      const frame = document.getElementById("googleMapFrame");
-      const fromQuery = encodeURIComponent(from || "Bangalore Metro");
-      const toQuery = encodeURIComponent(to || "Bangalore Metro");
-      frame.src = `https://www.google.com/maps?q=${fromQuery}+to+${toQuery}&output=embed`;
-    }
-
-    function buildNetworkOverview() {
-      const container = document.getElementById("networkMap");
-      const lines = [
-        { name: "Purple", stations: purpleLine },
-        { name: "Yellow", stations: yellowLine },
-        { name: "Green", stations: greenLine }
-      ];
-
-      const width = 620;
-      const height = 220;
-      const padding = 40;
-      const laneY = { Purple: 70, Yellow: 110, Green: 150 };
-      const lineColors = { Purple: "#8b5cf6", Yellow: "#fbbf24", Green: "#10b981" };
-
-      const svg = lines.map(line => {
-        const stations = line.stations;
-        const step = (width - padding * 2) / Math.max(1, stations.length - 1);
-        const points = stations.map((station, index) => {
-          const x = padding + step * index;
-          const y = laneY[line.name];
-          return `<circle cx="${x}" cy="${y}" r="5" fill="${lineColors[line.name]}" />`;
-        }).join("");
-        return points;
-      }).join("");
-
-      container.innerHTML = `
-        <svg viewBox="0 0 ${width} ${height}" class="w-full h-52 rounded-lg bg-white">
-          <rect x="0" y="0" width="${width}" height="${height}" rx="16" fill="#f8fafc"></rect>
-          <line x1="${padding}" y1="70" x2="${width - padding}" y2="70" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
-          <line x1="${padding}" y1="110" x2="${width - padding}" y2="110" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
-          <line x1="${padding}" y1="150" x2="${width - padding}" y2="150" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
-          ${svg}
-        </svg>
-        <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-600">
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span> Purple Line</span>
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Yellow Line</span>
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Green Line</span>
-        </div>
-      `;
-    }
-
-    populateStationSuggestions();
-    buildNetworkOverview();
-    updateMapPreview("Bangalore Metro", "Bangalore Metro");
-
-    [fromInput, toInput].forEach(input => {
-      input.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          findRoute();
-        }
-      });
-    });
-
-    // Shortest Path Algorithm (BFS)
-    function findShortestPath(start, end) {
-      if (start === end) return null;
-
-      const queue = [[{ node: start, line: null }]];
-      const visited = new Set([start]);
-
-      while (queue.length > 0) {
-        const path = queue.shift();
-        const current = path[path.length - 1].node;
-
-        if (current === end) {
-          return path;
-        }
-
-        for (const neighbor of graph[current] || []) {
-          if (!visited.has(neighbor.node)) {
-            visited.add(neighbor.node);
-            queue.push([...path, { node: neighbor.node, line: neighbor.line }]);
+        for (const [station, coords] of Object.entries(STATIONS)) {
+          if (!coords.lat || !coords.lng) continue;
+          const dist = getDistanceInKm(userLat, userLng, coords.lat, coords.lng);
+          if (dist < minDistance) {
+            minDistance = dist;
+            nearestStation = station;
           }
         }
-      }
-      return null;
-    }
 
-    // Calculate Fare Strategy based on station count
-    function calculateFare(stationCount) {
-      if (stationCount <= 1) return 10;
-      if (stationCount <= 3) return 15;
-      if (stationCount <= 6) return 25;
-      if (stationCount <= 10) return 35;
-      if (stationCount <= 15) return 45;
-      if (stationCount <= 20) return 55;
-      return 60; // Max slab limit approx.
-    }
+        if (nearestStation) {
+          if (fromSelect.value !== nearestStation) {
+            fromSelect.value = nearestStation;
+            calculateRoute(); // Automatically update route timeline as you move between stations
+          }
+          statusDiv.innerText = `📡 Live: Nearest to ${nearestStation} (${(minDistance * 1000).toFixed(0)}m away)`;
+        }
+      },
+      (err) => {
+        statusDiv.innerText = "GPS signal lost or permission denied.";
+      },
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 }
+    );
+  }
 
-    function buildLineInstructions(path) {
-      if (!path || path.length < 2) return [];
+  function findShortestPath(start, goal) {
+    let queue = [[start]];
+    let visited = new Set([start]);
 
-      const instructions = [];
-      let segmentStart = path[0].node;
-      let currentLine = path[1].line;
+    while (queue.length > 0) {
+      let path = queue.shift();
+      let node = path[path.length - 1];
 
-      for (let i = 1; i < path.length; i++) {
-        const edgeLine = path[i].line;
+      if (node === goal) return path;
 
-        if (i > 1 && edgeLine !== currentLine) {
-          instructions.push({
-            line: currentLine,
-            from: segmentStart,
-            to: path[i - 1].node,
-            switchAt: path[i - 1].node,
-            switchTo: edgeLine
-          });
-          segmentStart = path[i - 1].node;
-          currentLine = edgeLine;
+      for (let neighbor of (ADJACENCY[node] || [])) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          queue.push([...path, neighbor]);
         }
       }
+    }
+    return null;
+  }
 
-      instructions.push({
-        line: currentLine,
-        from: segmentStart,
-        to: path[path.length - 1].node,
-        switchAt: null,
-        switchTo: null
-      });
+  function getLineForSegment(current, next) {
+    if (STATIONS[current].line !== "Interchange") return STATIONS[current].line;
+    if (STATIONS[next].line !== "Interchange") return STATIONS[next].line;
 
-      return instructions;
+    const purple = ["Challaghatta", "Kengeri", "Mysore Road", "Vijayanagar", "MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
+    if (purple.includes(next)) return "Purple Line";
+    const yellow = ["Ragigudda", "Jayadeva Hospital", "BTM Layout", "Central Silk Board", "Bommanahalli", "Hongasandra", "Kudlu Gate", "Singasandra", "Hosa Road", "Beratena Agrahara", "Electronic City", "Konappana Agrahara", "Huskur Road", "Hebbagodi", "Bommasandra"];
+    if (yellow.includes(next)) return "Yellow Line";
+    return "Green Line";
+  }
+
+  function getPlatformDetails(current, next) {
+    const line = getLineForSegment(current, next);
+
+    if (current === "Nadaprabhu Kempegowda (Majestic)") {
+      if (line === "Purple Line") {
+        const eastBound = ["MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
+        return eastBound.includes(next)
+          ? { platform: "Platform 1 (Level 1)", direction: "Towards Whitefield (Kadugodi)", line }
+          : { platform: "Platform 2 (Level 1)", direction: "Towards Challaghatta", line };
+      } else {
+        const southBound = ["Chickpet", "Jayanagar", "RV Road", "Silk Institute"];
+        return southBound.includes(next)
+          ? { platform: "Platform 3 (Level 2)", direction: "Towards Silk Institute", line }
+          : { platform: "Platform 4 (Level 2)", direction: "Towards Madavara", line };
+      }
     }
 
-    function buildMapVisualization(path) {
-      const container = document.getElementById("routeMap");
-      if (!path || path.length < 2) {
-        container.innerHTML = `
-          <div class="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-            Choose two stations to view a simple free-form metro map.
+    if (current === "RV Road") {
+      if (line === "Yellow Line") {
+        return { platform: "Platform 3 (Yellow Line Concourse)", direction: "Towards Bommasandra / Electronic City", line };
+      } else {
+        const southBound = ["Silk Institute"];
+        return southBound.includes(next)
+          ? { platform: "Platform 1 (Green Line)", direction: "Towards Silk Institute", line }
+          : { platform: "Platform 2 (Green Line)", direction: "Towards Madavara / Majestic", line };
+      }
+    }
+
+    if (line === "Purple Line") {
+      const eastBound = ["MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
+      return eastBound.includes(next) || STATIONS[next]?.order > STATIONS[current]?.order
+        ? { platform: "Platform 1", direction: "Towards Whitefield (Kadugodi)", line }
+        : { platform: "Platform 2", direction: "Towards Challaghatta", line };
+    } else if (line === "Yellow Line") {
+      const southBound = ["Ragigudda", "Jayadeva Hospital", "BTM Layout", "Central Silk Board", "Electronic City", "Bommasandra"];
+      return southBound.includes(next) || STATIONS[next]?.order > STATIONS[current]?.order
+        ? { platform: "Platform 1", direction: "Towards Delta Electronics Bommasandra", line }
+        : { platform: "Platform 2", direction: "Towards RV Road", line };
+    } else {
+      const southBound = ["Chickpet", "Jayanagar", "RV Road", "Silk Institute"];
+      return southBound.includes(next) || STATIONS[next]?.order > STATIONS[current]?.order
+        ? { platform: "Platform 1", direction: "Towards Silk Institute", line }
+        : { platform: "Platform 2", direction: "Towards Madavara", line };
+    }
+  }
+
+  function calculateRoute() {
+    const start = fromSelect.value;
+    const end = toSelect.value;
+
+    if (start === end) {
+      alert("Source and Destination cannot be the same!");
+      return;
+    }
+
+    const path = findShortestPath(start, end);
+    if (!path) return;
+
+    const totalStops = path.length - 1;
+    const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("RV Road");
+    const estTimeMinutes = totalStops * 2.5 + (isInterchange ? 5 : 0);
+    const calculatedFare = Math.min(90, Math.max(10, Math.ceil(totalStops * 5.5)));
+
+    document.getElementById('metric-fare').innerText = `₹${calculatedFare}`;
+    document.getElementById('metric-time').innerText = `~${Math.round(estTimeMinutes)} mins`;
+    document.getElementById('metric-stops').innerText = totalStops;
+
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = '';
+
+    let currentLine = null;
+
+    for (let i = 0; i < path.length; i++) {
+      const station = path[i];
+      const isStart = i === 0;
+      const isEnd = i === path.length - 1;
+      const nextStation = path[i + 1];
+
+      let stepDiv = document.createElement('div');
+      stepDiv.className = 'step';
+
+      if (isStart) {
+        const platInfo = getPlatformDetails(station, nextStation);
+        currentLine = platInfo.line;
+        const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : "green");
+
+        stepDiv.innerHTML = `
+          <div class="badge ${colorClass}">1</div>
+          <div class="step-content">
+            <div class="step-title">Current / Boarding at ${station}</div>
+            <div class="step-desc">Take the <strong>${currentLine}</strong> train.</div>
+            <div class="platform-tag">${platInfo.platform} • ${platInfo.direction}</div>
           </div>
         `;
-        return;
-      }
-
-      const width = 620;
-      const height = 220;
-      const padding = 32;
-      const lineColors = {
-        Purple: "#8b5cf6",
-        Yellow: "#fbbf24",
-        Green: "#10b981"
-      };
-      const laneY = {
-        Purple: 80,
-        Yellow: 120,
-        Green: 160
-      };
-
-      const points = path.map((step, idx) => {
-        const line = idx === 0 ? path[1].line : step.line;
-        const x = padding + (idx / Math.max(1, path.length - 1)) * (width - padding * 2);
-        const y = laneY[line] || 120;
-        return { x, y, line, station: step.node };
-      });
-
-      const segments = points.slice(1).map((point, idx) => {
-        const prev = points[idx];
-        return `<line x1="${prev.x}" y1="${prev.y}" x2="${point.x}" y2="${point.y}" stroke="${lineColors[prev.line] || '#64748b'}" stroke-width="6" stroke-linecap="round" />`;
-      }).join("");
-
-      const nodes = points.map((point) => `
-        <circle cx="${point.x}" cy="${point.y}" r="8" fill="${lineColors[point.line] || '#64748b'}" stroke="#fff" stroke-width="3" />
-      `).join("");
-
-      const stationList = `
-        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
-          ${points.map((point) => `<div class="rounded-md bg-white px-2 py-1 border border-slate-200">${point.station}</div>`).join("")}
-        </div>
-      `;
-
-      const legend = `
-        <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-600">
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span> Purple Line</span>
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Yellow Line</span>
-          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Green Line</span>
-        </div>
-      `;
-
-      container.innerHTML = `
-        <svg viewBox="0 0 ${width} ${height}" class="w-full h-56 rounded-lg bg-white">
-          <rect x="0" y="0" width="${width}" height="${height}" rx="16" fill="#f8fafc"></rect>
-          <line x1="${padding}" y1="80" x2="${width - padding}" y2="80" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
-          <line x1="${padding}" y1="120" x2="${width - padding}" y2="120" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
-          <line x1="${padding}" y1="160" x2="${width - padding}" y2="160" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 4"></line>
-          ${segments}
-          ${nodes}
-        </svg>
-        ${legend}
-        ${stationList}
-      `;
-    }
-
-    // Handle Search Button Click
-    function findRoute() {
-      const from = resolveStationName(fromInput.value);
-      const to = resolveStationName(toInput.value);
-      const errorAlert = document.getElementById("errorAlert");
-      const resultCard = document.getElementById("resultCard");
-
-      errorAlert.classList.add("hidden");
-
-      if (!from || !to) {
-        errorAlert.textContent = "Please type or choose valid origin and destination stations.";
-        errorAlert.classList.remove("hidden");
-        return;
-      }
-
-      if (from === to) {
-        errorAlert.textContent = "Source and destination stations cannot be the same.";
-        errorAlert.classList.remove("hidden");
-        return;
-      }
-
-      const path = findShortestPath(from, to);
-      if (!path) {
-        errorAlert.textContent = "No valid metro route found between the selected stations.";
-        errorAlert.classList.remove("hidden");
-        return;
-      }
-
-      // Calculate Metrics
-      const stationCount = path.length;
-      const fare = calculateFare(stationCount - 1);
-      
-      let interchangeCount = 0;
-      let currentLine = path[1].line;
-      
-      for (let i = 1; i < path.length; i++) {
-        if (path[i].line !== currentLine) {
-          interchangeCount++;
-          currentLine = path[i].line;
-        }
-      }
-
-      const travelTimeMinutes = Math.round((stationCount - 1) * 2.2 + (interchangeCount * 5));
-
-      // Update UI Stats
-      document.getElementById("resFare").textContent = `₹${fare}`;
-      document.getElementById("resTime").textContent = `${travelTimeMinutes} mins`;
-      document.getElementById("resCount").textContent = stationCount;
-      document.getElementById("resInterchange").textContent = interchangeCount;
-
-      updateMapPreview(from, to);
-
-      const instructions = buildLineInstructions(path);
-      const routeGuide = document.getElementById("routeGuide");
-      routeGuide.innerHTML = "";
-
-      instructions.forEach((step, idx) => {
-        const card = document.createElement("div");
-        card.className = "rounded-lg border border-slate-200 bg-slate-50 p-3";
-
-        const lineLabel = step.line === "Purple" ? "Purple Line" : step.line === "Yellow" ? "Yellow Line" : "Green Line";
-        const lineColor = step.line === "Purple" ? "text-purple-line" : step.line === "Yellow" ? "text-yellow-line" : "text-green-line";
-
-        if (step.switchAt) {
-          card.innerHTML = `
-            <p class="font-semibold text-slate-800">${idx + 1}. Take ${lineLabel} from ${step.from} to ${step.to}</p>
-            <p class="text-sm ${lineColor} mt-1">Switch to ${step.switchTo === "Purple" ? "Purple Line" : step.switchTo === "Yellow" ? "Yellow Line" : "Green Line"} at ${step.switchAt}</p>
-          `;
-        } else {
-          card.innerHTML = `
-            <p class="font-semibold text-slate-800">${idx + 1}. Continue on ${lineLabel} from ${step.from} to ${step.to}</p>
-            <p class="text-sm ${lineColor} mt-1">No further line change required for the rest of the trip.</p>
-          `;
-        }
-
-        routeGuide.appendChild(card);
-      });
-
-      buildMapVisualization(path);
-
-      // Build Timeline HTML
-      const timeline = document.getElementById("routeTimeline");
-      timeline.innerHTML = "";
-
-      path.forEach((step, idx) => {
-        const isStart = idx === 0;
-        const isEnd = idx === path.length - 1;
-        const line = isStart ? path[1].line : step.line;
-        
-        let isInterchange = false;
-        if (!isStart && !isEnd && path[idx + 1] && path[idx + 1].line !== line) {
-          isInterchange = true;
-        }
-
-        const lineBg = line === "Purple" ? "bg-purple-line" : line === "Yellow" ? "bg-yellow-line" : "bg-green-line";
-        const lineText = line === "Purple" ? "text-purple-line" : line === "Yellow" ? "text-yellow-line" : "text-green-line";
-
-        const node = document.createElement("div");
-        node.className = "relative flex items-start gap-4";
-
-        node.innerHTML = `
-          <div class="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full ${lineBg} border-2 border-white shadow"></div>
-          <div class="flex-1">
-            <p class="font-semibold text-slate-800 text-sm">
-              ${step.node}
-              ${isStart ? '<span class="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Start</span>' : ''}
-              ${isEnd ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Destination</span>' : ''}
-            </p>
-            <p class="text-xs ${lineText} font-medium mt-0.5">
-              ${isInterchange ? ` Interchange: Change to ${path[idx+1].line} Line` : `${line} Line`}
-            </p>
+      } else if (isEnd) {
+        const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : "green");
+        stepDiv.innerHTML = `
+          <div class="badge ${colorClass}">✓</div>
+          <div class="step-content">
+            <div class="step-title">Arrive at ${station}</div>
+            <div class="step-desc">Exit through fare gates. Journey complete.</div>
           </div>
         `;
+      } else if (STATIONS[station].line === "Interchange") {
+        const nextPlat = getPlatformDetails(station, nextStation);
+        const lineChanged = currentLine !== nextPlat.line;
+        currentLine = nextPlat.line;
 
-        timeline.appendChild(node);
-      });
+        stepDiv.innerHTML = `
+          <div class="badge interchange">⇄</div>
+          <div class="step-content">
+            <div class="step-title">Interchange at ${station}</div>
+            ${lineChanged ? `<div class="alert"><strong>Line Switch:</strong> Use pedestrian walkway/stairs to switch to <strong>${nextPlat.line}</strong>.</div>` : ''}
+            <div class="platform-tag">${nextPlat.platform} • ${nextPlat.direction}</div>
+          </div>
+        `;
+      } else {
+        const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : "green");
+        stepDiv.innerHTML = `
+          <div class="badge ${colorClass}">•</div>
+          <div class="step-content">
+            <div class="step-title">${station}</div>
+            <div class="step-desc">Passing station</div>
+          </div>
+        `;
+      }
 
-      resultCard.classList.remove("hidden");
+      timeline.appendChild(stepDiv);
     }
-  </script>
+
+    document.getElementById('result-card').style.display = 'block';
+  }
+
+  // Auto start on page load
+  window.onload = function() {
+    toggleLiveTracking();
+    calculateRoute();
+  };
+</script>
 </body>
 </html>
