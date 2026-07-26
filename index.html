@@ -15,6 +15,7 @@
       --yellow-line: #eab308;
       --border: #334155;
       --accent: #38bdf8;
+      --highlight: #f43f5e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -23,32 +24,50 @@
       background-color: var(--bg);
       color: var(--text);
       display: flex;
-      justify-content: center;
-      padding: 20px;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
       min-height: 100vh;
     }
 
     .container {
       width: 100%;
-      max-width: 650px;
+      max-width: 680px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
+      flex: 1;
     }
 
     .header {
       text-align: center;
-      padding-bottom: 10px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
     }
 
-    .header h1 { font-size: 1.5rem; color: var(--accent); }
-    .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+    .header h1 { font-size: 1.35rem; color: var(--accent); }
+    .header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+
+    /* Live Digital Clock Header Banner */
+    .clock-banner {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
 
     .card {
       background: var(--card-bg);
       border-radius: 12px;
-      padding: 20px;
+      padding: 16px;
       border: 1px solid var(--border);
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
@@ -56,26 +75,87 @@
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 16px;
+      position: relative;
     }
 
-    label { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
 
-    select, button {
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    input, button {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: #0f172a;
       color: var(--text);
-      font-size: 1rem;
+      font-size: 0.95rem;
       outline: none;
     }
 
-    select:focus { border-color: var(--accent); }
+    input:focus { border-color: var(--accent); }
+    input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #1e293b;
+    }
 
-    button {
+    .autocomplete-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 220px;
+      overflow-y: auto;
+      background: #0f172a;
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+    }
+
+    .autocomplete-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--text);
+      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover {
+      background: #1e293b;
+      color: var(--accent);
+    }
+
+    .line-badge-sm {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .line-badge-sm.Purple { background: var(--purple-line); color: #fff; }
+    .line-badge-sm.Green { background: var(--green-line); color: #fff; }
+    .line-badge-sm.Yellow { background: var(--yellow-line); color: #000; }
+    .line-badge-sm.Interchange { background: #f59e0b; color: #000; }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    button.primary-btn {
       background: var(--accent);
       color: #0f172a;
       font-weight: 700;
@@ -84,45 +164,70 @@
       transition: opacity 0.2s;
     }
 
-    button:hover { opacity: 0.9; }
+    button.secondary-btn {
+      background: #334155;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+
+    button.primary-btn:hover, button.secondary-btn:hover { opacity: 0.9; }
 
     .gps-btn {
       background: #334155;
       color: var(--text);
       font-size: 0.85rem;
-      padding: 8px 12px;
-      margin-top: 4px;
+      padding: 10px 12px;
       border-radius: 6px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      border: 1px solid var(--border);
+      margin-top: 6px;
     }
 
     .gps-status {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--accent);
-      margin-top: 4px;
+      margin-top: 6px;
+      line-height: 1.3;
     }
 
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 16px;
     }
 
     .metric-card {
       background: #0f172a;
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px;
+      padding: 10px 6px;
       text-align: center;
     }
 
-    .metric-card .val { font-size: 1.25rem; font-weight: bold; color: var(--accent); }
-    .metric-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .metric-card .val { font-size: 1.1rem; font-weight: bold; color: var(--accent); }
+    .metric-card .lbl { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+    .next-train-box {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .next-train-box .time-title { font-size: 0.8rem; color: var(--text-muted); }
+    .next-train-box .time-val { font-size: 1rem; font-weight: 700; color: #38bdf8; white-space: nowrap; }
 
     .route-timeline {
       display: flex;
@@ -133,9 +238,11 @@
 
     .step {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       position: relative;
-      padding-bottom: 24px;
+      padding-bottom: 20px;
+      border-radius: 6px;
+      transition: background 0.3s ease;
     }
 
     .step:last-child { padding-bottom: 0; }
@@ -171,19 +278,70 @@
     .badge.yellow { background: var(--yellow-line); color: black; }
     .badge.interchange { background: #f59e0b; color: black; }
 
-    .step-content { flex: 1; }
-    .step-title { font-weight: 600; font-size: 1rem; }
-    .step-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+    .step-content { flex: 1; min-width: 0; }
+    
+    .step-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .step-title { font-weight: 600; font-size: 0.9rem; word-break: break-word; }
+    .arrival-time-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      white-space: nowrap;
+    }
+
+    .step-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
+
+    .step.live-location-active {
+      background: rgba(244, 63, 94, 0.12);
+      border-left: 4px solid var(--highlight);
+      padding: 8px 10px 12px 10px;
+      margin-left: -10px;
+      border-radius: 8px;
+    }
+
+    .step.live-location-active .badge {
+      box-shadow: 0 0 10px var(--highlight);
+      border: 2px solid #ffffff;
+    }
+
+    .live-tag {
+      display: inline-block;
+      background: var(--highlight);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 2px 5px;
+      border-radius: 4px;
+      margin-left: 6px;
+      letter-spacing: 0.5px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
 
     .platform-tag {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
       background: rgba(56, 189, 248, 0.15);
       color: var(--accent);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      margin-top: 6px;
+      margin-top: 4px;
       border: 1px solid rgba(56, 189, 248, 0.3);
     }
 
@@ -191,10 +349,42 @@
       background: rgba(245, 158, 11, 0.1);
       border: 1px solid rgba(245, 158, 11, 0.3);
       color: #fbbf24;
-      padding: 10px;
+      padding: 8px;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       margin-top: 6px;
+    }
+
+    /* Footer & Terms */
+    footer {
+      width: 100%;
+      max-width: 680px;
+      margin-top: 20px;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    footer p.disclaimer {
+      margin-bottom: 8px;
+      color: #64748b;
+    }
+
+    footer p.copyright {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .card { padding: 12px; }
+      .header h1 { font-size: 1.2rem; }
+      .metric-card .val { font-size: 0.95rem; }
+      .metric-card .lbl { font-size: 0.65rem; }
+      .btn-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -203,25 +393,37 @@
 <div class="container">
   <div class="header">
     <h1>Namma Metro Route Finder</h1>
-    <p>Bengaluru Metro • Network Route & Platform Switch Calculator</p>
+    <p>Bengaluru Metro • Live Schedule & Platform Switch Navigator</p>
+    <div class="clock-banner">
+      🕒 Current Location Time: <span id="live-clock">--:--:-- --</span>
+    </div>
   </div>
 
   <div class="card">
     <div class="form-group">
-      <label for="from">From (Current Station)</label>
-      <select id="from" onchange="calculateRoute()"></select>
+      <label for="from-input">From (Boarding Station)</label>
+      <div class="input-wrapper">
+        <input type="text" id="from-input" placeholder="Search boarding station..." autocomplete="off" />
+        <div id="from-results" class="autocomplete-results"></div>
+      </div>
       <button type="button" id="tracking-btn" class="gps-btn" onclick="toggleLiveTracking()">
         📡 Enable Continuous Live Tracking
       </button>
-      <div id="gps-status" class="gps-status"></div>
+      <div id="gps-status" class="gps-status">GPS Tracking is disabled.</div>
     </div>
 
     <div class="form-group">
-      <label for="to">To (Destination Station)</label>
-      <select id="to" onchange="calculateRoute()"></select>
+      <label for="to-input">To (Destination Station)</label>
+      <div class="input-wrapper">
+        <input type="text" id="to-input" placeholder="Search destination station..." autocomplete="off" />
+        <div id="to-results" class="autocomplete-results"></div>
+      </div>
     </div>
 
-    <button onclick="calculateRoute()">Recalculate Route</button>
+    <div class="btn-group">
+      <button class="primary-btn" id="calc-btn" onclick="calculateRoute()">Calculate Route</button>
+      <button class="secondary-btn" id="edit-btn" onclick="unlockInputs()" style="display: none;">Edit Route</button>
+    </div>
   </div>
 
   <div id="result-card" class="card" style="display: none;">
@@ -232,45 +434,120 @@
       </div>
       <div class="metric-card">
         <div class="val" id="metric-time">0 min</div>
-        <div class="lbl">Remaining Time</div>
+        <div class="lbl">Total Travel Time</div>
       </div>
       <div class="metric-card">
         <div class="val" id="metric-stops">0</div>
-        <div class="lbl">Stops Left</div>
+        <div class="lbl">Total Stations</div>
       </div>
     </div>
 
-    <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-muted);">LIVE JOURNEY DIRECTIONS</h3>
+    <div class="next-train-box">
+      <div>
+        <div class="time-title">Next Boarding Train</div>
+        <div id="next-train-dir" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;"></div>
+      </div>
+      <div class="time-val" id="metric-next-train">-- mins</div>
+    </div>
+
+    <h3 style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">LIVE JOURNEY DIRECTIONS & ARRIVAL SCHEDULE</h3>
     <div class="route-timeline" id="timeline"></div>
   </div>
 </div>
 
+<footer>
+  <p class="disclaimer">
+    <strong>Terms & Conditions:</strong> Train schedules, platform directions, fares, and arrival times are approximately calculated based on standard train speeds and schedules. Data is subjected to change due to operational delays or BMRCL adjustments.
+  </p>
+  <p class="copyright">
+    &copy; <span id="year"></span> Namma Metro Navigator. All rights reserved.
+  </p>
+</footer>
+
 <script>
   let watchId = null;
   let isTracking = false;
+  let currentNearestStation = null;
+  let hasAutoSelectedFrom = false;
+  let isLocked = false;
+  let nextTrainDepartureTime = null;
 
   // Station Coordinates
   const STATIONS = {
+    // PURPLE LINE
     "Challaghatta": { line: "Purple Line", order: 1, lat: 12.9090, lng: 77.4640 },
     "Kengeri": { line: "Purple Line", order: 2, lat: 12.9075, lng: 77.4789 },
-    "Mysore Road": { line: "Purple Line", order: 3, lat: 12.9463, lng: 77.5300 },
-    "Vijayanagar": { line: "Purple Line", order: 4, lat: 12.9702, lng: 77.5372 },
-    "Nadaprabhu Kempegowda (Majestic)": { line: "Interchange", order: 5, lat: 12.9781, lng: 77.5723 },
-    "MG Road": { line: "Purple Line", order: 6, lat: 12.9756, lng: 77.6067 },
-    "Indiranagar": { line: "Purple Line", order: 7, lat: 12.9783, lng: 77.6408 },
-    "KR Puram": { line: "Purple Line", order: 8, lat: 13.0012, lng: 77.6765 },
-    "ITPL": { line: "Purple Line", order: 9, lat: 12.9882, lng: 77.7318 },
-    "Whitefield (Kadugodi)": { line: "Purple Line", order: 10, lat: 12.9961, lng: 77.7601 },
+    "Kengeri Bus Terminal": { line: "Purple Line", order: 3, lat: 12.9100, lng: 77.4855 },
+    "Pattanagere": { line: "Purple Line", order: 4, lat: 12.9242, lng: 77.4988 },
+    "Jnanabharathi": { line: "Purple Line", order: 5, lat: 12.9301, lng: 77.5050 },
+    "Rajarajeswari Nagar": { line: "Purple Line", order: 6, lat: 12.9355, lng: 77.5140 },
+    "Nayakandahalli": { line: "Purple Line", order: 7, lat: 12.9410, lng: 77.5230 },
+    "Mysore Road": { line: "Purple Line", order: 8, lat: 12.9463, lng: 77.5300 },
+    "Deepanjali Nagar": { line: "Purple Line", order: 9, lat: 12.9535, lng: 77.5320 },
+    "Attiguppe": { line: "Purple Line", order: 10, lat: 12.9620, lng: 77.5338 },
+    "Vijayanagar": { line: "Purple Line", order: 11, lat: 12.9702, lng: 77.5372 },
+    "Hosahalli": { line: "Purple Line", order: 12, lat: 12.9730, lng: 77.5450 },
+    "Magadi Road": { line: "Purple Line", order: 13, lat: 12.9755, lng: 77.5550 },
+    "KSR Bengaluru Railway Station": { line: "Purple Line", order: 14, lat: 12.9780, lng: 77.5660 },
+    "Nadaprabhu Kempegowda (Majestic)": { line: "Interchange", order: 15, lat: 12.9781, lng: 77.5723 },
+    "Sir M. Visvesvaraya Stn. (Central College)": { line: "Purple Line", order: 16, lat: 12.9740, lng: 77.5830 },
+    "Dr. B.R. Ambedkar Stn. (Vidhana Soudha)": { line: "Purple Line", order: 17, lat: 12.9790, lng: 77.5910 },
+    "Cubbon Park": { line: "Purple Line", order: 18, lat: 12.9810, lng: 77.5970 },
+    "MG Road": { line: "Purple Line", order: 19, lat: 12.9756, lng: 77.6067 },
+    "Trinity": { line: "Purple Line", order: 20, lat: 12.9728, lng: 77.6170 },
+    "Halasuru": { line: "Purple Line", order: 21, lat: 12.9750, lng: 77.6260 },
+    "Indiranagar": { line: "Purple Line", order: 22, lat: 12.9783, lng: 77.6408 },
+    "Swami Vivekananda Road": { line: "Purple Line", order: 23, lat: 12.9855, lng: 77.6530 },
+    "Baiyappanahalli": { line: "Purple Line", order: 24, lat: 12.9908, lng: 77.6524 },
+    "Benniganahalli": { line: "Purple Line", order: 25, lat: 12.9960, lng: 77.6620 },
+    "KR Puram": { line: "Purple Line", order: 26, lat: 13.0012, lng: 77.6765 },
+    "Singayyanapalya": { line: "Purple Line", order: 27, lat: 12.9970, lng: 77.6900 },
+    "Garudacharpalya": { line: "Purple Line", order: 28, lat: 12.9910, lng: 77.7030 },
+    "Hoodi Junction": { line: "Purple Line", order: 29, lat: 12.9880, lng: 77.7140 },
+    "Seetharampalya": { line: "Purple Line", order: 30, lat: 12.9850, lng: 77.7220 },
+    "Kundalahalli": { line: "Purple Line", order: 31, lat: 12.9810, lng: 77.7280 },
+    "Nallurhalli": { line: "Purple Line", order: 32, lat: 12.9780, lng: 77.7330 },
+    "Sadaramangala": { line: "Purple Line", order: 33, lat: 12.9830, lng: 77.7380 },
+    "ITPL": { line: "Purple Line", order: 34, lat: 12.9882, lng: 77.7318 },
+    "Pattandur Agrahara": { line: "Purple Line", order: 35, lat: 12.9890, lng: 77.7460 },
+    "Kadugodi Tree Park": { line: "Purple Line", order: 36, lat: 12.9915, lng: 77.7530 },
+    "Hope Farm Channasandra": { line: "Purple Line", order: 37, lat: 12.9940, lng: 77.7570 },
+    "Whitefield (Kadugodi)": { line: "Purple Line", order: 38, lat: 12.9961, lng: 77.7601 },
 
+    // GREEN LINE
     "Madavara": { line: "Green Line", order: 1, lat: 13.0623, lng: 77.4761 },
-    "Nagasandra": { line: "Green Line", order: 2, lat: 13.0478, lng: 77.4996 },
-    "Yeshwanthpur": { line: "Green Line", order: 3, lat: 13.0236, lng: 77.5498 },
-    "Sampige Road": { line: "Green Line", order: 4, lat: 12.9906, lng: 77.5711 },
-    "Chickpet": { line: "Green Line", order: 6, lat: 12.9663, lng: 77.5750 },
-    "Jayanagar": { line: "Green Line", order: 7, lat: 12.9298, lng: 77.5824 },
-    "RV Road": { line: "Interchange", order: 8, lat: 12.9216, lng: 77.5802 },
-    "Silk Institute": { line: "Green Line", order: 9, lat: 12.8623, lng: 77.5480 },
+    "Chikkabidarakallu": { line: "Green Line", order: 2, lat: 13.0560, lng: 77.4880 },
+    "Manjunathnagar": { line: "Green Line", order: 3, lat: 13.0510, lng: 77.4930 },
+    "Nagasandra": { line: "Green Line", order: 4, lat: 13.0478, lng: 77.4996 },
+    "Dasarahalli": { line: "Green Line", order: 5, lat: 13.0435, lng: 77.5100 },
+    "Jalahalli": { line: "Green Line", order: 6, lat: 13.0390, lng: 77.5190 },
+    "Peenya Industry": { line: "Green Line", order: 7, lat: 13.0340, lng: 77.5250 },
+    "Peenya": { line: "Green Line", order: 8, lat: 13.0310, lng: 77.5320 },
+    "Goraguntepalya": { line: "Green Line", order: 9, lat: 13.0280, lng: 77.5400 },
+    "Yeshwanthpur": { line: "Green Line", order: 10, lat: 13.0236, lng: 77.5498 },
+    "Sandal Soap Factory": { line: "Green Line", order: 11, lat: 13.0150, lng: 77.5540 },
+    "Mahalakshmi": { line: "Green Line", order: 12, lat: 13.0080, lng: 77.5560 },
+    "Rajajinagar": { line: "Green Line", order: 13, lat: 13.0000, lng: 77.5570 },
+    "Kuvempu Road": { line: "Green Line", order: 14, lat: 12.9970, lng: 77.5620 },
+    "Srirampura": { line: "Green Line", order: 15, lat: 12.9940, lng: 77.5660 },
+    "Sampige Road": { line: "Green Line", order: 16, lat: 12.9906, lng: 77.5711 },
+    "Chickpet": { line: "Green Line", order: 18, lat: 12.9663, lng: 77.5750 },
+    "Krishna Rajendra Market": { line: "Green Line", order: 19, lat: 12.9600, lng: 77.5760 },
+    "National College": { line: "Green Line", order: 20, lat: 12.9500, lng: 77.5730 },
+    "Lalbagh": { line: "Green Line", order: 21, lat: 12.9460, lng: 77.5800 },
+    "South End Circle": { line: "Green Line", order: 22, lat: 12.9380, lng: 77.5810 },
+    "Jayanagar": { line: "Green Line", order: 23, lat: 12.9298, lng: 77.5824 },
+    "RV Road": { line: "Interchange", order: 24, lat: 12.9216, lng: 77.5802 },
+    "Banashankari": { line: "Green Line", order: 25, lat: 12.9150, lng: 77.5730 },
+    "Jaya Prakash Nagar": { line: "Green Line", order: 26, lat: 12.9070, lng: 77.5720 },
+    "Yelachenahalli": { line: "Green Line", order: 27, lat: 12.8960, lng: 77.5700 },
+    "Konanakunte Cross": { line: "Green Line", order: 28, lat: 12.8880, lng: 77.5680 },
+    "Doddakallasandra": { line: "Green Line", order: 29, lat: 12.8790, lng: 77.5640 },
+    "Vajarahalli": { line: "Green Line", order: 30, lat: 12.8720, lng: 77.5580 },
+    "Talaghattapura": { line: "Green Line", order: 31, lat: 12.8680, lng: 77.5520 },
+    "Silk Institute": { line: "Green Line", order: 32, lat: 12.8623, lng: 77.5480 },
 
+    // YELLOW LINE
     "Ragigudda": { line: "Yellow Line", order: 2, lat: 12.9175, lng: 77.5912 },
     "Jayadeva Hospital": { line: "Yellow Line", order: 3, lat: 12.9170, lng: 77.6015 },
     "BTM Layout": { line: "Yellow Line", order: 4, lat: 12.9161, lng: 77.6101 },
@@ -290,24 +567,75 @@
 
   const ADJACENCY = {
     "Challaghatta": ["Kengeri"],
-    "Kengeri": ["Challaghatta", "Mysore Road"],
-    "Mysore Road": ["Kengeri", "Vijayanagar"],
-    "Vijayanagar": ["Mysore Road", "Nadaprabhu Kempegowda (Majestic)"],
-    "Nadaprabhu Kempegowda (Majestic)": ["Vijayanagar", "MG Road", "Sampige Road", "Chickpet"],
-    "MG Road": ["Nadaprabhu Kempegowda (Majestic)", "Indiranagar"],
-    "Indiranagar": ["MG Road", "KR Puram"],
-    "KR Puram": ["Indiranagar", "ITPL"],
-    "ITPL": ["KR Puram", "Whitefield (Kadugodi)"],
-    "Whitefield (Kadugodi)": ["ITPL"],
+    "Kengeri": ["Challaghatta", "Kengeri Bus Terminal"],
+    "Kengeri Bus Terminal": ["Kengeri", "Pattanagere"],
+    "Pattanagere": ["Kengeri Bus Terminal", "Jnanabharathi"],
+    "Jnanabharathi": ["Pattanagere", "Rajarajeswari Nagar"],
+    "Rajarajeswari Nagar": ["Jnanabharathi", "Nayakandahalli"],
+    "Nayakandahalli": ["Rajarajeswari Nagar", "Mysore Road"],
+    "Mysore Road": ["Nayakandahalli", "Deepanjali Nagar"],
+    "Deepanjali Nagar": ["Mysore Road", "Attiguppe"],
+    "Attiguppe": ["Deepanjali Nagar", "Vijayanagar"],
+    "Vijayanagar": ["Attiguppe", "Hosahalli"],
+    "Hosahalli": ["Vijayanagar", "Magadi Road"],
+    "Magadi Road": ["Hosahalli", "KSR Bengaluru Railway Station"],
+    "KSR Bengaluru Railway Station": ["Magadi Road", "Nadaprabhu Kempegowda (Majestic)"],
+    "Nadaprabhu Kempegowda (Majestic)": ["KSR Bengaluru Railway Station", "Sir M. Visvesvaraya Stn. (Central College)", "Sampige Road", "Chickpet"],
+    "Sir M. Visvesvaraya Stn. (Central College)": ["Nadaprabhu Kempegowda (Majestic)", "Dr. B.R. Ambedkar Stn. (Vidhana Soudha)"],
+    "Dr. B.R. Ambedkar Stn. (Vidhana Soudha)": ["Sir M. Visvesvaraya Stn. (Central College)", "Cubbon Park"],
+    "Cubbon Park": ["Dr. B.R. Ambedkar Stn. (Vidhana Soudha)", "MG Road"],
+    "MG Road": ["Cubbon Park", "Trinity"],
+    "Trinity": ["MG Road", "Halasuru"],
+    "Halasuru": ["Trinity", "Indiranagar"],
+    "Indiranagar": ["Halasuru", "Swami Vivekananda Road"],
+    "Swami Vivekananda Road": ["Indiranagar", "Baiyappanahalli"],
+    "Baiyappanahalli": ["Swami Vivekananda Road", "Benniganahalli"],
+    "Benniganahalli": ["Baiyappanahalli", "KR Puram"],
+    "KR Puram": ["Benniganahalli", "Singayyanapalya"],
+    "Singayyanapalya": ["KR Puram", "Garudacharpalya"],
+    "Garudacharpalya": ["Singayyanapalya", "Hoodi Junction"],
+    "Hoodi Junction": ["Garudacharpalya", "Seetharampalya"],
+    "Seetharampalya": ["Hoodi Junction", "Kundalahalli"],
+    "Kundalahalli": ["Seetharampalya", "Nallurhalli"],
+    "Nallurhalli": ["Kundalahalli", "Sadaramangala"],
+    "Sadaramangala": ["Nallurhalli", "ITPL"],
+    "ITPL": ["Sadaramangala", "Pattandur Agrahara"],
+    "Pattandur Agrahara": ["ITPL", "Kadugodi Tree Park"],
+    "Kadugodi Tree Park": ["Pattandur Agrahara", "Hope Farm Channasandra"],
+    "Hope Farm Channasandra": ["Kadugodi Tree Park", "Whitefield (Kadugodi)"],
+    "Whitefield (Kadugodi)": ["Hope Farm Channasandra"],
 
-    "Madavara": ["Nagasandra"],
-    "Nagasandra": ["Madavara", "Yeshwanthpur"],
-    "Yeshwanthpur": ["Nagasandra", "Sampige Road"],
-    "Sampige Road": ["Yeshwanthpur", "Nadaprabhu Kempegowda (Majestic)"],
-    "Chickpet": ["Nadaprabhu Kempegowda (Majestic)", "Jayanagar"],
-    "Jayanagar": ["Chickpet", "RV Road"],
-    "RV Road": ["Jayanagar", "Silk Institute", "Ragigudda"],
-    "Silk Institute": ["RV Road"],
+    "Madavara": ["Chikkabidarakallu"],
+    "Chikkabidarakallu": ["Madavara", "Manjunathnagar"],
+    "Manjunathnagar": ["Chikkabidarakallu", "Nagasandra"],
+    "Nagasandra": ["Manjunathnagar", "Dasarahalli"],
+    "Dasarahalli": ["Nagasandra", "Jalahalli"],
+    "Jalahalli": ["Dasarahalli", "Peenya Industry"],
+    "Peenya Industry": ["Jalahalli", "Peenya"],
+    "Peenya": ["Peenya Industry", "Goraguntepalya"],
+    "Goraguntepalya": ["Peenya", "Yeshwanthpur"],
+    "Yeshwanthpur": ["Goraguntepalya", "Sandal Soap Factory"],
+    "Sandal Soap Factory": ["Yeshwanthpur", "Mahalakshmi"],
+    "Mahalakshmi": ["Sandal Soap Factory", "Rajajinagar"],
+    "Rajajinagar": ["Mahalakshmi", "Kuvempu Road"],
+    "Kuvempu Road": ["Rajajinagar", "Srirampura"],
+    "Srirampura": ["Kuvempu Road", "Sampige Road"],
+    "Sampige Road": ["Srirampura", "Nadaprabhu Kempegowda (Majestic)"],
+    "Chickpet": ["Nadaprabhu Kempegowda (Majestic)", "Krishna Rajendra Market"],
+    "Krishna Rajendra Market": ["Chickpet", "National College"],
+    "National College": ["Krishna Rajendra Market", "Lalbagh"],
+    "Lalbagh": ["National College", "South End Circle"],
+    "South End Circle": ["Lalbagh", "Jayanagar"],
+    "Jayanagar": ["South End Circle", "RV Road"],
+    "RV Road": ["Jayanagar", "Banashankari", "Ragigudda"],
+    "Banashankari": ["RV Road", "Jaya Prakash Nagar"],
+    "Jaya Prakash Nagar": ["Banashankari", "Yelachenahalli"],
+    "Yelachenahalli": ["Jaya Prakash Nagar", "Konanakunte Cross"],
+    "Konanakunte Cross": ["Yelachenahalli", "Doddakallasandra"],
+    "Doddakallasandra": ["Konanakunte Cross", "Vajarahalli"],
+    "Vajarahalli": ["Doddakallasandra", "Talaghattapura"],
+    "Talaghattapura": ["Vajarahalli", "Silk Institute"],
+    "Silk Institute": ["Talaghattapura"],
 
     "Ragigudda": ["RV Road", "Jayadeva Hospital"],
     "Jayadeva Hospital": ["Ragigudda", "BTM Layout"],
@@ -326,16 +654,73 @@
     "Bommasandra": ["Hebbagodi"]
   };
 
-  const fromSelect = document.getElementById('from');
-  const toSelect = document.getElementById('to');
+  const stationNames = Object.keys(STATIONS).sort();
 
-  Object.keys(STATIONS).sort().forEach(st => {
-    fromSelect.add(new Option(st, st));
-    toSelect.add(new Option(st, st));
-  });
+  // 1. Live Clock Functionality
+  function updateLiveClock() {
+    const now = new Date();
+    document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  setInterval(updateLiveClock, 1000);
+  updateLiveClock();
 
-  fromSelect.value = "Indiranagar";
-  toSelect.value = "Electronic City";
+  document.getElementById('year').innerText = new Date().getFullYear();
+
+  // 2. Setup Custom Autocomplete Dropdown Attached Beneath Fields
+  function setupAutocomplete(inputId, resultsId) {
+    const input = document.getElementById(inputId);
+    const results = document.getElementById(resultsId);
+
+    function renderResults(filterText = '') {
+      results.innerHTML = '';
+      const query = filterText.toLowerCase().trim();
+      const matches = stationNames.filter(name => name.toLowerCase().includes(query));
+
+      if (matches.length === 0) {
+        results.style.display = 'none';
+        return;
+      }
+
+      matches.forEach(st => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        
+        const lineType = STATIONS[st].line.split(' ')[0];
+        item.innerHTML = `
+          <span>${st}</span>
+          <span class="line-badge-sm ${lineType}">${lineType}</span>
+        `;
+
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          input.value = st;
+          results.style.display = 'none';
+        });
+
+        results.appendChild(item);
+      });
+
+      results.style.display = 'block';
+    }
+
+    input.addEventListener('focus', () => {
+      if (!input.disabled) renderResults(input.value);
+    });
+
+    input.addEventListener('input', () => {
+      if (!input.disabled) renderResults(input.value);
+    });
+
+    input.addEventListener('blur', () => {
+      setTimeout(() => { results.style.display = 'none'; }, 150);
+    });
+  }
+
+  setupAutocomplete('from-input', 'from-results');
+  setupAutocomplete('to-input', 'to-results');
+
+  document.getElementById('from-input').value = "Indiranagar";
+  document.getElementById('to-input').value = "Electronic City";
 
   function getDistanceInKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -348,7 +733,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  // Continuous tracking using watchPosition
   function toggleLiveTracking() {
     const statusDiv = document.getElementById('gps-status');
     const btn = document.getElementById('tracking-btn');
@@ -356,19 +740,21 @@
     if (isTracking) {
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       isTracking = false;
+      currentNearestStation = null;
       btn.innerText = "📡 Enable Continuous Live Tracking";
-      statusDiv.innerText = "Tracking stopped.";
+      statusDiv.innerText = "GPS Tracking is disabled.";
+      if (isLocked) calculateRoute(true);
       return;
     }
 
     if (!("geolocation" in navigator)) {
-      statusDiv.innerText = "Geolocation not supported.";
+      statusDiv.innerText = "Geolocation not supported by browser.";
       return;
     }
 
     isTracking = true;
     btn.innerText = "🛑 Stop Live Tracking";
-    statusDiv.innerText = "Connecting to GPS...";
+    statusDiv.innerText = "Connecting to GPS signals...";
 
     watchId = navigator.geolocation.watchPosition(
       (position) => {
@@ -388,11 +774,19 @@
         }
 
         if (nearestStation) {
-          if (fromSelect.value !== nearestStation) {
-            fromSelect.value = nearestStation;
-            calculateRoute(); // Automatically update route timeline as you move between stations
+          currentNearestStation = nearestStation;
+          const distInMeters = (minDistance * 1000).toFixed(0);
+
+          if (!hasAutoSelectedFrom && !isLocked) {
+            document.getElementById('from-input').value = nearestStation;
+            hasAutoSelectedFrom = true;
           }
-          statusDiv.innerText = `📡 Live: Nearest to ${nearestStation} (${(minDistance * 1000).toFixed(0)}m away)`;
+
+          statusDiv.innerHTML = `📡 Live GPS: Nearest to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
+
+          if (isLocked) {
+            calculateRoute(true);
+          }
         }
       },
       (err) => {
@@ -425,12 +819,7 @@
   function getLineForSegment(current, next) {
     if (STATIONS[current].line !== "Interchange") return STATIONS[current].line;
     if (STATIONS[next].line !== "Interchange") return STATIONS[next].line;
-
-    const purple = ["Challaghatta", "Kengeri", "Mysore Road", "Vijayanagar", "MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
-    if (purple.includes(next)) return "Purple Line";
-    const yellow = ["Ragigudda", "Jayadeva Hospital", "BTM Layout", "Central Silk Board", "Bommanahalli", "Hongasandra", "Kudlu Gate", "Singasandra", "Hosa Road", "Beratena Agrahara", "Electronic City", "Konappana Agrahara", "Huskur Road", "Hebbagodi", "Bommasandra"];
-    if (yellow.includes(next)) return "Yellow Line";
-    return "Green Line";
+    return STATIONS[next].line || "Purple Line";
   }
 
   function getPlatformDetails(current, next) {
@@ -438,12 +827,12 @@
 
     if (current === "Nadaprabhu Kempegowda (Majestic)") {
       if (line === "Purple Line") {
-        const eastBound = ["MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
+        const eastBound = ["Sir M. Visvesvaraya Stn. (Central College)", "Cubbon Park", "MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
         return eastBound.includes(next)
           ? { platform: "Platform 1 (Level 1)", direction: "Towards Whitefield (Kadugodi)", line }
           : { platform: "Platform 2 (Level 1)", direction: "Towards Challaghatta", line };
       } else {
-        const southBound = ["Chickpet", "Jayanagar", "RV Road", "Silk Institute"];
+        const southBound = ["Chickpet", "Krishna Rajendra Market", "National College", "Jayanagar", "RV Road", "Silk Institute"];
         return southBound.includes(next)
           ? { platform: "Platform 3 (Level 2)", direction: "Towards Silk Institute", line }
           : { platform: "Platform 4 (Level 2)", direction: "Towards Madavara", line };
@@ -452,9 +841,9 @@
 
     if (current === "RV Road") {
       if (line === "Yellow Line") {
-        return { platform: "Platform 3 (Yellow Line Concourse)", direction: "Towards Bommasandra / Electronic City", line };
+        return { platform: "Platform 3 (Yellow Line Concourse)", direction: "Towards Delta Electronics Bommasandra", line };
       } else {
-        const southBound = ["Silk Institute"];
+        const southBound = ["Banashankari", "Yelachenahalli", "Silk Institute"];
         return southBound.includes(next)
           ? { platform: "Platform 1 (Green Line)", direction: "Towards Silk Institute", line }
           : { platform: "Platform 2 (Green Line)", direction: "Towards Madavara / Majestic", line };
@@ -462,26 +851,75 @@
     }
 
     if (line === "Purple Line") {
-      const eastBound = ["MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
-      return eastBound.includes(next) || STATIONS[next]?.order > STATIONS[current]?.order
+      const eastBound = ["Sir M. Visvesvaraya Stn. (Central College)", "MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
+      return eastBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
         ? { platform: "Platform 1", direction: "Towards Whitefield (Kadugodi)", line }
         : { platform: "Platform 2", direction: "Towards Challaghatta", line };
     } else if (line === "Yellow Line") {
       const southBound = ["Ragigudda", "Jayadeva Hospital", "BTM Layout", "Central Silk Board", "Electronic City", "Bommasandra"];
-      return southBound.includes(next) || STATIONS[next]?.order > STATIONS[current]?.order
+      return southBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
         ? { platform: "Platform 1", direction: "Towards Delta Electronics Bommasandra", line }
         : { platform: "Platform 2", direction: "Towards RV Road", line };
     } else {
-      const southBound = ["Chickpet", "Jayanagar", "RV Road", "Silk Institute"];
-      return southBound.includes(next) || STATIONS[next]?.order > STATIONS[current]?.order
+      const southBound = ["Chickpet", "National College", "Jayanagar", "RV Road", "Silk Institute"];
+      return southBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
         ? { platform: "Platform 1", direction: "Towards Silk Institute", line }
         : { platform: "Platform 2", direction: "Towards Madavara", line };
     }
   }
 
-  function calculateRoute() {
-    const start = fromSelect.value;
-    const end = toSelect.value;
+  function getNextTrainArrival(platformInfo) {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const totalMins = hours * 60 + minutes;
+
+    if (totalMins < 300 || totalMins > 1385) {
+      return { mins: "No Service", detail: "Metros operate 05:00 AM - 11:05 PM", dateObj: null };
+    }
+
+    let headway = 8;
+    if ((totalMins >= 480 && totalMins <= 690) || (totalMins >= 1020 && totalMins <= 1200)) {
+      headway = 4;
+    } else if (totalMins > 1320) {
+      headway = 12;
+    }
+
+    const nextMins = headway - (minutes % headway);
+    const depTime = new Date(now.getTime() + nextMins * 60000);
+    const depTimeString = depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    return { mins: `${nextMins} min${nextMins > 1 ? 's' : ''}`, detail: `Expected at ${depTimeString} (${platformInfo.direction})`, dateObj: depTime };
+  }
+
+  function freezeInputs() {
+    document.getElementById('from-input').disabled = true;
+    document.getElementById('to-input').disabled = true;
+    document.getElementById('edit-btn').style.display = 'block';
+    document.getElementById('calc-btn').innerText = 'Recalculate';
+    isLocked = true;
+  }
+
+  function unlockInputs() {
+    document.getElementById('from-input').disabled = false;
+    document.getElementById('to-input').disabled = false;
+    document.getElementById('edit-btn').style.display = 'none';
+    isLocked = false;
+  }
+
+  function calculateRoute(isGpsUpdate = false) {
+    const start = document.getElementById('from-input').value.trim();
+    const end = document.getElementById('to-input').value.trim();
+
+    if (!STATIONS[start]) {
+      alert("Please select a valid boarding station from the search dropdown!");
+      return;
+    }
+
+    if (!STATIONS[end]) {
+      alert("Please select a valid destination station from the search dropdown!");
+      return;
+    }
 
     if (start === end) {
       alert("Source and Destination cannot be the same!");
@@ -491,14 +929,26 @@
     const path = findShortestPath(start, end);
     if (!path) return;
 
+    if (!isGpsUpdate) {
+      freezeInputs();
+    }
+
     const totalStops = path.length - 1;
     const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("RV Road");
     const estTimeMinutes = totalStops * 2.5 + (isInterchange ? 5 : 0);
-    const calculatedFare = Math.min(90, Math.max(10, Math.ceil(totalStops * 5.5)));
+    const calculatedFare = Math.min(90, Math.max(10, Math.ceil(totalStops * 5.2)));
 
     document.getElementById('metric-fare').innerText = `₹${calculatedFare}`;
     document.getElementById('metric-time').innerText = `~${Math.round(estTimeMinutes)} mins`;
     document.getElementById('metric-stops').innerText = totalStops;
+
+    const firstPlatInfo = getPlatformDetails(path[0], path[1]);
+    const trainArrival = getNextTrainArrival(firstPlatInfo);
+    document.getElementById('metric-next-train').innerText = trainArrival.mins;
+    document.getElementById('next-train-dir').innerText = trainArrival.detail;
+
+    // Base departure time calculation for station-by-station arrival estimation
+    let runningTime = trainArrival.dateObj ? new Date(trainArrival.dateObj.getTime()) : new Date();
 
     const timeline = document.getElementById('timeline');
     timeline.innerHTML = '';
@@ -510,9 +960,20 @@
       const isStart = i === 0;
       const isEnd = i === path.length - 1;
       const nextStation = path[i + 1];
+      const isLivePos = (currentNearestStation === station);
+
+      // Increment arrival time per station stop (2.5 mins per segment, +5 mins if interchange)
+      if (i > 0) {
+        const prevStation = path[i - 1];
+        const isPrevInterchange = STATIONS[prevStation]?.line === "Interchange";
+        const extraMins = isPrevInterchange ? 5 : 2.5;
+        runningTime = new Date(runningTime.getTime() + extraMins * 60000);
+      }
+
+      const formattedArrivalTime = runningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       let stepDiv = document.createElement('div');
-      stepDiv.className = 'step';
+      stepDiv.className = 'step' + (isLivePos ? ' live-location-active' : '');
 
       if (isStart) {
         const platInfo = getPlatformDetails(station, nextStation);
@@ -522,8 +983,14 @@
         stepDiv.innerHTML = `
           <div class="badge ${colorClass}">1</div>
           <div class="step-content">
-            <div class="step-title">Current / Boarding at ${station}</div>
-            <div class="step-desc">Take the <strong>${currentLine}</strong> train.</div>
+            <div class="step-header-row">
+              <div class="step-title">
+                Boarding at ${station}
+                ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
+              </div>
+              <span class="arrival-time-tag">Dep: ${formattedArrivalTime}</span>
+            </div>
+            <div class="step-desc">Board the <strong>${currentLine}</strong> train.</div>
             <div class="platform-tag">${platInfo.platform} • ${platInfo.direction}</div>
           </div>
         `;
@@ -532,7 +999,13 @@
         stepDiv.innerHTML = `
           <div class="badge ${colorClass}">✓</div>
           <div class="step-content">
-            <div class="step-title">Arrive at ${station}</div>
+            <div class="step-header-row">
+              <div class="step-title">
+                Arrive at ${station}
+                ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
+              </div>
+              <span class="arrival-time-tag">Arr: ${formattedArrivalTime}</span>
+            </div>
             <div class="step-desc">Exit through fare gates. Journey complete.</div>
           </div>
         `;
@@ -544,8 +1017,14 @@
         stepDiv.innerHTML = `
           <div class="badge interchange">⇄</div>
           <div class="step-content">
-            <div class="step-title">Interchange at ${station}</div>
-            ${lineChanged ? `<div class="alert"><strong>Line Switch:</strong> Use pedestrian walkway/stairs to switch to <strong>${nextPlat.line}</strong>.</div>` : ''}
+            <div class="step-header-row">
+              <div class="step-title">
+                Interchange at ${station}
+                ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
+              </div>
+              <span class="arrival-time-tag">Arr: ${formattedArrivalTime}</span>
+            </div>
+            ${lineChanged ? `<div class="alert"><strong>Line Switch:</strong> Transfer to <strong>${nextPlat.line}</strong> using concourse walkway/stairs.</div>` : ''}
             <div class="platform-tag">${nextPlat.platform} • ${nextPlat.direction}</div>
           </div>
         `;
@@ -554,8 +1033,14 @@
         stepDiv.innerHTML = `
           <div class="badge ${colorClass}">•</div>
           <div class="step-content">
-            <div class="step-title">${station}</div>
-            <div class="step-desc">Passing station</div>
+            <div class="step-header-row">
+              <div class="step-title">
+                ${station}
+                ${isLivePos ? '<span class="live-tag">YOU ARE HERE</span>' : ''}
+              </div>
+              <span class="arrival-time-tag">Arr: ${formattedArrivalTime}</span>
+            </div>
+            <div class="step-desc">En-route station</div>
           </div>
         `;
       }
@@ -566,9 +1051,7 @@
     document.getElementById('result-card').style.display = 'block';
   }
 
-  // Auto start on page load
   window.onload = function() {
-    toggleLiveTracking();
     calculateRoute();
   };
 </script>
