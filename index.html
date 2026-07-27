@@ -12,10 +12,13 @@
     </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f6f8fb" media="(prefers-color-scheme: light)" />
   
   <!-- SEO & Search Engine Optimization -->
   <title>Namma Metro Route Finder - Bengaluru GPS & Timetable Navigator</title>
-  <meta name="description" content="GPS-enabled Namma Metro route finder for Bengaluru. Search stations, view BMRC timetable frequency estimates, fare estimates, and station-by-station journey times." />
+  <meta name="description" content="GPS-enabled Namma Metro route finder for Bengaluru. Search stations, view BMRCL timetable frequency estimates, fare estimates, and station-by-station journey times." />
   <meta name="keywords" content="Namma Metro, Bengaluru Metro Route, Purple Line, Green Line, Yellow Line, Majestic Interchange, Metro Fares, Live Metro Schedule" />
   <meta name="robots" content="index, follow" />
   <meta name="author" content="Namma Metro Navigator" />
@@ -23,7 +26,7 @@
   <!-- Open Graph Meta Tags -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Namma Metro GPS Route Finder & Platform Navigator" />
-  <meta property="og:description" content="Calculate metro routes, view BMRC timetable frequency estimates, platform directions, and station arrival estimates in Bengaluru." />
+  <meta property="og:description" content="Calculate metro routes, view BMRCL timetable frequency estimates, platform directions, and station arrival estimates in Bengaluru." />
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
@@ -33,14 +36,17 @@
     "name": "Namma Metro Navigator",
     "applicationCategory": "TravelApplication",
     "operatingSystem": "All",
-    "description": "GPS route finder, BMRC timetable estimator, and platform navigator for Namma Metro Bengaluru."
+    "description": "GPS route finder, BMRCL timetable estimator, and platform navigator for Namma Metro Bengaluru."
   }
   </script>
 
   <style>
     :root {
+      color-scheme: dark;
       --bg: #0f172a;
       --card-bg: #1e293b;
+      --surface-bg: #0f172a;
+      --surface-hover: #1e293b;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --purple-line: #a855f7;
@@ -49,6 +55,54 @@
       --border: #334155;
       --accent: #38bdf8;
       --highlight: #f43f5e;
+      --warning: #fbbf24;
+      --footer-muted: #64748b;
+      --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      --dropdown-shadow: 0 8px 16px rgba(0,0,0,0.5);
+      --accent-soft: rgba(56, 189, 248, 0.08);
+      --accent-medium: rgba(56, 189, 248, 0.16);
+      --accent-border: rgba(56, 189, 248, 0.25);
+      --accent-border-strong: rgba(56, 189, 248, 0.3);
+      --highlight-soft: rgba(244, 63, 94, 0.1);
+      --highlight-medium: rgba(244, 63, 94, 0.12);
+      --highlight-border: rgba(244, 63, 94, 0.3);
+      --warning-soft: rgba(245, 158, 11, 0.1);
+      --warning-border: rgba(245, 158, 11, 0.3);
+      --item-border: rgba(51, 65, 85, 0.4);
+      --badge-ring: #ffffff;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --card-bg: #ffffff;
+        --surface-bg: #f8fafc;
+        --surface-hover: #eaf2fb;
+        --text: #0f172a;
+        --text-muted: #586579;
+        --purple-line: #7c3aed;
+        --green-line: #15803d;
+        --yellow-line: #d97706;
+        --border: #d8e0eb;
+        --accent: #0369a1;
+        --highlight: #be123c;
+        --warning: #92400e;
+        --footer-muted: #697586;
+        --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+        --dropdown-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+        --accent-soft: rgba(3, 105, 161, 0.08);
+        --accent-medium: rgba(3, 105, 161, 0.14);
+        --accent-border: rgba(3, 105, 161, 0.22);
+        --accent-border-strong: rgba(3, 105, 161, 0.32);
+        --highlight-soft: rgba(190, 18, 60, 0.08);
+        --highlight-medium: rgba(190, 18, 60, 0.11);
+        --highlight-border: rgba(190, 18, 60, 0.25);
+        --warning-soft: rgba(146, 64, 14, 0.08);
+        --warning-border: rgba(146, 64, 14, 0.24);
+        --item-border: rgba(216, 224, 235, 0.9);
+        --badge-ring: #ffffff;
+      }
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -82,7 +136,7 @@
     .header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
 
     .clock-banner {
-      background: rgba(15, 23, 42, 0.6);
+      background: var(--surface-bg);
       border: 1px solid var(--border);
       padding: 8px 12px;
       border-radius: 8px;
@@ -101,7 +155,7 @@
       border-radius: 12px;
       padding: 16px;
       border: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: var(--card-shadow);
     }
 
     .form-group {
@@ -116,19 +170,19 @@
 
     .input-wrapper { position: relative; width: 100%; }
 
-    input, button {
+    input {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
-      background: #0f172a;
+      background: var(--surface-bg);
       color: var(--text);
       font-size: 0.95rem;
       outline: none;
     }
 
     input:focus { border-color: var(--accent); }
-    input:disabled { opacity: 0.6; cursor: not-allowed; background: #1e293b; }
+    input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--surface-hover); }
 
     .autocomplete-results {
       position: absolute;
@@ -137,14 +191,14 @@
       right: 0;
       max-height: 220px;
       overflow-y: auto;
-      background: #0f172a;
+      background: var(--surface-bg);
       border: 1px solid var(--accent);
       border-top: none;
       border-bottom-left-radius: 8px;
       border-bottom-right-radius: 8px;
       z-index: 100;
       display: none;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+      box-shadow: var(--dropdown-shadow);
     }
 
     .autocomplete-item {
@@ -152,41 +206,20 @@
       cursor: pointer;
       font-size: 0.9rem;
       color: var(--text);
-      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+      border-bottom: 1px solid var(--item-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .autocomplete-item:last-child { border-bottom: none; }
-    .autocomplete-item:hover { background: #1e293b; color: var(--accent); }
+    .autocomplete-item:hover { background: var(--surface-hover); color: var(--accent); }
 
     .line-badge-sm { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
     .line-badge-sm.Purple { background: var(--purple-line); color: #fff; }
     .line-badge-sm.Green { background: var(--green-line); color: #fff; }
     .line-badge-sm.Yellow { background: var(--yellow-line); color: #000; }
     .line-badge-sm.Interchange { background: #f59e0b; color: #000; }
-
-    .btn-group { display: flex; gap: 10px; }
-
-    button.primary-btn { background: var(--accent); color: #0f172a; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.2s; }
-    button.secondary-btn { background: #334155; color: var(--text); font-weight: 600; cursor: pointer; border: 1px solid var(--border); }
-    button.primary-btn:hover, button.secondary-btn:hover { opacity: 0.9; }
-
-    .gps-btn {
-      background: #334155;
-      color: var(--text);
-      font-size: 0.85rem;
-      padding: 10px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border: 1px solid var(--border);
-      margin-top: 6px;
-    }
 
     .gps-status { font-size: 0.8rem; color: var(--accent); margin-top: 6px; line-height: 1.3; }
 
@@ -198,7 +231,7 @@
     }
 
     .metric-card {
-      background: #0f172a;
+      background: var(--surface-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px 6px;
@@ -217,8 +250,8 @@
     }
 
     .next-train-box {
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
       padding: 10px 12px;
       border-radius: 8px;
       display: flex;
@@ -229,12 +262,12 @@
 
     .next-train-box.active-route-dir {
       border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.16);
+      background: var(--accent-medium);
     }
 
     .next-train-box .time-title { font-size: 0.82rem; font-weight: 600; color: var(--text); }
     .next-train-box .time-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
-    .next-train-box .time-val { font-size: 0.95rem; font-weight: 700; color: #38bdf8; white-space: nowrap; text-align: right; }
+    .next-train-box .time-val { font-size: 0.95rem; font-weight: 700; color: var(--accent); white-space: nowrap; text-align: right; }
     .next-train-box .time-val.no-service { color: var(--highlight); }
 
     .route-timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
@@ -288,30 +321,30 @@
       font-size: 0.75rem;
       font-weight: 700;
       color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
+      background: var(--accent-soft);
       padding: 2px 6px;
       border-radius: 4px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
+      border: 1px solid var(--accent-border);
       white-space: nowrap;
     }
 
     .arrival-time-tag.no-service-tag {
       color: var(--highlight);
-      background: rgba(244, 63, 94, 0.1);
-      border-color: rgba(244, 63, 94, 0.3);
+      background: var(--highlight-soft);
+      border-color: var(--highlight-border);
     }
 
     .step-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
 
     .step.live-location-active {
-      background: rgba(244, 63, 94, 0.12);
+      background: var(--highlight-medium);
       border-left: 4px solid var(--highlight);
       padding: 8px 10px 12px 10px;
       margin-left: -10px;
       border-radius: 8px;
     }
 
-    .step.live-location-active .badge { box-shadow: 0 0 10px var(--highlight); border: 2px solid #ffffff; }
+    .step.live-location-active .badge { box-shadow: 0 0 10px var(--highlight); border: 2px solid var(--badge-ring); }
 
     .live-tag {
       display: inline-block;
@@ -332,18 +365,18 @@
       display: inline-block;
       padding: 2px 6px;
       border-radius: 4px;
-      background: rgba(56, 189, 248, 0.15);
+      background: var(--accent-medium);
       color: var(--accent);
       font-size: 0.72rem;
       font-weight: 600;
       margin-top: 4px;
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      border: 1px solid var(--accent-border-strong);
     }
 
     .alert {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fbbf24;
+      background: var(--warning-soft);
+      border: 1px solid var(--warning-border);
+      color: var(--warning);
       padding: 8px;
       border-radius: 6px;
       font-size: 0.8rem;
@@ -351,9 +384,9 @@
     }
 
     .alert.danger {
-      background: rgba(244, 63, 94, 0.1);
-      border-color: rgba(244, 63, 94, 0.3);
-      color: #fda4af;
+      background: var(--highlight-soft);
+      border-color: var(--highlight-border);
+      color: var(--highlight);
       margin-bottom: 12px;
     }
 
@@ -369,7 +402,7 @@
       line-height: 1.5;
     }
 
-    footer p.disclaimer { margin-bottom: 8px; color: #64748b; }
+    footer p.disclaimer { margin-bottom: 8px; color: var(--footer-muted); }
     footer p.copyright { font-weight: 600; color: var(--text-muted); }
 
     @media (max-width: 480px) {
@@ -378,7 +411,6 @@
       .header h1 { font-size: 1.2rem; }
       .metric-card .val { font-size: 0.95rem; }
       .metric-card .lbl { font-size: 0.65rem; }
-      .btn-group { flex-direction: column; }
     }
   </style>
 </head>
@@ -387,9 +419,9 @@
 <div class="container">
   <header class="header">
     <h1>Namma Metro Route Finder</h1>
-    <p>Bengaluru Metro • BMRC Timetable & Platform Switch Navigator</p>
+    <p>Bengaluru Metro • BMRCL Timetable & Platform Switch Navigator</p>
     <div class="clock-banner">
-      🕒 Current Location Time: <span id="live-clock">--:--:-- --</span>
+      Bengaluru time: <span id="live-clock">--:--:-- --</span>
     </div>
   </header>
 
@@ -400,9 +432,6 @@
         <input type="text" id="from-input" placeholder="Detecting nearest station via GPS..." autocomplete="off" />
         <div id="from-results" class="autocomplete-results"></div>
       </div>
-      <button type="button" id="tracking-btn" class="gps-btn" onclick="toggleLiveTracking()">
-        🛑 Stop Live Tracking
-      </button>
       <div id="gps-status" class="gps-status">Connecting to live GPS positioning...</div>
     </div>
 
@@ -414,10 +443,6 @@
       </div>
     </div>
 
-    <div class="btn-group">
-      <button class="primary-btn" id="calc-btn" onclick="calculateRoute()">Calculate Route</button>
-      <button class="secondary-btn" id="edit-btn" onclick="unlockInputs()" style="display: none;">Edit Route</button>
-    </div>
   </main>
 
   <!-- Unselected Mode Card: Shows Dual-Direction Timetable Estimates -->
@@ -426,7 +451,7 @@
       📍 BOARDING STATION: BOTH UPCOMING DIRECTIONS
     </h3>
     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-      Select a destination above to see your exact single journey route and BMRC timetable estimate.
+      Select a destination above to see your exact single journey route and BMRCL timetable estimate.
     </p>
     <div class="dual-train-container" id="unselected-dual-container"></div>
   </section>
@@ -454,7 +479,7 @@
     <div class="dual-train-container" id="single-route-train-container"></div>
 
     <div id="no-service-banner" class="alert danger" style="display: none;">
-      <strong>Metro Services Closed:</strong> Train operations are outside the current BMRC timetable window for this line and direction. Timestamps along the route are unavailable during non-operational hours.
+      <strong>Metro Services Closed:</strong> Train operations are outside the current BMRCL timetable window for this line and direction. Timestamps along the route are unavailable during non-operational hours.
     </div>
 
     <h3 style="margin: 16px 0 12px 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
@@ -466,7 +491,7 @@
 
 <footer>
   <p class="disclaimer">
-    <strong>Terms & Conditions:</strong> Train schedules use BMRC timetable frequency bands where available. Platform directions, fares, and station arrival times are estimates for journey planning and should be verified at the station.
+    <strong>Terms & Conditions:</strong> Train schedules use BMRCL timetable frequency bands where available. Platform directions, fares, and station arrival times are estimates for journey planning and should be verified at the station.
   </p>
   <p class="copyright">
     &copy; <span id="year"></span> Namma Metro Navigator. All rights reserved.
@@ -477,98 +502,96 @@
   let watchId = null;
   let isTracking = false;
   let currentNearestStation = null;
-  let isLocked = false;
 
   const STATIONS = {
     // PURPLE LINE
-    "Challaghatta": { line: "Purple Line", order: 1, lat: 12.9090, lng: 77.4640 },
-    "Kengeri": { line: "Purple Line", order: 2, lat: 12.9075, lng: 77.4789 },
-    "Kengeri Bus Terminal": { line: "Purple Line", order: 3, lat: 12.9100, lng: 77.4855 },
-    "Pattanagere": { line: "Purple Line", order: 4, lat: 12.9242, lng: 77.4988 },
-    "Jnanabharathi": { line: "Purple Line", order: 5, lat: 12.9301, lng: 77.5050 },
-    "Rajarajeswari Nagar": { line: "Purple Line", order: 6, lat: 12.9355, lng: 77.5140 },
-    "Nayakandahalli": { line: "Purple Line", order: 7, lat: 12.9410, lng: 77.5230 },
-    "Mysore Road": { line: "Purple Line", order: 8, lat: 12.9463, lng: 77.5300 },
-    "Deepanjali Nagar": { line: "Purple Line", order: 9, lat: 12.9535, lng: 77.5320 },
-    "Attiguppe": { line: "Purple Line", order: 10, lat: 12.9620, lng: 77.5338 },
-    "Vijayanagar": { line: "Purple Line", order: 11, lat: 12.9702, lng: 77.5372 },
-    "Hosahalli": { line: "Purple Line", order: 12, lat: 12.9730, lng: 77.5450 },
-    "Magadi Road": { line: "Purple Line", order: 13, lat: 12.9755, lng: 77.5550 },
-    "KSR Bengaluru Railway Station": { line: "Purple Line", order: 14, lat: 12.9780, lng: 77.5660 },
-    "Nadaprabhu Kempegowda (Majestic)": { line: "Interchange", order: 15, lat: 12.9781, lng: 77.5723 },
-    "Sir M. Visvesvaraya Stn. (Central College)": { line: "Purple Line", order: 16, lat: 12.9740, lng: 77.5830 },
-    "Dr. B.R. Ambedkar Stn. (Vidhana Soudha)": { line: "Purple Line", order: 17, lat: 12.9790, lng: 77.5910 },
-    "Cubbon Park": { line: "Purple Line", order: 18, lat: 12.9810, lng: 77.5970 },
-    "MG Road": { line: "Purple Line", order: 19, lat: 12.9756, lng: 77.6067 },
-    "Trinity": { line: "Purple Line", order: 20, lat: 12.9728, lng: 77.6170 },
-    "Halasuru": { line: "Purple Line", order: 21, lat: 12.9750, lng: 77.6260 },
-    "Indiranagar": { line: "Purple Line", order: 22, lat: 12.9783, lng: 77.6408 },
-    "Swami Vivekananda Road": { line: "Purple Line", order: 23, lat: 12.9855, lng: 77.6530 },
-    "Baiyappanahalli": { line: "Purple Line", order: 24, lat: 12.9908, lng: 77.6524 },
-    "Benniganahalli": { line: "Purple Line", order: 25, lat: 12.9960, lng: 77.6620 },
-    "KR Puram": { line: "Purple Line", order: 26, lat: 13.0012, lng: 77.6765 },
-    "Singayyanapalya": { line: "Purple Line", order: 27, lat: 12.9970, lng: 77.6900 },
-    "Garudacharpalya": { line: "Purple Line", order: 28, lat: 12.9910, lng: 77.7030 },
-    "Hoodi Junction": { line: "Purple Line", order: 29, lat: 12.9880, lng: 77.7140 },
-    "Seetharampalya": { line: "Purple Line", order: 30, lat: 12.9850, lng: 77.7220 },
-    "Kundalahalli": { line: "Purple Line", order: 31, lat: 12.9810, lng: 77.7280 },
-    "Nallurhalli": { line: "Purple Line", order: 32, lat: 12.9780, lng: 77.7330 },
-    "Sadaramangala": { line: "Purple Line", order: 33, lat: 12.9830, lng: 77.7380 },
-    "ITPL": { line: "Purple Line", order: 34, lat: 12.9882, lng: 77.7318 },
-    "Pattandur Agrahara": { line: "Purple Line", order: 35, lat: 12.9890, lng: 77.7460 },
-    "Kadugodi Tree Park": { line: "Purple Line", order: 36, lat: 12.9915, lng: 77.7530 },
-    "Hope Farm Channasandra": { line: "Purple Line", order: 37, lat: 12.9940, lng: 77.7570 },
-    "Whitefield (Kadugodi)": { line: "Purple Line", order: 38, lat: 12.9961, lng: 77.7601 },
+    "Challaghatta": { line: "Purple Line", order: 1, lat: 12.8974200, lng: 77.4612400 },
+    "Kengeri": { line: "Purple Line", order: 2, lat: 12.9079540, lng: 77.4765118 },
+    "Kengeri Bus Terminal": { line: "Purple Line", order: 3, lat: 12.9148975, lng: 77.4875928 },
+    "Pattanagere": { line: "Purple Line", order: 4, lat: 12.9244147, lng: 77.4982564 },
+    "Jnanabharathi": { line: "Purple Line", order: 5, lat: 12.9355559, lng: 77.5120187 },
+    "Rajarajeshwari Nagar": { line: "Purple Line", order: 6, lat: 12.9367268, lng: 77.5195822 },
+    "Pantharapalya - Nayandahalli": { line: "Purple Line", order: 7, lat: 12.9416700, lng: 77.5251200 },
+    "Mysuru Road": { line: "Purple Line", order: 8, lat: 12.9467266, lng: 77.5300737 },
+    "Deepanjali Nagar": { line: "Purple Line", order: 9, lat: 12.9522153, lng: 77.5371011 },
+    "Attiguppe": { line: "Purple Line", order: 10, lat: 12.9619570, lng: 77.5335820 },
+    "Vijayanagar": { line: "Purple Line", order: 11, lat: 12.9709156, lng: 77.5374015 },
+    "Balagangadharanatha Swamiji Station, Hosahalli": { line: "Purple Line", order: 12, lat: 12.9743030, lng: 77.5454434 },
+    "Magadi Road": { line: "Purple Line", order: 13, lat: 12.9756582, lng: 77.5554118 },
+    "Krantivira Sangolli Rayanna Railway Station": { line: "Purple Line", order: 14, lat: 12.9758405, lng: 77.5657558 },
+    "Nadaprabhu Kempegowda (Majestic)": { line: "Interchange", order: 15, lat: 12.9756893, lng: 77.5728703 },
+    "Sir M. Visvesvaraya Station, Central College": { line: "Purple Line", order: 16, lat: 12.9742808, lng: 77.5839458 },
+    "Dr. B. R. Ambedkar Station, Vidhana Soudha": { line: "Purple Line", order: 17, lat: 12.9787400, lng: 77.5916400 },
+    "Cubbon Park": { line: "Purple Line", order: 18, lat: 12.9809006, lng: 77.5974655 },
+    "MG Road": { line: "Purple Line", order: 19, lat: 12.9755000, lng: 77.6068000 },
+    "Trinity": { line: "Purple Line", order: 20, lat: 12.9730000, lng: 77.6170000 },
+    "Halasuru": { line: "Purple Line", order: 21, lat: 12.9756600, lng: 77.6262800 },
+    "Indiranagar": { line: "Purple Line", order: 22, lat: 12.9783300, lng: 77.6386500 },
+    "Swami Vivekananda Road": { line: "Purple Line", order: 23, lat: 12.9859103, lng: 77.6450043 },
+    "Baiyappanahalli": { line: "Purple Line", order: 24, lat: 12.9906651, lng: 77.6525903 },
+    "Benniganahalli": { line: "Purple Line", order: 25, lat: 12.9964275, lng: 77.6683160 },
+    "K. R. Pura": { line: "Purple Line", order: 26, lat: 12.9999900, lng: 77.6779400 },
+    "Singayyanapalya": { line: "Purple Line", order: 27, lat: 12.9967800, lng: 77.6921700 },
+    "Garudacharpalya": { line: "Purple Line", order: 28, lat: 12.9935600, lng: 77.7037600 },
+    "Hoodi": { line: "Purple Line", order: 29, lat: 12.9887300, lng: 77.7112700 },
+    "Seetharampalya": { line: "Purple Line", order: 30, lat: 12.9809200, lng: 77.7088700 },
+    "Kundalahalli": { line: "Purple Line", order: 31, lat: 12.9774610, lng: 77.7157610 },
+    "Nallur Halli": { line: "Purple Line", order: 32, lat: 12.9765280, lng: 77.7247630 },
+    "Sri Sathya Sai Hospital": { line: "Purple Line", order: 33, lat: 12.9810200, lng: 77.7276200 },
+    "Pattandur Agrahara": { line: "Purple Line", order: 34, lat: 12.9876130, lng: 77.7382110 },
+    "Kadugodi Tree Park": { line: "Purple Line", order: 35, lat: 12.9856500, lng: 77.7469000 },
+    "Hopefarm Channasandra": { line: "Purple Line", order: 36, lat: 12.9879300, lng: 77.7540900 },
+    "Whitefield (Kadugodi)": { line: "Purple Line", order: 37, lat: 12.9950700, lng: 77.7577700 },
 
     // GREEN LINE
-    "Madavara": { line: "Green Line", order: 1, lat: 13.0623, lng: 77.4761 },
-    "Chikkabidarakallu": { line: "Green Line", order: 2, lat: 13.0560, lng: 77.4880 },
-    "Manjunathnagar": { line: "Green Line", order: 3, lat: 13.0510, lng: 77.4930 },
-    "Nagasandra": { line: "Green Line", order: 4, lat: 13.0478, lng: 77.4996 },
-    "Dasarahalli": { line: "Green Line", order: 5, lat: 13.0435, lng: 77.5100 },
-    "Jalahalli": { line: "Green Line", order: 6, lat: 13.0390, lng: 77.5190 },
-    "Peenya Industry": { line: "Green Line", order: 7, lat: 13.0340, lng: 77.5250 },
-    "Peenya": { line: "Green Line", order: 8, lat: 13.0310, lng: 77.5320 },
-    "Goraguntepalya": { line: "Green Line", order: 9, lat: 13.0280, lng: 77.5400 },
-    "Yeshwanthpur": { line: "Green Line", order: 10, lat: 13.0236, lng: 77.5498 },
-    "Sandal Soap Factory": { line: "Green Line", order: 11, lat: 13.0150, lng: 77.5540 },
-    "Mahalakshmi": { line: "Green Line", order: 12, lat: 13.0080, lng: 77.5560 },
-    "Rajajinagar": { line: "Green Line", order: 13, lat: 13.0000, lng: 77.5570 },
-    "Kuvempu Road": { line: "Green Line", order: 14, lat: 12.9970, lng: 77.5620 },
-    "Srirampura": { line: "Green Line", order: 15, lat: 12.9940, lng: 77.5660 },
-    "Sampige Road": { line: "Green Line", order: 16, lat: 12.9906, lng: 77.5711 },
-    "Chickpet": { line: "Green Line", order: 18, lat: 12.9663, lng: 77.5750 },
-    "Krishna Rajendra Market": { line: "Green Line", order: 19, lat: 12.9600, lng: 77.5760 },
-    "National College": { line: "Green Line", order: 20, lat: 12.9500, lng: 77.5730 },
-    "Lalbagh": { line: "Green Line", order: 21, lat: 12.9460, lng: 77.5800 },
-    "South End Circle": { line: "Green Line", order: 22, lat: 12.9380, lng: 77.5810 },
-    "Jayanagar": { line: "Green Line", order: 23, lat: 12.9298, lng: 77.5824 },
-    "RV Road": { line: "Interchange", order: 24, lat: 12.9216, lng: 77.5802 },
-    "Banashankari": { line: "Green Line", order: 25, lat: 12.9150, lng: 77.5730 },
-    "Jaya Prakash Nagar": { line: "Green Line", order: 26, lat: 12.9070, lng: 77.5720 },
-    "Yelachenahalli": { line: "Green Line", order: 27, lat: 12.8960, lng: 77.5700 },
-    "Konanakunte Cross": { line: "Green Line", order: 28, lat: 12.8880, lng: 77.5680 },
-    "Doddakallasandra": { line: "Green Line", order: 29, lat: 12.8790, lng: 77.5640 },
-    "Vajarahalli": { line: "Green Line", order: 30, lat: 12.8720, lng: 77.5580 },
-    "Talaghattapura": { line: "Green Line", order: 31, lat: 12.8680, lng: 77.5520 },
-    "Silk Institute": { line: "Green Line", order: 32, lat: 12.8623, lng: 77.5480 },
+    "Madavara": { line: "Green Line", order: 1, lat: 13.0574214, lng: 77.4728055 },
+    "Chikkabidarakallu": { line: "Green Line", order: 2, lat: 13.0519444, lng: 77.4863889 },
+    "Manjunathnagar": { line: "Green Line", order: 3, lat: 13.0502778, lng: 77.4944444 },
+    "Nagasandra": { line: "Green Line", order: 4, lat: 13.0481315, lng: 77.5001257 },
+    "Dasarahalli": { line: "Green Line", order: 5, lat: 13.0435416, lng: 77.5123791 },
+    "Jalahalli": { line: "Green Line", order: 6, lat: 13.0395842, lng: 77.5198377 },
+    "Peenya Industry": { line: "Green Line", order: 7, lat: 13.0363220, lng: 77.5257170 },
+    "Peenya": { line: "Green Line", order: 8, lat: 13.0329868, lng: 77.5334693 },
+    "Goraguntepalya": { line: "Green Line", order: 9, lat: 13.0284000, lng: 77.5402000 },
+    "Yeshwanthpur": { line: "Green Line", order: 10, lat: 13.0232000, lng: 77.5499000 },
+    "Sandal Soap Factory": { line: "Green Line", order: 11, lat: 13.0148000, lng: 77.5539000 },
+    "Mahalakshmi": { line: "Green Line", order: 12, lat: 13.0083374, lng: 77.5488344 },
+    "Rajajinagar": { line: "Green Line", order: 13, lat: 13.0003455, lng: 77.5497483 },
+    "Mahakavi Kuvempu Road": { line: "Green Line", order: 14, lat: 12.9985024, lng: 77.5569474 },
+    "Srirampura": { line: "Green Line", order: 15, lat: 12.9965259, lng: 77.5633565 },
+    "Mantri Square Sampige Road": { line: "Green Line", order: 16, lat: 12.9905455, lng: 77.5708050 },
+    "Chickpet": { line: "Green Line", order: 18, lat: 12.9675484, lng: 77.5747975 },
+    "Krishna Rajendra Market": { line: "Green Line", order: 19, lat: 12.9564453, lng: 77.5735999 },
+    "National College": { line: "Green Line", order: 20, lat: 12.9506136, lng: 77.5737360 },
+    "Lalbagh": { line: "Green Line", order: 21, lat: 12.9462868, lng: 77.5800613 },
+    "South End Circle": { line: "Green Line", order: 22, lat: 12.9383210, lng: 77.5800747 },
+    "Jayanagar": { line: "Green Line", order: 23, lat: 12.9294558, lng: 77.5802873 },
+    "Rashtreeya Vidyalaya Road": { line: "Interchange", order: 24, lat: 12.9215875, lng: 77.5802612 },
+    "Banashankari": { line: "Green Line", order: 25, lat: 12.9155387, lng: 77.5736287 },
+    "Jaya Prakash Nagar": { line: "Green Line", order: 26, lat: 12.9074229, lng: 77.5731788 },
+    "Yelachenahalli": { line: "Green Line", order: 27, lat: 12.8959381, lng: 77.5701687 },
+    "Konanakunte Cross": { line: "Green Line", order: 28, lat: 12.8890002, lng: 77.5626407 },
+    "Doddakallasandra": { line: "Green Line", order: 29, lat: 12.8846862, lng: 77.5527510 },
+    "Vajarahalli": { line: "Green Line", order: 30, lat: 12.8775389, lng: 77.5447450 },
+    "Thalaghattapura": { line: "Green Line", order: 31, lat: 12.8714244, lng: 77.5383625 },
+    "Silk Institute": { line: "Green Line", order: 32, lat: 12.8617700, lng: 77.5299900 },
 
     // YELLOW LINE
-    "Ragigudda": { line: "Yellow Line", order: 2, lat: 12.9175, lng: 77.5912 },
-    "Jayadeva Hospital": { line: "Yellow Line", order: 3, lat: 12.9170, lng: 77.6015 },
-    "BTM Layout": { line: "Yellow Line", order: 4, lat: 12.9161, lng: 77.6101 },
-    "Central Silk Board": { line: "Yellow Line", order: 5, lat: 12.9173, lng: 77.6228 },
-    "Bommanahalli": { line: "Yellow Line", order: 6, lat: 12.9088, lng: 77.6280 },
-    "Hongasandra": { line: "Yellow Line", order: 7, lat: 12.8980, lng: 77.6360 },
-    "Kudlu Gate": { line: "Yellow Line", order: 8, lat: 12.8885, lng: 77.6432 },
-    "Singasandra": { line: "Yellow Line", order: 9, lat: 12.8782, lng: 77.6508 },
-    "Hosa Road": { line: "Yellow Line", order: 10, lat: 12.8675, lng: 77.6582 },
-    "Beratena Agrahara": { line: "Yellow Line", order: 11, lat: 12.8569, lng: 77.6625 },
-    "Electronic City": { line: "Yellow Line", order: 12, lat: 12.8452, lng: 77.6602 },
-    "Infosys Foundation Konappana Agrahara": { line: "Yellow Line", order: 13, lat: 12.8361, lng: 77.6680 },
-    "Huskur Road": { line: "Yellow Line", order: 14, lat: 12.8250, lng: 77.6740 },
-    "Biocon Hebbagodi": { line: "Yellow Line", order: 15, lat: 12.8120, lng: 77.6830 },
-    "Delta Electronics Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8020, lng: 77.6920 }
+    "Ragigudda": { line: "Yellow Line", order: 2, lat: 12.9171100, lng: 77.5883700 },
+    "Jayadeva Hospital": { line: "Yellow Line", order: 3, lat: 12.9167300, lng: 77.6000900 },
+    "BTM Layout": { line: "Yellow Line", order: 4, lat: 12.9165600, lng: 77.6082500 },
+    "Central Silk Board": { line: "Yellow Line", order: 5, lat: 12.9165200, lng: 77.6205600 },
+    "Bommanahalli": { line: "Yellow Line", order: 6, lat: 12.9106600, lng: 77.6265700 },
+    "Hongasandra": { line: "Yellow Line", order: 7, lat: 12.9016500, lng: 77.6320800 },
+    "Kudlu Gate": { line: "Yellow Line", order: 8, lat: 12.8899200, lng: 77.6392900 },
+    "Singasandra": { line: "Yellow Line", order: 9, lat: 12.8806900, lng: 77.6449800 },
+    "Hosa Road": { line: "Yellow Line", order: 10, lat: 12.8707800, lng: 77.6524800 },
+    "Beratena Agrahara": { line: "Yellow Line", order: 11, lat: 12.8638500, lng: 77.6579800 },
+    "Electronic City": { line: "Yellow Line", order: 12, lat: 12.8564800, lng: 77.6636100 },
+    "Infosys Foundation Konappana Agrahara": { line: "Yellow Line", order: 13, lat: 12.8464900, lng: 77.6711200 },
+    "Huskur Road": { line: "Yellow Line", order: 14, lat: 12.8390100, lng: 77.6775400 },
+    "Biocon Hebbagodi": { line: "Yellow Line", order: 15, lat: 12.8290900, lng: 77.6813300 },
+    "Delta electronics Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8193300, lng: 77.6883400 }
   };
 
   const ADJACENCY = {
@@ -576,40 +599,39 @@
     "Kengeri": ["Challaghatta", "Kengeri Bus Terminal"],
     "Kengeri Bus Terminal": ["Kengeri", "Pattanagere"],
     "Pattanagere": ["Kengeri Bus Terminal", "Jnanabharathi"],
-    "Jnanabharathi": ["Pattanagere", "Rajarajeswari Nagar"],
-    "Rajarajeswari Nagar": ["Jnanabharathi", "Nayakandahalli"],
-    "Nayakandahalli": ["Rajarajeswari Nagar", "Mysore Road"],
-    "Mysore Road": ["Nayakandahalli", "Deepanjali Nagar"],
-    "Deepanjali Nagar": ["Mysore Road", "Attiguppe"],
+    "Jnanabharathi": ["Pattanagere", "Rajarajeshwari Nagar"],
+    "Rajarajeshwari Nagar": ["Jnanabharathi", "Pantharapalya - Nayandahalli"],
+    "Pantharapalya - Nayandahalli": ["Rajarajeshwari Nagar", "Mysuru Road"],
+    "Mysuru Road": ["Pantharapalya - Nayandahalli", "Deepanjali Nagar"],
+    "Deepanjali Nagar": ["Mysuru Road", "Attiguppe"],
     "Attiguppe": ["Deepanjali Nagar", "Vijayanagar"],
-    "Vijayanagar": ["Attiguppe", "Hosahalli"],
-    "Hosahalli": ["Vijayanagar", "Magadi Road"],
-    "Magadi Road": ["Hosahalli", "KSR Bengaluru Railway Station"],
-    "KSR Bengaluru Railway Station": ["Magadi Road", "Nadaprabhu Kempegowda (Majestic)"],
-    "Nadaprabhu Kempegowda (Majestic)": ["KSR Bengaluru Railway Station", "Sir M. Visvesvaraya Stn. (Central College)", "Sampige Road", "Chickpet"],
-    "Sir M. Visvesvaraya Stn. (Central College)": ["Nadaprabhu Kempegowda (Majestic)", "Dr. B.R. Ambedkar Stn. (Vidhana Soudha)"],
-    "Dr. B.R. Ambedkar Stn. (Vidhana Soudha)": ["Sir M. Visvesvaraya Stn. (Central College)", "Cubbon Park"],
-    "Cubbon Park": ["Dr. B.R. Ambedkar Stn. (Vidhana Soudha)", "MG Road"],
+    "Vijayanagar": ["Attiguppe", "Balagangadharanatha Swamiji Station, Hosahalli"],
+    "Balagangadharanatha Swamiji Station, Hosahalli": ["Vijayanagar", "Magadi Road"],
+    "Magadi Road": ["Balagangadharanatha Swamiji Station, Hosahalli", "Krantivira Sangolli Rayanna Railway Station"],
+    "Krantivira Sangolli Rayanna Railway Station": ["Magadi Road", "Nadaprabhu Kempegowda (Majestic)"],
+    "Nadaprabhu Kempegowda (Majestic)": ["Krantivira Sangolli Rayanna Railway Station", "Sir M. Visvesvaraya Station, Central College", "Mantri Square Sampige Road", "Chickpet"],
+    "Sir M. Visvesvaraya Station, Central College": ["Nadaprabhu Kempegowda (Majestic)", "Dr. B. R. Ambedkar Station, Vidhana Soudha"],
+    "Dr. B. R. Ambedkar Station, Vidhana Soudha": ["Sir M. Visvesvaraya Station, Central College", "Cubbon Park"],
+    "Cubbon Park": ["Dr. B. R. Ambedkar Station, Vidhana Soudha", "MG Road"],
     "MG Road": ["Cubbon Park", "Trinity"],
     "Trinity": ["MG Road", "Halasuru"],
     "Halasuru": ["Trinity", "Indiranagar"],
     "Indiranagar": ["Halasuru", "Swami Vivekananda Road"],
     "Swami Vivekananda Road": ["Indiranagar", "Baiyappanahalli"],
     "Baiyappanahalli": ["Swami Vivekananda Road", "Benniganahalli"],
-    "Benniganahalli": ["Baiyappanahalli", "KR Puram"],
-    "KR Puram": ["Benniganahalli", "Singayyanapalya"],
-    "Singayyanapalya": ["KR Puram", "Garudacharpalya"],
-    "Garudacharpalya": ["Singayyanapalya", "Hoodi Junction"],
-    "Hoodi Junction": ["Garudacharpalya", "Seetharampalya"],
-    "Seetharampalya": ["Hoodi Junction", "Kundalahalli"],
-    "Kundalahalli": ["Seetharampalya", "Nallurhalli"],
-    "Nallurhalli": ["Kundalahalli", "Sadaramangala"],
-    "Sadaramangala": ["Nallurhalli", "ITPL"],
-    "ITPL": ["Sadaramangala", "Pattandur Agrahara"],
-    "Pattandur Agrahara": ["ITPL", "Kadugodi Tree Park"],
-    "Kadugodi Tree Park": ["Pattandur Agrahara", "Hope Farm Channasandra"],
-    "Hope Farm Channasandra": ["Kadugodi Tree Park", "Whitefield (Kadugodi)"],
-    "Whitefield (Kadugodi)": ["Hope Farm Channasandra"],
+    "Benniganahalli": ["Baiyappanahalli", "K. R. Pura"],
+    "K. R. Pura": ["Benniganahalli", "Singayyanapalya"],
+    "Singayyanapalya": ["K. R. Pura", "Garudacharpalya"],
+    "Garudacharpalya": ["Singayyanapalya", "Hoodi"],
+    "Hoodi": ["Garudacharpalya", "Seetharampalya"],
+    "Seetharampalya": ["Hoodi", "Kundalahalli"],
+    "Kundalahalli": ["Seetharampalya", "Nallur Halli"],
+    "Nallur Halli": ["Kundalahalli", "Sri Sathya Sai Hospital"],
+    "Sri Sathya Sai Hospital": ["Nallur Halli", "Pattandur Agrahara"],
+    "Pattandur Agrahara": ["Sri Sathya Sai Hospital", "Kadugodi Tree Park"],
+    "Kadugodi Tree Park": ["Pattandur Agrahara", "Hopefarm Channasandra"],
+    "Hopefarm Channasandra": ["Kadugodi Tree Park", "Whitefield (Kadugodi)"],
+    "Whitefield (Kadugodi)": ["Hopefarm Channasandra"],
 
     "Madavara": ["Chikkabidarakallu"],
     "Chikkabidarakallu": ["Madavara", "Manjunathnagar"],
@@ -623,27 +645,27 @@
     "Yeshwanthpur": ["Goraguntepalya", "Sandal Soap Factory"],
     "Sandal Soap Factory": ["Yeshwanthpur", "Mahalakshmi"],
     "Mahalakshmi": ["Sandal Soap Factory", "Rajajinagar"],
-    "Rajajinagar": ["Mahalakshmi", "Kuvempu Road"],
-    "Kuvempu Road": ["Rajajinagar", "Srirampura"],
-    "Srirampura": ["Kuvempu Road", "Sampige Road"],
-    "Sampige Road": ["Srirampura", "Nadaprabhu Kempegowda (Majestic)"],
+    "Rajajinagar": ["Mahalakshmi", "Mahakavi Kuvempu Road"],
+    "Mahakavi Kuvempu Road": ["Rajajinagar", "Srirampura"],
+    "Srirampura": ["Mahakavi Kuvempu Road", "Mantri Square Sampige Road"],
+    "Mantri Square Sampige Road": ["Srirampura", "Nadaprabhu Kempegowda (Majestic)"],
     "Chickpet": ["Nadaprabhu Kempegowda (Majestic)", "Krishna Rajendra Market"],
     "Krishna Rajendra Market": ["Chickpet", "National College"],
     "National College": ["Krishna Rajendra Market", "Lalbagh"],
     "Lalbagh": ["National College", "South End Circle"],
     "South End Circle": ["Lalbagh", "Jayanagar"],
-    "Jayanagar": ["South End Circle", "RV Road"],
-    "RV Road": ["Jayanagar", "Banashankari", "Ragigudda"],
-    "Banashankari": ["RV Road", "Jaya Prakash Nagar"],
+    "Jayanagar": ["South End Circle", "Rashtreeya Vidyalaya Road"],
+    "Rashtreeya Vidyalaya Road": ["Jayanagar", "Banashankari", "Ragigudda"],
+    "Banashankari": ["Rashtreeya Vidyalaya Road", "Jaya Prakash Nagar"],
     "Jaya Prakash Nagar": ["Banashankari", "Yelachenahalli"],
     "Yelachenahalli": ["Jaya Prakash Nagar", "Konanakunte Cross"],
     "Konanakunte Cross": ["Yelachenahalli", "Doddakallasandra"],
     "Doddakallasandra": ["Konanakunte Cross", "Vajarahalli"],
-    "Vajarahalli": ["Doddakallasandra", "Talaghattapura"],
-    "Talaghattapura": ["Vajarahalli", "Silk Institute"],
-    "Silk Institute": ["Talaghattapura"],
+    "Vajarahalli": ["Doddakallasandra", "Thalaghattapura"],
+    "Thalaghattapura": ["Vajarahalli", "Silk Institute"],
+    "Silk Institute": ["Thalaghattapura"],
 
-    "Ragigudda": ["RV Road", "Jayadeva Hospital"],
+    "Ragigudda": ["Rashtreeya Vidyalaya Road", "Jayadeva Hospital"],
     "Jayadeva Hospital": ["Ragigudda", "BTM Layout"],
     "BTM Layout": ["Jayadeva Hospital", "Central Silk Board"],
     "Central Silk Board": ["BTM Layout", "Bommanahalli"],
@@ -656,15 +678,24 @@
     "Electronic City": ["Beratena Agrahara", "Infosys Foundation Konappana Agrahara"],
     "Infosys Foundation Konappana Agrahara": ["Electronic City", "Huskur Road"],
     "Huskur Road": ["Infosys Foundation Konappana Agrahara", "Biocon Hebbagodi"],
-    "Biocon Hebbagodi": ["Huskur Road", "Delta Electronics Bommasandra"],
-    "Delta Electronics Bommasandra": ["Biocon Hebbagodi"]
+    "Biocon Hebbagodi": ["Huskur Road", "Delta electronics Bommasandra"],
+    "Delta electronics Bommasandra": ["Biocon Hebbagodi"]
   };
 
   const STATION_ALIASES = {
+    "Rajarajeswari Nagar": "Rajarajeshwari Nagar",
+    "Nallurhalli": "Nallur Halli",
+    "Nallur Halli": "Nallur Halli",
+    "Sadaramangala": "Sri Sathya Sai Hospital",
+    "ITPL": "Sri Sathya Sai Hospital",
+    "Sri Sathya Sai Hospital": "Sri Sathya Sai Hospital",
+    "RV Road": "Rashtreeya Vidyalaya Road",
+    "R V Road": "Rashtreeya Vidyalaya Road",
     "Konappana Agrahara": "Infosys Foundation Konappana Agrahara",
     "Hebbagodi": "Biocon Hebbagodi",
-    "Bommasandra": "Delta Electronics Bommasandra",
-    "Delta Electronics Bommasandra": "Delta Electronics Bommasandra"
+    "Bommasandra": "Delta electronics Bommasandra",
+    "Delta Electronics Bommasandra": "Delta electronics Bommasandra",
+    "Delta electronics Bommasandra": "Delta electronics Bommasandra"
   };
 
   const stationNames = Object.keys(STATIONS).sort();
@@ -712,9 +743,10 @@
           input.value = st;
           results.style.display = 'none';
           
-          if (inputId === 'from-input' && !isLocked) {
+          if (inputId === 'from-input') {
             renderUnselectedDualDirections(st);
           }
+          updateRouteFromInputs(true);
         });
 
         results.appendChild(item);
@@ -731,6 +763,7 @@
         if (inputId === 'from-input' && STATIONS[normalizedInput]) {
           renderUnselectedDualDirections(normalizedInput);
         }
+        updateRouteFromInputs(true);
       }
     });
     input.addEventListener('blur', () => { setTimeout(() => { results.style.display = 'none'; }, 150); });
@@ -752,7 +785,6 @@
 
   function startGPSLiveTracking() {
     const statusDiv = document.getElementById('gps-status');
-    const btn = document.getElementById('tracking-btn');
 
     if (!("geolocation" in navigator)) {
       statusDiv.innerText = "Geolocation not supported by your browser.";
@@ -762,7 +794,6 @@
     }
 
     isTracking = true;
-    btn.innerText = "🛑 Stop Live Tracking";
     statusDiv.innerText = "Connecting to live GPS positioning...";
 
     watchId = navigator.geolocation.watchPosition(
@@ -786,16 +817,11 @@
           currentNearestStation = nearestStation;
           const distInMeters = (minDistance * 1000).toFixed(0);
 
-          if (!isLocked) {
-            document.getElementById('from-input').value = nearestStation;
-            renderUnselectedDualDirections(nearestStation);
-          }
+          document.getElementById('from-input').value = nearestStation;
+          renderUnselectedDualDirections(nearestStation);
 
           statusDiv.innerHTML = `📡 Live GPS: Nearest to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
-
-          if (isLocked) {
-            calculateRoute(true);
-          }
+          updateRouteFromInputs(true);
         }
       },
       (err) => {
@@ -807,22 +833,6 @@
       },
       { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 }
     );
-  }
-
-  function toggleLiveTracking() {
-    const statusDiv = document.getElementById('gps-status');
-    const btn = document.getElementById('tracking-btn');
-
-    if (isTracking) {
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      isTracking = false;
-      currentNearestStation = null;
-      btn.innerText = "📡 Enable Continuous Live Tracking";
-      statusDiv.innerText = "GPS Tracking is disabled.";
-      if (isLocked) calculateRoute(true);
-    } else {
-      startGPSLiveTracking();
-    }
   }
 
   function findShortestPath(start, goal) {
@@ -856,21 +866,21 @@
 
     if (current === "Nadaprabhu Kempegowda (Majestic)") {
       if (line === "Purple Line") {
-        const eastBound = ["Sir M. Visvesvaraya Stn. (Central College)", "Cubbon Park", "MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
+        const eastBound = ["Sir M. Visvesvaraya Station, Central College", "Cubbon Park", "MG Road", "Indiranagar", "K. R. Pura", "Sri Sathya Sai Hospital", "Whitefield (Kadugodi)"];
         return eastBound.includes(next)
           ? { platform: "Platform 1 (Level 1)", direction: "Towards Whitefield (Kadugodi)", line }
           : { platform: "Platform 2 (Level 1)", direction: "Towards Challaghatta", line };
       } else {
-        const southBound = ["Chickpet", "Krishna Rajendra Market", "National College", "Jayanagar", "RV Road", "Silk Institute"];
+        const southBound = ["Chickpet", "Krishna Rajendra Market", "National College", "Jayanagar", "Rashtreeya Vidyalaya Road", "Silk Institute"];
         return southBound.includes(next)
           ? { platform: "Platform 4 (Level 2)", direction: "Towards Silk Institute", line }
           : { platform: "Platform 3 (Level 2)", direction: "Towards Madavara", line };
       }
     }
 
-    if (current === "RV Road") {
+    if (current === "Rashtreeya Vidyalaya Road") {
       if (line === "Yellow Line") {
-        return { platform: "Platform 3 (Yellow Line Concourse)", direction: "Towards Delta Electronics Bommasandra", line };
+        return { platform: "Platform 3 (Yellow Line Concourse)", direction: "Towards Delta electronics Bommasandra", line };
       } else {
         const southBound = ["Banashankari", "Yelachenahalli", "Silk Institute"];
         return southBound.includes(next)
@@ -880,17 +890,16 @@
     }
 
     if (line === "Purple Line") {
-      const eastBound = ["Sir M. Visvesvaraya Stn. (Central College)", "MG Road", "Indiranagar", "KR Puram", "ITPL", "Whitefield (Kadugodi)"];
+      const eastBound = ["Sir M. Visvesvaraya Station, Central College", "MG Road", "Indiranagar", "K. R. Pura", "Sri Sathya Sai Hospital", "Whitefield (Kadugodi)"];
       return eastBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
         ? { platform: "Platform 1", direction: "Towards Whitefield (Kadugodi)", line }
         : { platform: "Platform 2", direction: "Towards Challaghatta", line };
     } else if (line === "Yellow Line") {
-      const southBound = ["Ragigudda", "Jayadeva Hospital", "BTM Layout", "Central Silk Board", "Electronic City", "Delta Electronics Bommasandra"];
-      return southBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
-        ? { platform: "Platform 1", direction: "Towards Delta Electronics Bommasandra", line }
-        : { platform: "Platform 2", direction: "Towards RV Road", line };
+      return STATIONS[next]?.order > STATIONS[current]?.order
+        ? { platform: "Platform 2", direction: "Towards Delta electronics Bommasandra", line }
+        : { platform: "Platform 1", direction: "Towards Rashtreeya Vidyalaya Road", line };
     } else {
-      const southBound = ["Chickpet", "National College", "Jayanagar", "RV Road", "Silk Institute"];
+      const southBound = ["Chickpet", "National College", "Jayanagar", "Rashtreeya Vidyalaya Road", "Silk Institute"];
       return southBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
         ? { platform: "Platform 2", direction: "Towards Silk Institute", line }
         : { platform: "Platform 1", direction: "Towards Madavara", line };
@@ -991,7 +1000,7 @@
     const bands = directionKey ? timetable[getScheduleKey(now)]?.[directionKey] : null;
 
     if (!bands) {
-      return { mins: "See BMRC", detail: `Check BMRC official timetable (${directionText})`, dateObj: null, isAvailable: false };
+      return { mins: "See BMRCL", detail: `Check BMRCL official timetable (${directionText})`, dateObj: null, isAvailable: false };
     }
 
     let activeBand = bands.find(([start, end]) => totalMins >= start && totalMins <= end);
@@ -1007,7 +1016,7 @@
       const depTimeString = depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       return {
         mins: `${Math.ceil(nextMins)} min${Math.ceil(nextMins) > 1 ? 's' : ''}`,
-        detail: `Expected at ${depTimeString} (${directionText}) • BMRC ${headway} min frequency until ${serviceEnd}`,
+        detail: `Expected at ${depTimeString} (${directionText}) • BMRCL ${headway} min frequency until ${serviceEnd}`,
         dateObj: depTime,
         isAvailable: true
       };
@@ -1017,7 +1026,7 @@
     if (!upcomingBand) {
       const firstStart = minutesToTime(bands[0][0]);
       const lastEnd = minutesToTime(bands[bands.length - 1][1]);
-      return { mins: "No Service", detail: `${line} ${directionText}: BMRC timetable window is ${firstStart} - ${lastEnd}`, dateObj: null, isAvailable: false };
+      return { mins: "No Service", detail: `${line} ${directionText}: BMRCL timetable window is ${firstStart} - ${lastEnd}`, dateObj: null, isAvailable: false };
     }
 
     nextMins = upcomingBand[0] - totalMins;
@@ -1027,7 +1036,7 @@
 
     return {
       mins: `${Math.ceil(nextMins)} min${Math.ceil(nextMins) > 1 ? 's' : ''}`,
-      detail: `First scheduled service at ${depTimeString} (${directionText}) • BMRC timetable`,
+      detail: `First scheduled service at ${depTimeString} (${directionText}) • BMRCL timetable`,
       dateObj: depTime,
       isAvailable: true
     };
@@ -1055,8 +1064,8 @@
       ];
     } else {
       directions = [
-        { label: "Platform 1", dir: "Towards Delta Electronics Bommasandra", line, offset: 0 },
-        { label: "Platform 2", dir: "Towards RV Road", line, offset: 3 }
+        { label: "Platform 2", dir: "Towards Delta electronics Bommasandra", line, offset: 0 },
+        { label: "Platform 1", dir: "Towards Rashtreeya Vidyalaya Road", line, offset: 3 }
       ];
     }
 
@@ -1094,24 +1103,30 @@
     return schedule;
   }
 
-  function freezeInputs() {
-    document.getElementById('from-input').disabled = true;
-    document.getElementById('to-input').disabled = true;
-    document.getElementById('edit-btn').style.display = 'block';
-    document.getElementById('calc-btn').innerText = 'Recalculate';
-    isLocked = true;
-  }
-
-  function unlockInputs() {
-    document.getElementById('from-input').disabled = false;
-    document.getElementById('to-input').disabled = false;
-    document.getElementById('edit-btn').style.display = 'none';
+  function showBoardingDirections() {
     document.getElementById('result-card').style.display = 'none';
     document.getElementById('unselected-card').style.display = 'block';
-    isLocked = false;
 
     const currentFrom = normalizeStationName(document.getElementById('from-input').value);
     if (currentFrom) renderUnselectedDualDirections(currentFrom);
+  }
+
+  function updateRouteFromInputs(isDynamicUpdate = false) {
+    const start = normalizeStationName(document.getElementById('from-input').value);
+    const end = normalizeStationName(document.getElementById('to-input').value);
+
+    if (STATIONS[start] && STATIONS[end] && start !== end) {
+      calculateRoute(true);
+      return;
+    }
+
+    if (STATIONS[start]) {
+      showBoardingDirections();
+      return;
+    }
+
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('unselected-card').style.display = 'block';
   }
 
   function calculateRoute(isGpsUpdate = false) {
@@ -1136,16 +1151,12 @@
     const path = findShortestPath(start, end);
     if (!path) return;
 
-    if (!isGpsUpdate) {
-      freezeInputs();
-    }
-
     // Switch view from Unselected (Dual) to Selected (Single Path)
     document.getElementById('unselected-card').style.display = 'none';
     document.getElementById('result-card').style.display = 'block';
 
     const totalStops = path.length - 1;
-    const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("RV Road");
+    const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("Rashtreeya Vidyalaya Road");
     const estTimeMinutes = totalStops * 2.5 + (isInterchange ? 5 : 0);
     const calculatedFare = Math.min(90, Math.max(10, Math.ceil(totalStops * 5.2)));
 
