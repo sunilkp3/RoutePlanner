@@ -183,6 +183,7 @@
 
     input:focus { border-color: var(--accent); }
     input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--surface-hover); }
+    input[readonly] { cursor: default; }
 
     .clear-input-btn {
       position: absolute;
@@ -225,6 +226,12 @@
       color: var(--text-muted);
       font-size: 0.8rem;
       font-weight: 700;
+    }
+
+    .source-helper {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      line-height: 1.3;
     }
 
     .switch {
@@ -528,6 +535,7 @@
           <span class="switch-slider"></span>
         </label>
       </div>
+      <div class="source-helper" id="from-source-helper">Turn off to search and choose a boarding station manually.</div>
       <div id="gps-status" class="gps-status">Connecting to live GPS positioning...</div>
     </div>
 
@@ -805,8 +813,18 @@
 
   function setFromStationSource(source) {
     fromStationSource = source;
+    const fromInput = document.getElementById('from-input');
+    const fromClear = document.getElementById('from-clear');
+    const isLive = source === 'live';
+
     document.getElementById('from-source-toggle').checked = source === 'live';
-    document.getElementById('from-source-label').innerText = source === 'live' ? 'Live GPS from station' : 'Manual from station';
+    document.getElementById('from-source-label').innerText = isLive ? 'Live GPS from station' : 'Manual from station';
+    document.getElementById('from-source-helper').innerText = isLive
+      ? 'Turn off to search and choose a boarding station manually.'
+      : 'Type to filter stations. Live GPS will not replace this field.';
+    fromInput.readOnly = isLive;
+    fromInput.placeholder = isLive ? 'Detecting nearest station via GPS...' : 'Search boarding station...';
+    fromClear.style.display = (!isLive && fromInput.value.trim()) ? 'flex' : 'none';
   }
 
   function updateLiveClock() {
@@ -824,7 +842,8 @@
     const clearBtn = document.getElementById(inputId === 'from-input' ? 'from-clear' : 'to-clear');
 
     function updateClearButton() {
-      clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+      const shouldHideFromLive = inputId === 'from-input' && fromStationSource === 'live';
+      clearBtn.style.display = input.value.trim() && !shouldHideFromLive ? 'flex' : 'none';
     }
 
     function renderResults(filterText = '') {
@@ -866,22 +885,20 @@
       results.style.display = 'block';
     }
 
-    input.addEventListener('focus', () => { if (!input.disabled) renderResults(input.value); });
+    input.addEventListener('focus', () => {
+      if (!input.disabled && !input.readOnly) renderResults(input.value);
+    });
     clearBtn.addEventListener('mousedown', (e) => {
       e.preventDefault();
       input.value = '';
       results.style.display = 'none';
       updateClearButton();
 
-      if (inputId === 'from-input') {
-        setFromStationSource('live');
-      }
-
       input.focus();
       updateRouteFromInputs(true);
     });
     input.addEventListener('input', () => { 
-      if (!input.disabled) {
+      if (!input.disabled && !input.readOnly) {
         updateClearButton();
         renderResults(input.value);
         const normalizedInput = normalizeStationName(input.value);
@@ -900,12 +917,13 @@
 
   setupAutocomplete('from-input', 'from-results');
   setupAutocomplete('to-input', 'to-results');
+  setFromStationSource('live');
 
   document.getElementById('from-source-toggle').addEventListener('change', (e) => {
     setFromStationSource(e.target.checked ? 'live' : 'manual');
     if (fromStationSource === 'live' && currentNearestStation) {
       document.getElementById('from-input').value = currentNearestStation;
-      document.getElementById('from-clear').style.display = 'flex';
+      document.getElementById('from-clear').style.display = 'none';
       renderUnselectedDualDirections(currentNearestStation);
       updateRouteFromInputs(true);
     }
@@ -929,7 +947,7 @@
       statusDiv.innerText = "Geolocation not supported by your browser.";
       if (fromStationSource === 'live' && !document.getElementById('from-input').value.trim()) {
         document.getElementById('from-input').value = "Indiranagar";
-        document.getElementById('from-clear').style.display = 'flex';
+        document.getElementById('from-clear').style.display = 'none';
         renderUnselectedDualDirections("Indiranagar");
       }
       return;
@@ -961,7 +979,7 @@
 
           if (fromStationSource === 'live') {
             document.getElementById('from-input').value = nearestStation;
-            document.getElementById('from-clear').style.display = 'flex';
+            document.getElementById('from-clear').style.display = 'none';
             renderUnselectedDualDirections(nearestStation);
             updateRouteFromInputs(true);
             statusDiv.innerHTML = `Live GPS set boarding station to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
@@ -974,7 +992,7 @@
         statusDiv.innerText = "GPS signal unavailable. Please select station manually.";
         if (fromStationSource === 'live' && !document.getElementById('from-input').value.trim()) {
           document.getElementById('from-input').value = "Indiranagar";
-          document.getElementById('from-clear').style.display = 'flex';
+          document.getElementById('from-clear').style.display = 'none';
           renderUnselectedDualDirections("Indiranagar");
         }
       },
