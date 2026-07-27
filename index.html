@@ -172,7 +172,7 @@
 
     input {
       width: 100%;
-      padding: 12px;
+      padding: 12px 40px 12px 12px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--surface-bg);
@@ -183,6 +183,31 @@
 
     input:focus { border-color: var(--accent); }
     input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--surface-hover); }
+
+    .clear-input-btn {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      line-height: 1;
+      transform: translateY(-50%);
+    }
+
+    .clear-input-btn:hover,
+    .clear-input-btn:focus {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
 
     .autocomplete-results {
       position: absolute;
@@ -404,6 +429,8 @@
 
     footer p.disclaimer { margin-bottom: 8px; color: var(--footer-muted); }
     footer p.copyright { font-weight: 600; color: var(--text-muted); }
+    footer a { color: var(--accent); font-weight: 700; text-decoration: none; }
+    footer a:hover, footer a:focus { text-decoration: underline; }
 
     @media (max-width: 480px) {
       body { padding: 10px; }
@@ -430,6 +457,7 @@
       <label for="from-input">From (Boarding Station)</label>
       <div class="input-wrapper">
         <input type="text" id="from-input" placeholder="Detecting nearest station via GPS..." autocomplete="off" />
+        <button type="button" class="clear-input-btn" id="from-clear" aria-label="Clear boarding station">×</button>
         <div id="from-results" class="autocomplete-results"></div>
       </div>
       <div id="gps-status" class="gps-status">Connecting to live GPS positioning...</div>
@@ -439,6 +467,7 @@
       <label for="to-input">To (Destination Station)</label>
       <div class="input-wrapper">
         <input type="text" id="to-input" placeholder="Search destination station to calculate route..." autocomplete="off" />
+        <button type="button" class="clear-input-btn" id="to-clear" aria-label="Clear destination station">×</button>
         <div id="to-results" class="autocomplete-results"></div>
       </div>
     </div>
@@ -491,7 +520,7 @@
 
 <footer>
   <p class="disclaimer">
-    <strong>Terms & Conditions:</strong> Train schedules use BMRCL timetable frequency bands where available. Platform directions, fares, and station arrival times are estimates for journey planning and should be verified at the station.
+    <strong>Terms & Conditions:</strong> Train schedules use BMRCL timetable frequency bands where available. Platform directions, fares, and station arrival times are estimates for journey planning. For accurate and latest results, visit the official <a href="https://www.bmrc.co.in/" target="_blank" rel="noopener noreferrer">BMRCL website</a>.
   </p>
   <p class="copyright">
     &copy; <span id="year"></span> Namma Metro Navigator. All rights reserved.
@@ -502,6 +531,7 @@
   let watchId = null;
   let isTracking = false;
   let currentNearestStation = null;
+  let isFromStationManual = false;
 
   const STATIONS = {
     // PURPLE LINE
@@ -717,6 +747,11 @@
   function setupAutocomplete(inputId, resultsId) {
     const input = document.getElementById(inputId);
     const results = document.getElementById(resultsId);
+    const clearBtn = document.getElementById(inputId === 'from-input' ? 'from-clear' : 'to-clear');
+
+    function updateClearButton() {
+      clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+    }
 
     function renderResults(filterText = '') {
       results.innerHTML = '';
@@ -742,8 +777,10 @@
           e.preventDefault();
           input.value = st;
           results.style.display = 'none';
+          updateClearButton();
           
           if (inputId === 'from-input') {
+            isFromStationManual = true;
             renderUnselectedDualDirections(st);
           }
           updateRouteFromInputs(true);
@@ -756,17 +793,35 @@
     }
 
     input.addEventListener('focus', () => { if (!input.disabled) renderResults(input.value); });
+    clearBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      input.value = '';
+      results.style.display = 'none';
+      updateClearButton();
+
+      if (inputId === 'from-input') {
+        isFromStationManual = false;
+      }
+
+      input.focus();
+      updateRouteFromInputs(true);
+    });
     input.addEventListener('input', () => { 
       if (!input.disabled) {
+        updateClearButton();
         renderResults(input.value);
         const normalizedInput = normalizeStationName(input.value);
-        if (inputId === 'from-input' && STATIONS[normalizedInput]) {
-          renderUnselectedDualDirections(normalizedInput);
+        if (inputId === 'from-input') {
+          isFromStationManual = input.value.trim().length > 0;
+          if (STATIONS[normalizedInput]) {
+            renderUnselectedDualDirections(normalizedInput);
+          }
         }
         updateRouteFromInputs(true);
       }
     });
     input.addEventListener('blur', () => { setTimeout(() => { results.style.display = 'none'; }, 150); });
+    updateClearButton();
   }
 
   setupAutocomplete('from-input', 'from-results');
@@ -788,8 +843,10 @@
 
     if (!("geolocation" in navigator)) {
       statusDiv.innerText = "Geolocation not supported by your browser.";
-      document.getElementById('from-input').value = "Indiranagar";
-      renderUnselectedDualDirections("Indiranagar");
+      if (!isFromStationManual && !document.getElementById('from-input').value.trim()) {
+        document.getElementById('from-input').value = "Indiranagar";
+        renderUnselectedDualDirections("Indiranagar");
+      }
       return;
     }
 
@@ -817,16 +874,19 @@
           currentNearestStation = nearestStation;
           const distInMeters = (minDistance * 1000).toFixed(0);
 
-          document.getElementById('from-input').value = nearestStation;
-          renderUnselectedDualDirections(nearestStation);
-
-          statusDiv.innerHTML = `📡 Live GPS: Nearest to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
-          updateRouteFromInputs(true);
+          if (!isFromStationManual) {
+            document.getElementById('from-input').value = nearestStation;
+            renderUnselectedDualDirections(nearestStation);
+            updateRouteFromInputs(true);
+            statusDiv.innerHTML = `Live GPS set boarding station to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
+          } else {
+            statusDiv.innerHTML = `Live GPS nearby: <strong>${nearestStation}</strong> (${distInMeters}m away). Using your typed boarding station.`;
+          }
         }
       },
       (err) => {
         statusDiv.innerText = "GPS signal unavailable. Please select station manually.";
-        if (!document.getElementById('from-input').value) {
+        if (!isFromStationManual && !document.getElementById('from-input').value.trim()) {
           document.getElementById('from-input').value = "Indiranagar";
           renderUnselectedDualDirections("Indiranagar");
         }
