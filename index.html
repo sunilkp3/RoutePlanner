@@ -14,16 +14,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   
   <!-- SEO & Search Engine Optimization -->
-  <title>Namma Metro Route Finder - Real-Time Bengaluru GPS & Train Navigator</title>
-  <meta name="description" content="Live GPS-enabled Namma Metro route finder for Bengaluru. Search stations, view bi-directional schedules, fare estimates, and station-by-station live train arrival times." />
+  <title>Namma Metro Route Finder - Bengaluru GPS & Timetable Navigator</title>
+  <meta name="description" content="GPS-enabled Namma Metro route finder for Bengaluru. Search stations, view BMRC timetable frequency estimates, fare estimates, and station-by-station journey times." />
   <meta name="keywords" content="Namma Metro, Bengaluru Metro Route, Purple Line, Green Line, Yellow Line, Majestic Interchange, Metro Fares, Live Metro Schedule" />
   <meta name="robots" content="index, follow" />
   <meta name="author" content="Namma Metro Navigator" />
   
   <!-- Open Graph Meta Tags -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Namma Metro Live GPS Route Finder & Platform Navigator" />
-  <meta property="og:description" content="Calculate metro routes, view bi-directional train schedules, platform directions, and real-time station arrival times in Bengaluru." />
+  <meta property="og:title" content="Namma Metro GPS Route Finder & Platform Navigator" />
+  <meta property="og:description" content="Calculate metro routes, view BMRC timetable frequency estimates, platform directions, and station arrival estimates in Bengaluru." />
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
@@ -33,7 +33,7 @@
     "name": "Namma Metro Navigator",
     "applicationCategory": "TravelApplication",
     "operatingSystem": "All",
-    "description": "Live GPS route finder, schedule tracker, and platform navigator for Namma Metro Bengaluru."
+    "description": "GPS route finder, BMRC timetable estimator, and platform navigator for Namma Metro Bengaluru."
   }
   </script>
 
@@ -387,7 +387,7 @@
 <div class="container">
   <header class="header">
     <h1>Namma Metro Route Finder</h1>
-    <p>Bengaluru Metro • Live Schedule & Platform Switch Navigator</p>
+    <p>Bengaluru Metro • BMRC Timetable & Platform Switch Navigator</p>
     <div class="clock-banner">
       🕒 Current Location Time: <span id="live-clock">--:--:-- --</span>
     </div>
@@ -420,18 +420,18 @@
     </div>
   </main>
 
-  <!-- Unselected Mode Card: Shows Dual-Direction Live Schedules -->
+  <!-- Unselected Mode Card: Shows Dual-Direction Timetable Estimates -->
   <section id="unselected-card" class="card" style="display: block;">
     <h3 style="margin-bottom: 10px; font-size: 0.85rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;">
       📍 BOARDING STATION: BOTH UPCOMING DIRECTIONS
     </h3>
     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-      Select a destination above to see your exact single journey route and live station timetable.
+      Select a destination above to see your exact single journey route and BMRC timetable estimate.
     </p>
     <div class="dual-train-container" id="unselected-dual-container"></div>
   </section>
 
-  <!-- Selected Mode Card: Shows Single Journey Path, Next Train, and Live Station Times -->
+  <!-- Selected Mode Card: Shows Single Journey Path, Next Train, and Station Time Estimates -->
   <section id="result-card" class="card" style="display: none;">
     <div class="metrics-grid">
       <div class="metric-card">
@@ -454,11 +454,11 @@
     <div class="dual-train-container" id="single-route-train-container"></div>
 
     <div id="no-service-banner" class="alert danger" style="display: none;">
-      <strong>⚠️ Metro Services Closed:</strong> Train operations are closed for the night (05:00 AM – 11:05 PM). Timestamps along the route are unavailable during non-operational hours.
+      <strong>Metro Services Closed:</strong> Train operations are outside the current BMRC timetable window for this line and direction. Timestamps along the route are unavailable during non-operational hours.
     </div>
 
     <h3 style="margin: 16px 0 12px 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
-      LIVE JOURNEY PATH & STATION ARRIVAL TIMES
+      JOURNEY PATH & STATION ARRIVAL ESTIMATES
     </h3>
     <div class="route-timeline" id="timeline"></div>
   </section>
@@ -466,7 +466,7 @@
 
 <footer>
   <p class="disclaimer">
-    <strong>Terms & Conditions:</strong> Train schedules, platform directions, fares, and arrival times are calculated based on live time and standard BMRCL operational parameters.
+    <strong>Terms & Conditions:</strong> Train schedules use BMRC timetable frequency bands where available. Platform directions, fares, and station arrival times are estimates for journey planning and should be verified at the station.
   </p>
   <p class="copyright">
     &copy; <span id="year"></span> Namma Metro Navigator. All rights reserved.
@@ -565,10 +565,10 @@
     "Hosa Road": { line: "Yellow Line", order: 10, lat: 12.8675, lng: 77.6582 },
     "Beratena Agrahara": { line: "Yellow Line", order: 11, lat: 12.8569, lng: 77.6625 },
     "Electronic City": { line: "Yellow Line", order: 12, lat: 12.8452, lng: 77.6602 },
-    "Konappana Agrahara": { line: "Yellow Line", order: 13, lat: 12.8361, lng: 77.6680 },
+    "Infosys Foundation Konappana Agrahara": { line: "Yellow Line", order: 13, lat: 12.8361, lng: 77.6680 },
     "Huskur Road": { line: "Yellow Line", order: 14, lat: 12.8250, lng: 77.6740 },
-    "Hebbagodi": { line: "Yellow Line", order: 15, lat: 12.8120, lng: 77.6830 },
-    "Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8020, lng: 77.6920 }
+    "Biocon Hebbagodi": { line: "Yellow Line", order: 15, lat: 12.8120, lng: 77.6830 },
+    "Delta Electronics Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8020, lng: 77.6920 }
   };
 
   const ADJACENCY = {
@@ -653,14 +653,26 @@
     "Singasandra": ["Kudlu Gate", "Hosa Road"],
     "Hosa Road": ["Singasandra", "Beratena Agrahara"],
     "Beratena Agrahara": ["Hosa Road", "Electronic City"],
-    "Electronic City": ["Beratena Agrahara", "Konappana Agrahara"],
-    "Konappana Agrahara": ["Electronic City", "Huskur Road"],
-    "Huskur Road": ["Konappana Agrahara", "Hebbagodi"],
-    "Hebbagodi": ["Huskur Road", "Bommasandra"],
-    "Bommasandra": ["Hebbagodi"]
+    "Electronic City": ["Beratena Agrahara", "Infosys Foundation Konappana Agrahara"],
+    "Infosys Foundation Konappana Agrahara": ["Electronic City", "Huskur Road"],
+    "Huskur Road": ["Infosys Foundation Konappana Agrahara", "Biocon Hebbagodi"],
+    "Biocon Hebbagodi": ["Huskur Road", "Delta Electronics Bommasandra"],
+    "Delta Electronics Bommasandra": ["Biocon Hebbagodi"]
+  };
+
+  const STATION_ALIASES = {
+    "Konappana Agrahara": "Infosys Foundation Konappana Agrahara",
+    "Hebbagodi": "Biocon Hebbagodi",
+    "Bommasandra": "Delta Electronics Bommasandra",
+    "Delta Electronics Bommasandra": "Delta Electronics Bommasandra"
   };
 
   const stationNames = Object.keys(STATIONS).sort();
+
+  function normalizeStationName(name) {
+    const trimmed = name.trim();
+    return STATION_ALIASES[trimmed] || trimmed;
+  }
 
   function updateLiveClock() {
     const now = new Date();
@@ -715,8 +727,9 @@
     input.addEventListener('input', () => { 
       if (!input.disabled) {
         renderResults(input.value);
-        if (inputId === 'from-input' && STATIONS[input.value.trim()]) {
-          renderUnselectedDualDirections(input.value.trim());
+        const normalizedInput = normalizeStationName(input.value);
+        if (inputId === 'from-input' && STATIONS[normalizedInput]) {
+          renderUnselectedDualDirections(normalizedInput);
         }
       }
     });
@@ -850,8 +863,8 @@
       } else {
         const southBound = ["Chickpet", "Krishna Rajendra Market", "National College", "Jayanagar", "RV Road", "Silk Institute"];
         return southBound.includes(next)
-          ? { platform: "Platform 3 (Level 2)", direction: "Towards Silk Institute", line }
-          : { platform: "Platform 4 (Level 2)", direction: "Towards Madavara", line };
+          ? { platform: "Platform 4 (Level 2)", direction: "Towards Silk Institute", line }
+          : { platform: "Platform 3 (Level 2)", direction: "Towards Madavara", line };
       }
     }
 
@@ -861,8 +874,8 @@
       } else {
         const southBound = ["Banashankari", "Yelachenahalli", "Silk Institute"];
         return southBound.includes(next)
-          ? { platform: "Platform 1 (Green Line)", direction: "Towards Silk Institute", line }
-          : { platform: "Platform 2 (Green Line)", direction: "Towards Madavara / Majestic", line };
+          ? { platform: "Platform 2 (Green Line)", direction: "Towards Silk Institute", line }
+          : { platform: "Platform 1 (Green Line)", direction: "Towards Madavara / Majestic", line };
       }
     }
 
@@ -872,43 +885,152 @@
         ? { platform: "Platform 1", direction: "Towards Whitefield (Kadugodi)", line }
         : { platform: "Platform 2", direction: "Towards Challaghatta", line };
     } else if (line === "Yellow Line") {
-      const southBound = ["Ragigudda", "Jayadeva Hospital", "BTM Layout", "Central Silk Board", "Electronic City", "Bommasandra"];
+      const southBound = ["Ragigudda", "Jayadeva Hospital", "BTM Layout", "Central Silk Board", "Electronic City", "Delta Electronics Bommasandra"];
       return southBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
         ? { platform: "Platform 1", direction: "Towards Delta Electronics Bommasandra", line }
         : { platform: "Platform 2", direction: "Towards RV Road", line };
     } else {
       const southBound = ["Chickpet", "National College", "Jayanagar", "RV Road", "Silk Institute"];
       return southBound.includes(next) || (STATIONS[next]?.order > STATIONS[current]?.order)
-        ? { platform: "Platform 1", direction: "Towards Silk Institute", line }
-        : { platform: "Platform 2", direction: "Towards Madavara", line };
+        ? { platform: "Platform 2", direction: "Towards Silk Institute", line }
+        : { platform: "Platform 1", direction: "Towards Madavara", line };
     }
   }
 
-  function getNextTrainArrival(directionText, offsetMinutes = 0) {
+  const BMRC_TIMETABLES = {
+    "Purple Line": {
+      updated: "2025-12-24",
+      monday: {
+        toWhitefield: [[255, 275, 20], [275, 315, 15], [315, 414, 11], [414, 765, 10], [765, 1005, 8], [1005, 1385, 10]],
+        toChallaghatta: [[255, 275, 20], [275, 300, 13], [300, 657, 10], [657, 921, 8], [921, 1321, 10], [1321, 1365, 15]]
+      },
+      weekday: {
+        toWhitefield: [[300, 320, 20], [320, 360, 15], [360, 414, 11], [414, 740, 10], [740, 962, 8], [962, 1385, 10]],
+        toChallaghatta: [[300, 320, 20], [320, 657, 10], [657, 921, 8], [921, 1321, 10], [1321, 1365, 15]]
+      },
+      saturday: {
+        toWhitefield: [[300, 320, 20], [320, 360, 15], [360, 414, 11], [414, 740, 10], [740, 1005, 8], [1005, 1385, 10]],
+        toChallaghatta: [[300, 320, 20], [320, 657, 10], [657, 921, 8], [921, 1321, 10], [1321, 1365, 15]]
+      },
+      sunday: {
+        toWhitefield: [[420, 470, 15], [470, 720, 10], [720, 1288, 8], [1288, 1385, 10]],
+        toChallaghatta: [[420, 633, 10], [633, 1201, 8], [1201, 1351, 10], [1351, 1365, 14]]
+      }
+    },
+    "Green Line": {
+      updated: "2025-12-24",
+      monday: {
+        toSilkInstitute: [[255, 280, 25], [300, 375, 15], [375, 625, 10], [625, 639, 7], [639, 951, 8], [951, 1184, 10], [1184, 1224, 8], [1224, 1360, 10], [1360, 1377, 15]],
+        toMadavara: [[255, 300, 20], [300, 420, 15], [420, 669, 10], [669, 1008, 8], [1008, 1229, 10], [1229, 1290, 8], [1290, 1360, 10], [1360, 1385, 12.5]]
+      },
+      weekday: {
+        toSilkInstitute: [[300, 375, 15], [375, 625, 11], [625, 639, 7], [639, 951, 8], [951, 1184, 10], [1184, 1224, 8], [1224, 1324, 10], [1324, 1360, 10], [1360, 1377, 15]],
+        toMadavara: [[300, 420, 15], [420, 669, 10], [669, 1008, 8], [1008, 1229, 10], [1229, 1290, 8], [1290, 1360, 10], [1360, 1385, 12.5]]
+      },
+      saturday: {
+        toSilkInstitute: [[300, 375, 15], [375, 639, 11], [639, 961, 8], [961, 983, 5.5], [983, 1192, 11], [1192, 1224, 8], [1224, 1324, 10], [1324, 1380, 15]],
+        toMadavara: [[300, 420, 15], [420, 713, 11], [713, 1008, 8], [1008, 1257, 11], [1257, 1290, 8], [1290, 1360, 10], [1360, 1385, 12.5]]
+      },
+      sunday: {
+        toSilkInstitute: [[420, 647, 10], [647, 1215, 8], [1215, 1325, 10], [1325, 1349, 12], [1349, 1380, 15]],
+        toMadavara: [[420, 478, 15], [478, 728, 10], [728, 1304, 8], [1304, 1364, 10], [1364, 1385, 12]]
+      }
+    },
+    "Yellow Line": {
+      updated: "2026-06-03",
+      monday: {
+        toBommasandra: [[305, 335, 30], [335, 360, 25], [360, 400, 20], [400, 416, 16], [416, 427, 11], [427, 507, 10], [507, 563, 8], [563, 633, 7], [633, 665, 8], [665, 1005, 10], [1005, 1138, 7], [1138, 1234, 8], [1234, 1294, 10], [1294, 1305, 11], [1305, 1340, 12], [1340, 1360, 20], [1360, 1435, 25]],
+        toRvRoad: [[305, 335, 30], [335, 360, 20], [360, 380, 20], [380, 470, 10], [470, 526, 8], [526, 589, 7], [589, 629, 8], [629, 969, 10], [969, 1109, 7], [1109, 1197, 8], [1197, 1257, 10], [1257, 1353, 12], [1353, 1362, 9]]
+      },
+      weekday: {
+        toBommasandra: [[360, 400, 20], [400, 416, 16], [416, 427, 11], [427, 507, 10], [507, 563, 8], [563, 633, 7], [633, 665, 8], [665, 1005, 10], [1005, 1138, 7], [1138, 1234, 8], [1234, 1294, 10], [1294, 1305, 11], [1305, 1340, 12], [1340, 1360, 20], [1360, 1435, 25]],
+        toRvRoad: [[360, 380, 20], [380, 470, 10], [470, 526, 8], [526, 589, 7], [589, 629, 8], [629, 969, 10], [969, 1109, 7], [1109, 1197, 8], [1197, 1257, 10], [1257, 1353, 12], [1353, 1362, 9]]
+      },
+      saturday: {
+        toBommasandra: [[360, 385, 20], [385, 425, 20], [425, 440, 15], [440, 451, 11], [451, 1231, 10], [1231, 1327, 12], [1327, 1345, 18], [1345, 1385, 20], [1385, 1435, 25]],
+        toRvRoad: [[360, 400, 20], [400, 415, 15], [415, 1195, 10], [1195, 1351, 12], [1351, 1362, 11]]
+      },
+      sunday: {
+        toBommasandra: [[420, 528, 18], [528, 598, 14], [598, 646, 12], [646, 1256, 10], [1256, 1340, 12], [1340, 1370, 15], [1370, 1410, 20], [1410, 1435, 25]],
+        toRvRoad: [[420, 492, 18], [492, 548, 14], [548, 620, 12], [620, 1220, 10], [1220, 1352, 12], [1352, 1362, 10]]
+      }
+    }
+  };
+
+  function getScheduleKey(date = new Date()) {
+    const day = date.getDay();
+    if (day === 0) return "sunday";
+    if (day === 1) return "monday";
+    if (day === 6) return "saturday";
+    return "weekday";
+  }
+
+  function minutesToTime(totalMinutes) {
+    const minutes = Math.round(totalMinutes);
+    const h = Math.floor(minutes / 60) % 24;
+    const m = minutes % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+
+  function getDirectionKey(line, directionText) {
+    if (line === "Purple Line") return directionText.includes("Whitefield") ? "toWhitefield" : "toChallaghatta";
+    if (line === "Green Line") return directionText.includes("Silk Institute") ? "toSilkInstitute" : "toMadavara";
+    if (line === "Yellow Line") return directionText.includes("Bommasandra") ? "toBommasandra" : "toRvRoad";
+    return null;
+  }
+
+  function getNextTrainArrival(routeInfo, offsetMinutes = 0) {
+    const directionText = typeof routeInfo === "string" ? routeInfo : routeInfo.direction;
+    const line = typeof routeInfo === "string" ? null : routeInfo.line;
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const totalMins = hours * 60 + minutes;
+    const timetable = BMRC_TIMETABLES[line];
+    const directionKey = timetable ? getDirectionKey(line, directionText) : null;
+    const bands = directionKey ? timetable[getScheduleKey(now)]?.[directionKey] : null;
 
-    // Metro Operating Hours: 05:00 AM (300 mins) to 11:05 PM (1385 mins)
-    if (totalMins < 300 || totalMins > 1385) {
-      return { mins: "No Service", detail: "Metros operate 05:00 AM - 11:05 PM", dateObj: null, isAvailable: false };
+    if (!bands) {
+      return { mins: "See BMRC", detail: `Check BMRC official timetable (${directionText})`, dateObj: null, isAvailable: false };
     }
 
-    let headway = 8;
-    if ((totalMins >= 480 && totalMins <= 690) || (totalMins >= 1020 && totalMins <= 1200)) {
-      headway = 4;
-    } else if (totalMins > 1320) {
-      headway = 12;
+    let activeBand = bands.find(([start, end]) => totalMins >= start && totalMins <= end);
+    let nextMins;
+
+    if (activeBand) {
+      const [start, end, headway] = activeBand;
+      const elapsed = Math.max(0, totalMins - start + offsetMinutes);
+      nextMins = headway - (elapsed % headway);
+      if (nextMins <= 0) nextMins += headway;
+      const serviceEnd = minutesToTime(end);
+      const depTime = new Date(now.getTime() + nextMins * 60000);
+      const depTimeString = depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return {
+        mins: `${Math.ceil(nextMins)} min${Math.ceil(nextMins) > 1 ? 's' : ''}`,
+        detail: `Expected at ${depTimeString} (${directionText}) • BMRC ${headway} min frequency until ${serviceEnd}`,
+        dateObj: depTime,
+        isAvailable: true
+      };
     }
 
-    let nextMins = (headway - ((minutes + offsetMinutes) % headway));
-    if (nextMins <= 0) nextMins += headway;
+    const upcomingBand = bands.find(([start]) => totalMins < start);
+    if (!upcomingBand) {
+      const firstStart = minutesToTime(bands[0][0]);
+      const lastEnd = minutesToTime(bands[bands.length - 1][1]);
+      return { mins: "No Service", detail: `${line} ${directionText}: BMRC timetable window is ${firstStart} - ${lastEnd}`, dateObj: null, isAvailable: false };
+    }
+
+    nextMins = upcomingBand[0] - totalMins;
 
     const depTime = new Date(now.getTime() + nextMins * 60000);
     const depTimeString = depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    return { mins: `${nextMins} min${nextMins > 1 ? 's' : ''}`, detail: `Expected at ${depTimeString} (${directionText})`, dateObj: depTime, isAvailable: true };
+    return {
+      mins: `${Math.ceil(nextMins)} min${Math.ceil(nextMins) > 1 ? 's' : ''}`,
+      detail: `First scheduled service at ${depTimeString} (${directionText}) • BMRC timetable`,
+      dateObj: depTime,
+      isAvailable: true
+    };
   }
 
   // Renders Both Directions when Destination is NOT selected yet
@@ -923,23 +1045,23 @@
 
     if (line === "Purple Line") {
       directions = [
-        { label: "Platform 1", dir: "Towards Whitefield (Kadugodi)", offset: 0 },
-        { label: "Platform 2", dir: "Towards Challaghatta", offset: 3 }
+        { label: "Platform 1", dir: "Towards Whitefield (Kadugodi)", line, offset: 0 },
+        { label: "Platform 2", dir: "Towards Challaghatta", line, offset: 3 }
       ];
     } else if (line === "Green Line") {
       directions = [
-        { label: "Platform 1", dir: "Towards Silk Institute", offset: 0 },
-        { label: "Platform 2", dir: "Towards Madavara", offset: 4 }
+        { label: "Platform 2", dir: "Towards Silk Institute", line, offset: 0 },
+        { label: "Platform 1", dir: "Towards Madavara", line, offset: 4 }
       ];
     } else {
       directions = [
-        { label: "Platform 1", dir: "Towards Delta Electronics Bommasandra", offset: 0 },
-        { label: "Platform 2", dir: "Towards RV Road", offset: 3 }
+        { label: "Platform 1", dir: "Towards Delta Electronics Bommasandra", line, offset: 0 },
+        { label: "Platform 2", dir: "Towards RV Road", line, offset: 3 }
       ];
     }
 
     directions.forEach(d => {
-      const schedule = getNextTrainArrival(d.dir, d.offset);
+      const schedule = getNextTrainArrival({ direction: d.dir, line: d.line }, d.offset);
       const box = document.createElement('div');
       box.className = 'next-train-box';
       box.innerHTML = `
@@ -958,7 +1080,7 @@
     const container = document.getElementById('single-route-train-container');
     container.innerHTML = '';
 
-    const schedule = getNextTrainArrival(platInfo.direction, 0);
+    const schedule = getNextTrainArrival(platInfo, 0);
     const box = document.createElement('div');
     box.className = 'next-train-box active-route-dir';
     box.innerHTML = `
@@ -988,13 +1110,13 @@
     document.getElementById('unselected-card').style.display = 'block';
     isLocked = false;
 
-    const currentFrom = document.getElementById('from-input').value.trim();
+    const currentFrom = normalizeStationName(document.getElementById('from-input').value);
     if (currentFrom) renderUnselectedDualDirections(currentFrom);
   }
 
   function calculateRoute(isGpsUpdate = false) {
-    const start = document.getElementById('from-input').value.trim();
-    const end = document.getElementById('to-input').value.trim();
+    const start = normalizeStationName(document.getElementById('from-input').value);
+    const end = normalizeStationName(document.getElementById('to-input').value);
 
     if (!STATIONS[start]) {
       if (!isGpsUpdate) alert("Please select a valid boarding station from the search dropdown!");
@@ -1062,7 +1184,7 @@
         runningTime = new Date(runningTime.getTime() + extraMins * 60000);
       }
 
-      // Display live timestamp ONLY if service is currently available
+      // Display estimated timestamp ONLY if service is currently available
       const timeTagHTML = trainArrival.isAvailable 
         ? `<span class="arrival-time-tag">${isStart ? 'Dep:' : 'Arr:'} ${runningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`
         : `<span class="arrival-time-tag no-service-tag">No Service</span>`;
