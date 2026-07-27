@@ -209,6 +209,67 @@
       color: var(--text);
     }
 
+    .source-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-bg);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .source-toggle-label {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--border);
+      border-radius: 999px;
+      transition: background 0.2s ease;
+    }
+
+    .switch-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      top: 3px;
+      background: var(--card-bg);
+      border-radius: 50%;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .switch-slider {
+      background: var(--accent);
+    }
+
+    .switch input:checked + .switch-slider::before {
+      transform: translateX(22px);
+    }
+
     .autocomplete-results {
       position: absolute;
       top: 100%;
@@ -460,6 +521,13 @@
         <button type="button" class="clear-input-btn" id="from-clear" aria-label="Clear boarding station">×</button>
         <div id="from-results" class="autocomplete-results"></div>
       </div>
+      <div class="source-toggle">
+        <span class="source-toggle-label" id="from-source-label">Live GPS from station</span>
+        <label class="switch" aria-label="Use live GPS for boarding station">
+          <input type="checkbox" id="from-source-toggle" checked />
+          <span class="switch-slider"></span>
+        </label>
+      </div>
       <div id="gps-status" class="gps-status">Connecting to live GPS positioning...</div>
     </div>
 
@@ -531,7 +599,7 @@
   let watchId = null;
   let isTracking = false;
   let currentNearestStation = null;
-  let isFromStationManual = false;
+  let fromStationSource = 'live';
 
   const STATIONS = {
     // PURPLE LINE
@@ -735,6 +803,12 @@
     return STATION_ALIASES[trimmed] || trimmed;
   }
 
+  function setFromStationSource(source) {
+    fromStationSource = source;
+    document.getElementById('from-source-toggle').checked = source === 'live';
+    document.getElementById('from-source-label').innerText = source === 'live' ? 'Live GPS from station' : 'Manual from station';
+  }
+
   function updateLiveClock() {
     const now = new Date();
     document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -780,7 +854,7 @@
           updateClearButton();
           
           if (inputId === 'from-input') {
-            isFromStationManual = true;
+            setFromStationSource('manual');
             renderUnselectedDualDirections(st);
           }
           updateRouteFromInputs(true);
@@ -800,7 +874,7 @@
       updateClearButton();
 
       if (inputId === 'from-input') {
-        isFromStationManual = false;
+        setFromStationSource('live');
       }
 
       input.focus();
@@ -812,7 +886,7 @@
         renderResults(input.value);
         const normalizedInput = normalizeStationName(input.value);
         if (inputId === 'from-input') {
-          isFromStationManual = input.value.trim().length > 0;
+          if (input.value.trim()) setFromStationSource('manual');
           if (STATIONS[normalizedInput]) {
             renderUnselectedDualDirections(normalizedInput);
           }
@@ -826,6 +900,16 @@
 
   setupAutocomplete('from-input', 'from-results');
   setupAutocomplete('to-input', 'to-results');
+
+  document.getElementById('from-source-toggle').addEventListener('change', (e) => {
+    setFromStationSource(e.target.checked ? 'live' : 'manual');
+    if (fromStationSource === 'live' && currentNearestStation) {
+      document.getElementById('from-input').value = currentNearestStation;
+      document.getElementById('from-clear').style.display = 'flex';
+      renderUnselectedDualDirections(currentNearestStation);
+      updateRouteFromInputs(true);
+    }
+  });
 
   function getDistanceInKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -843,8 +927,9 @@
 
     if (!("geolocation" in navigator)) {
       statusDiv.innerText = "Geolocation not supported by your browser.";
-      if (!isFromStationManual && !document.getElementById('from-input').value.trim()) {
+      if (fromStationSource === 'live' && !document.getElementById('from-input').value.trim()) {
         document.getElementById('from-input').value = "Indiranagar";
+        document.getElementById('from-clear').style.display = 'flex';
         renderUnselectedDualDirections("Indiranagar");
       }
       return;
@@ -874,8 +959,9 @@
           currentNearestStation = nearestStation;
           const distInMeters = (minDistance * 1000).toFixed(0);
 
-          if (!isFromStationManual) {
+          if (fromStationSource === 'live') {
             document.getElementById('from-input').value = nearestStation;
+            document.getElementById('from-clear').style.display = 'flex';
             renderUnselectedDualDirections(nearestStation);
             updateRouteFromInputs(true);
             statusDiv.innerHTML = `Live GPS set boarding station to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
@@ -886,8 +972,9 @@
       },
       (err) => {
         statusDiv.innerText = "GPS signal unavailable. Please select station manually.";
-        if (!isFromStationManual && !document.getElementById('from-input').value.trim()) {
+        if (fromStationSource === 'live' && !document.getElementById('from-input').value.trim()) {
           document.getElementById('from-input').value = "Indiranagar";
+          document.getElementById('from-clear').style.display = 'flex';
           renderUnselectedDualDirections("Indiranagar");
         }
       },
