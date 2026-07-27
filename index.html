@@ -921,11 +921,12 @@
 
   document.getElementById('from-source-toggle').addEventListener('change', (e) => {
     setFromStationSource(e.target.checked ? 'live' : 'manual');
-    if (fromStationSource === 'live' && currentNearestStation) {
-      document.getElementById('from-input').value = currentNearestStation;
-      document.getElementById('from-clear').style.display = 'none';
-      renderUnselectedDualDirections(currentNearestStation);
-      updateRouteFromInputs(true);
+
+    if (fromStationSource === 'live') {
+      startGPSLiveTracking();
+    } else {
+      stopGPSLiveTracking();
+      document.getElementById('gps-status').innerText = "Manual mode. Search and select your boarding station.";
     }
   });
 
@@ -947,6 +948,11 @@
       setFromStationSource('manual');
       statusDiv.innerText = "GPS is not supported here. Search and select your boarding station manually.";
       return;
+    }
+
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
     }
 
     isTracking = true;
@@ -985,11 +991,24 @@
         }
       },
       (err) => {
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+        }
+        isTracking = false;
         setFromStationSource('manual');
         statusDiv.innerText = "GPS permission unavailable. Search and select your boarding station manually.";
       },
       { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 }
     );
+  }
+
+  function stopGPSLiveTracking() {
+    if (watchId !== null && "geolocation" in navigator) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+    isTracking = false;
   }
 
   function findShortestPath(start, goal) {
