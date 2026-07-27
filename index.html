@@ -944,12 +944,8 @@
     const statusDiv = document.getElementById('gps-status');
 
     if (!("geolocation" in navigator)) {
-      statusDiv.innerText = "Geolocation not supported by your browser.";
-      if (fromStationSource === 'live' && !document.getElementById('from-input').value.trim()) {
-        document.getElementById('from-input').value = "Indiranagar";
-        document.getElementById('from-clear').style.display = 'none';
-        renderUnselectedDualDirections("Indiranagar");
-      }
+      setFromStationSource('manual');
+      statusDiv.innerText = "GPS is not supported here. Search and select your boarding station manually.";
       return;
     }
 
@@ -989,12 +985,8 @@
         }
       },
       (err) => {
-        statusDiv.innerText = "GPS signal unavailable. Please select station manually.";
-        if (fromStationSource === 'live' && !document.getElementById('from-input').value.trim()) {
-          document.getElementById('from-input').value = "Indiranagar";
-          document.getElementById('from-clear').style.display = 'none';
-          renderUnselectedDualDirections("Indiranagar");
-        }
+        setFromStationSource('manual');
+        statusDiv.innerText = "GPS permission unavailable. Search and select your boarding station manually.";
       },
       { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 }
     );
