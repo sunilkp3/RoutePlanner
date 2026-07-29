@@ -1750,6 +1750,7 @@
   let lastLeafletFocusKey = '';
   let leafletUserTouched = false;
   let leafletProgrammaticFit = false;
+  let leafletAutoFitRequested = true;
 
   const STATIONS = {
     // PURPLE LINE
@@ -2265,8 +2266,14 @@
     document.getElementById('map-view-btn').classList.toggle('active', activeView === 'map');
   }
 
+  function requestLeafletAutoFit(resetTouch = false) {
+    leafletAutoFitRequested = true;
+    if (resetTouch) leafletUserTouched = false;
+  }
+
   function setActiveView(view) {
     activeView = view;
+    if (view === 'map') requestLeafletAutoFit(false);
     updatePanelVisibility();
     renderMetroMap();
   }
@@ -2636,15 +2643,18 @@
     const focusKey = isRouteMap
       ? `route:${currentRoutePath.join('|')}`
       : 'overview:network';
-    const isNewFocus = focusKey !== lastLeafletFocusKey;
-    const shouldAutoFitMap = activeView === 'map' && isNewFocus && (!leafletUserTouched || isRouteMap);
+    const shouldAutoFitMap = activeView === 'map' && leafletAutoFitRequested && (!leafletUserTouched || isRouteMap);
 
     setTimeout(() => {
       if (activeView !== 'map') return;
       leafletMap.invalidateSize({ pan: false });
-      if (!shouldAutoFitMap) return;
+      if (!shouldAutoFitMap) {
+        leafletAutoFitRequested = false;
+        return;
+      }
       leafletProgrammaticFit = true;
-      if (isRouteMap) leafletUserTouched = false;
+      leafletAutoFitRequested = false;
+      leafletUserTouched = false;
       lastLeafletFocusKey = focusKey;
       if (focusBounds.length) {
         leafletMap.fitBounds(focusBounds, {
@@ -2759,7 +2769,8 @@
           document.getElementById('from-input').value = stationName;
           setFromStationSource('manual');
         }
-        updateRouteFromInputs(true);
+        requestLeafletAutoFit(true);
+        updateRouteFromInputs(false);
       });
       svg.appendChild(circle);
 
@@ -2878,7 +2889,8 @@
             setFromStationSource('manual');
             renderUnselectedDualDirections(st);
           }
-          updateRouteFromInputs(true);
+          requestLeafletAutoFit(true);
+          updateRouteFromInputs(false);
         });
 
         results.appendChild(item);
@@ -2897,7 +2909,8 @@
       updateClearButton();
 
       input.focus();
-      updateRouteFromInputs(true);
+      requestLeafletAutoFit(true);
+      updateRouteFromInputs(false);
     });
     input.addEventListener('input', () => { 
       if (!input.disabled && !input.readOnly) {
@@ -2910,7 +2923,8 @@
             renderUnselectedDualDirections(normalizedInput);
           }
         }
-        updateRouteFromInputs(true);
+        if (STATIONS[normalizedInput]) requestLeafletAutoFit(true);
+        updateRouteFromInputs(false);
       }
     });
     input.addEventListener('blur', () => { setTimeout(() => { results.style.display = 'none'; }, 150); });
@@ -3306,7 +3320,7 @@
     const end = normalizeStationName(document.getElementById('to-input').value);
 
     if (STATIONS[start] && STATIONS[end] && start !== end) {
-      calculateRoute(true);
+      calculateRoute(isDynamicUpdate);
       return;
     }
 
@@ -3343,6 +3357,7 @@
     const path = findShortestPath(start, end);
     if (!path) return;
     currentRoutePath = path;
+    if (!isGpsUpdate) requestLeafletAutoFit(true);
 
     // Switch view from Unselected (Dual) to Selected (Single Path)
     currentPanel = 'result';
