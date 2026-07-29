@@ -1748,6 +1748,8 @@
   let leafletLayerGroup = null;
   let leafletBaseLayers = null;
   let lastLeafletFocusKey = '';
+  let leafletUserTouched = false;
+  let leafletProgrammaticFit = false;
 
   const STATIONS = {
     // PURPLE LINE
@@ -2508,6 +2510,9 @@
     };
     L.control.layers(leafletBaseLayers, null, { position: 'topright' }).addTo(leafletMap);
     leafletLayerGroup = L.layerGroup().addTo(leafletMap);
+    leafletMap.on('dragstart zoomstart', () => {
+      if (!leafletProgrammaticFit) leafletUserTouched = true;
+    });
     setTimeout(() => leafletMap.invalidateSize(), 0);
     return true;
   }
@@ -2630,21 +2635,27 @@
       : bounds;
     const focusKey = isRouteMap
       ? `route:${currentRoutePath.join('|')}`
-      : `overview:${currentNearestStation || from || 'all'}`;
-    const shouldAutoFitMap = activeView === 'map' && focusKey !== lastLeafletFocusKey;
+      : 'overview:network';
+    const isNewFocus = focusKey !== lastLeafletFocusKey;
+    const shouldAutoFitMap = activeView === 'map' && isNewFocus && (!leafletUserTouched || isRouteMap);
 
     setTimeout(() => {
-      leafletMap.invalidateSize();
+      if (activeView !== 'map') return;
+      leafletMap.invalidateSize({ pan: false });
       if (!shouldAutoFitMap) return;
+      leafletProgrammaticFit = true;
+      if (isRouteMap) leafletUserTouched = false;
       lastLeafletFocusKey = focusKey;
       if (focusBounds.length) {
         leafletMap.fitBounds(focusBounds, {
+          animate: false,
           padding: isRouteMap ? [18, 18] : [28, 28],
           maxZoom: isRouteMap ? 16 : 12
         });
       } else {
-        leafletMap.setView([12.9716, 77.5946], 11);
+        leafletMap.setView([12.9716, 77.5946], 11, { animate: false });
       }
+      setTimeout(() => { leafletProgrammaticFit = false; }, 350);
     }, 0);
     return true;
   }
