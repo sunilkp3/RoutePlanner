@@ -502,6 +502,13 @@
     }
 
     footer p.disclaimer { margin-bottom: 8px; color: var(--footer-muted); }
+    footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
     footer p.copyright { font-weight: 600; color: var(--text-muted); }
     footer a { color: var(--accent); font-weight: 700; text-decoration: none; }
     footer a:hover, footer a:focus { text-decoration: underline; }
@@ -604,6 +611,11 @@
   <p class="disclaimer">
     <strong>Terms & Conditions:</strong> Train schedules use BMRCL timetable frequency bands where available. Platform directions, fares, and station arrival times are estimates for journey planning. For accurate and latest results, visit the official <a href="https://www.bmrc.co.in/" target="_blank" rel="noopener noreferrer">BMRCL website</a>.
   </p>
+  <nav class="footer-links" aria-label="Site information">
+    <a href="about.html">About</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="contact.html">Contact</a>
+  </nav>
   <p class="copyright">
     &copy; <span id="year"></span> Namma Metro Navigator. All rights reserved.
   </p>
