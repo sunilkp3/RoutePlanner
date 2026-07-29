@@ -23,26 +23,89 @@
   <meta name="theme-color" content="#f6f8fb" media="(prefers-color-scheme: light)" />
   
   <!-- SEO & Search Engine Optimization -->
-  <title>Namma Metro Route Finder - Bengaluru GPS & Timetable Navigator</title>
-  <meta name="description" content="GPS-enabled Namma Metro route finder for Bengaluru. Search stations, view BMRCL timetable frequency estimates, fare estimates, and station-by-station journey times." />
-  <meta name="keywords" content="Namma Metro, Bengaluru Metro Route, Purple Line, Green Line, Yellow Line, Majestic Interchange, Metro Fares, Live Metro Schedule" />
+  <title>Bengaluru Metro Route Finder | Namma Metro Fare, Timetable & Platform</title>
+  <meta name="description" content="Plan Bengaluru Namma Metro routes across Purple, Green, and Yellow Lines. Check route stops, estimated fare, platform direction, BMRCL timetable frequency, and live nearest station." />
+  <meta name="keywords" content="Namma Metro route finder, Bengaluru Metro route map, BMRCL timetable, Bengaluru metro fare, Namma Metro platform, Purple Line, Green Line, Yellow Line, Electronic City metro" />
   <meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <meta name="author" content="Namma Metro Navigator" />
+  <link rel="canonical" href="https://www.blrmetro.com/" />
   
   <!-- Open Graph Meta Tags -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Namma Metro GPS Route Finder & Platform Navigator" />
-  <meta property="og:description" content="Calculate metro routes, view BMRCL timetable frequency estimates, platform directions, and station arrival estimates in Bengaluru." />
+  <meta property="og:site_name" content="Namma Metro Navigator" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:url" content="https://www.blrmetro.com/" />
+  <meta property="og:title" content="Bengaluru Metro Route Finder, Fare & Platform Navigator" />
+  <meta property="og:description" content="Calculate Namma Metro routes, stops, fare estimates, platform directions, and BMRCL timetable frequency across Bengaluru." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:url" content="https://www.blrmetro.com/" />
+  <meta name="twitter:title" content="Bengaluru Metro Route Finder" />
+  <meta name="twitter:description" content="Plan Namma Metro journeys with route stops, fare estimate, platform direction, timetable frequency, and live nearest station." />
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Namma Metro Navigator",
-    "applicationCategory": "TravelApplication",
-    "operatingSystem": "All",
-    "description": "GPS route finder, BMRCL timetable estimator, and platform navigator for Namma Metro Bengaluru."
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.blrmetro.com/#website",
+        "url": "https://www.blrmetro.com/",
+        "name": "Namma Metro Navigator",
+        "inLanguage": "en-IN",
+        "description": "Bengaluru Namma Metro route finder for Purple Line, Green Line, and Yellow Line journeys."
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://www.blrmetro.com/#app",
+        "url": "https://www.blrmetro.com/",
+        "name": "Bengaluru Metro Route Finder",
+        "alternateName": "Namma Metro Navigator",
+        "applicationCategory": "TravelApplication",
+        "operatingSystem": "All",
+        "isAccessibleForFree": true,
+        "inLanguage": "en-IN",
+        "description": "Plan Namma Metro routes with station stops, platform direction, estimated fare, live nearest station, and BMRCL timetable frequency estimates.",
+        "featureList": [
+          "Namma Metro route planning",
+          "Purple Line, Green Line, and Yellow Line stations",
+          "Estimated fare and journey time",
+          "Platform direction guidance",
+          "Live nearest station from GPS",
+          "BMRCL timetable frequency estimates"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How can I find a Bengaluru Metro route?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Select a boarding station and destination station to view the Namma Metro route, stops, interchange points, estimated fare, platform direction, and journey time."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does this show BMRCL platform direction?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The page shows estimated platform and direction guidance for Purple Line, Green Line, and Yellow Line journeys. Always verify final platform information at the station or on the official BMRCL website."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use live GPS for the nearest metro station?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. If location permission is granted, the route finder can set the boarding station from the nearest Namma Metro station and show a live nearest station marker on the map."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
 
@@ -1563,6 +1626,47 @@
       margin-bottom: 12px;
     }
 
+    .seo-content {
+      width: 100%;
+      max-width: 720px;
+      margin-top: 16px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .seo-content h2 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .seo-content h3 {
+      font-size: 0.88rem;
+      margin: 14px 0 6px;
+      color: var(--accent);
+    }
+
+    .seo-content p,
+    .seo-content li {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .seo-content ul {
+      margin: 8px 0 0 18px;
+    }
+
+    .seo-content a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .seo-content a:hover,
+    .seo-content a:focus {
+      text-decoration: underline;
+    }
+
     footer {
       width: 100%;
       max-width: 720px;
@@ -1718,6 +1822,30 @@
     <div class="route-timeline" id="timeline"></div>
   </section>
 </div>
+
+<section class="card seo-content" aria-label="Bengaluru Metro route finder information">
+  <h2>Bengaluru Namma Metro Route Finder</h2>
+  <p>
+    Use this Namma Metro route finder to plan Bengaluru Metro trips across the Purple Line, Green Line, and Yellow Line. The planner helps compare boarding and destination stations, route stops, interchange points, estimated fare, platform direction, BMRCL timetable frequency, and live nearest station from GPS.
+  </p>
+
+  <h3>Metro Lines Covered</h3>
+  <ul>
+    <li><strong>Purple Line:</strong> Challaghatta to Whitefield (Kadugodi), including Majestic, MG Road, Indiranagar, K. R. Pura, and Whitefield.</li>
+    <li><strong>Green Line:</strong> Madavara to Silk Institute, including Majestic, Mantri Square Sampige Road, Jayanagar, Banashankari, and Yelachenahalli.</li>
+    <li><strong>Yellow Line:</strong> Rashtreeya Vidyalaya Road to Delta electronics Bommasandra, including Jayadeva Hospital, Electronic City, Infosys Foundation Konappana Agrahara, Biocon Hebbagodi, and Bommasandra.</li>
+  </ul>
+
+  <h3>Frequently Searched Namma Metro Routes</h3>
+  <p>
+    Popular Bengaluru Metro route searches include Majestic to Whitefield, Jayanagar to Electronic City, RV Road to Bommasandra, Indiranagar to Majestic, Kengeri to MG Road, and Silk Institute to Cubbon Park. Select the stations above to calculate the exact route and platform direction.
+  </p>
+
+  <h3>Accuracy Note</h3>
+  <p>
+    This is an independent journey planning tool. Metro schedules, platforms, fares, and operational changes can change. For the official and latest BMRCL information, check <a href="https://www.bmrc.co.in/" target="_blank" rel="noopener noreferrer">bmrc.co.in</a>.
+  </p>
+</section>
 
 <footer>
   <p class="disclaimer">
