@@ -1748,6 +1748,7 @@
   let leafletLayerGroup = null;
   let leafletBaseLayers = null;
   let lastLeafletFocusKey = '';
+  let lastLeafletRenderKey = '';
   let leafletUserTouched = false;
   let leafletProgrammaticFit = false;
   let leafletAutoFitRequested = true;
@@ -2542,6 +2543,22 @@
     const isRouteMap = currentRoutePath.length > 1;
     const bounds = [];
     const routeEdgeKeys = new Set();
+    const focusKey = isRouteMap
+      ? `route:${currentRoutePath.join('|')}`
+      : 'overview:network';
+    const renderKey = [
+      activeView,
+      focusKey,
+      from,
+      to,
+      currentNearestStation || '',
+      leafletAutoFitRequested ? 'fit' : 'steady'
+    ].join('::');
+
+    if (renderKey === lastLeafletRenderKey && !leafletAutoFitRequested) {
+      return true;
+    }
+    lastLeafletRenderKey = renderKey;
 
     if (isRouteMap) {
       for (let i = 0; i < currentRoutePath.length - 1; i++) {
@@ -2640,18 +2657,15 @@
     const focusBounds = isRouteMap
       ? currentRoutePath.map(stationLatLng).filter(Boolean)
       : bounds;
-    const focusKey = isRouteMap
-      ? `route:${currentRoutePath.join('|')}`
-      : 'overview:network';
     const shouldAutoFitMap = activeView === 'map' && leafletAutoFitRequested && (!leafletUserTouched || isRouteMap);
 
     setTimeout(() => {
       if (activeView !== 'map') return;
-      leafletMap.invalidateSize({ pan: false });
       if (!shouldAutoFitMap) {
         leafletAutoFitRequested = false;
         return;
       }
+      leafletMap.invalidateSize({ pan: false });
       leafletProgrammaticFit = true;
       leafletAutoFitRequested = false;
       leafletUserTouched = false;
@@ -2997,19 +3011,25 @@
         }
 
         if (nearestStation) {
+          const nearestChanged = nearestStation !== currentNearestStation;
           currentNearestStation = nearestStation;
           const distInMeters = (minDistance * 1000).toFixed(0);
 
           if (fromStationSource === 'live') {
-            document.getElementById('from-input').value = nearestStation;
+            const fromInput = document.getElementById('from-input');
+            const stationChangedInInput = fromInput.value !== nearestStation;
+            fromInput.value = nearestStation;
             document.getElementById('from-clear').style.display = 'none';
-            renderUnselectedDualDirections(nearestStation);
-            updateRouteFromInputs(true);
+            if (nearestChanged || stationChangedInInput) {
+              const destination = normalizeStationName(document.getElementById('to-input')?.value || '');
+              if (!STATIONS[destination]) renderUnselectedDualDirections(nearestStation);
+              updateRouteFromInputs(true);
+            }
             statusDiv.innerHTML = `Live GPS set boarding station to <strong>${nearestStation}</strong> (${distInMeters}m away)`;
           } else {
             statusDiv.innerHTML = `Live GPS nearby: <strong>${nearestStation}</strong> (${distInMeters}m away). Using your typed boarding station.`;
           }
-          renderMetroMap();
+          if (nearestChanged) renderMetroMap();
         }
       },
       (err) => {
