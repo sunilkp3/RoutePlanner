@@ -2868,6 +2868,13 @@
     const results = document.getElementById(resultsId);
     const clearBtn = document.getElementById(inputId === 'from-input' ? 'from-clear' : 'to-clear');
 
+    function closeMobileKeyboard() {
+      input.blur();
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+    }
+
     function updateClearButton() {
       const shouldHideFromLive = inputId === 'from-input' && fromStationSource === 'live';
       clearBtn.style.display = input.value.trim() && !shouldHideFromLive ? 'flex' : 'none';
@@ -2905,6 +2912,7 @@
           }
           requestLeafletAutoFit(true);
           updateRouteFromInputs(false);
+          closeMobileKeyboard();
         });
 
         results.appendChild(item);
