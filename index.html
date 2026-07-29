@@ -1747,6 +1747,7 @@
   let leafletMap = null;
   let leafletLayerGroup = null;
   let leafletBaseLayers = null;
+  let lastLeafletFocusKey = '';
 
   const STATIONS = {
     // PURPLE LINE
@@ -2585,7 +2586,8 @@
           direction: 'top',
           offset: [0, -9],
           opacity: 0.95,
-          permanent: true,
+          permanent: selected,
+          sticky: !selected,
           className: selected ? 'route-station-label' : 'station-label'
         })
         .addTo(leafletLayerGroup);
@@ -2626,9 +2628,15 @@
     const focusBounds = isRouteMap
       ? currentRoutePath.map(stationLatLng).filter(Boolean)
       : bounds;
+    const focusKey = isRouteMap
+      ? `route:${currentRoutePath.join('|')}`
+      : `overview:${currentNearestStation || from || 'all'}`;
+    const shouldAutoFitMap = activeView === 'map' && focusKey !== lastLeafletFocusKey;
 
     setTimeout(() => {
       leafletMap.invalidateSize();
+      if (!shouldAutoFitMap) return;
+      lastLeafletFocusKey = focusKey;
       if (focusBounds.length) {
         leafletMap.fitBounds(focusBounds, {
           padding: isRouteMap ? [18, 18] : [28, 28],
