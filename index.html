@@ -46,29 +46,33 @@
   }
   </script>
 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --surface-bg: #0f172a;
-      --surface-hover: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --purple-line: #a855f7;
-      --green-line: #22c55e;
-      --yellow-line: #eab308;
-      --border: #334155;
-      --accent: #38bdf8;
-      --highlight: #f43f5e;
-      --warning: #fbbf24;
-      --footer-muted: #64748b;
-      --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      --dropdown-shadow: 0 8px 16px rgba(0,0,0,0.5);
-      --accent-soft: rgba(56, 189, 248, 0.08);
-      --accent-medium: rgba(56, 189, 248, 0.16);
-      --accent-border: rgba(56, 189, 248, 0.25);
-      --accent-border-strong: rgba(56, 189, 248, 0.3);
+      --bg: #05070b;
+      --page-bg: linear-gradient(180deg, #111827 0%, #05070b 42%, #0b0f17 100%);
+      --card-bg: rgba(28, 31, 38, 0.78);
+      --surface-bg: rgba(255, 255, 255, 0.07);
+      --surface-hover: rgba(255, 255, 255, 0.12);
+      --dropdown-bg: #1c1f26;
+      --text: #f5f5f7;
+      --text-muted: #a1a1aa;
+      --purple-line: #bf5af2;
+      --green-line: #30d158;
+      --yellow-line: #ffd60a;
+      --border: rgba(255, 255, 255, 0.13);
+      --accent: #64d2ff;
+      --highlight: #ff375f;
+      --warning: #ffd60a;
+      --footer-muted: #8e8e93;
+      --card-shadow: 0 18px 50px rgba(0,0,0,0.32);
+      --dropdown-shadow: 0 18px 36px rgba(0,0,0,0.46);
+      --accent-soft: rgba(100, 210, 255, 0.10);
+      --accent-medium: rgba(100, 210, 255, 0.18);
+      --accent-border: rgba(100, 210, 255, 0.28);
+      --accent-border-strong: rgba(100, 210, 255, 0.42);
       --highlight-soft: rgba(244, 63, 94, 0.1);
       --highlight-medium: rgba(244, 63, 94, 0.12);
       --highlight-border: rgba(244, 63, 94, 0.3);
@@ -81,26 +85,28 @@
     @media (prefers-color-scheme: light) {
       :root {
         color-scheme: light;
-        --bg: #f6f8fb;
-        --card-bg: #ffffff;
-        --surface-bg: #f8fafc;
-        --surface-hover: #eaf2fb;
-        --text: #0f172a;
-        --text-muted: #586579;
-        --purple-line: #7c3aed;
-        --green-line: #15803d;
-        --yellow-line: #d97706;
-        --border: #d8e0eb;
-        --accent: #0369a1;
-        --highlight: #be123c;
-        --warning: #92400e;
-        --footer-muted: #697586;
-        --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-        --dropdown-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
-        --accent-soft: rgba(3, 105, 161, 0.08);
-        --accent-medium: rgba(3, 105, 161, 0.14);
-        --accent-border: rgba(3, 105, 161, 0.22);
-        --accent-border-strong: rgba(3, 105, 161, 0.32);
+        --bg: #f5f5f7;
+        --page-bg: linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 54%, #eef2f6 100%);
+        --card-bg: rgba(255, 255, 255, 0.82);
+        --surface-bg: rgba(118, 118, 128, 0.10);
+        --surface-hover: rgba(118, 118, 128, 0.16);
+        --dropdown-bg: #ffffff;
+        --text: #1d1d1f;
+        --text-muted: #6e6e73;
+        --purple-line: #af52de;
+        --green-line: #34c759;
+        --yellow-line: #ffcc00;
+        --border: rgba(60, 60, 67, 0.16);
+        --accent: #007aff;
+        --highlight: #ff2d55;
+        --warning: #b25000;
+        --footer-muted: #86868b;
+        --card-shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
+        --dropdown-shadow: 0 18px 38px rgba(15, 23, 42, 0.14);
+        --accent-soft: rgba(0, 122, 255, 0.08);
+        --accent-medium: rgba(0, 122, 255, 0.14);
+        --accent-border: rgba(0, 122, 255, 0.22);
+        --accent-border-strong: rgba(0, 122, 255, 0.34);
         --highlight-soft: rgba(190, 18, 60, 0.08);
         --highlight-medium: rgba(190, 18, 60, 0.11);
         --highlight-border: rgba(190, 18, 60, 0.25);
@@ -111,57 +117,78 @@
       }
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif; }
 
     body {
-      background-color: var(--bg);
+      background: var(--page-bg);
       color: var(--text);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px;
+      padding: 18px;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     .container {
       width: 100%;
-      max-width: 680px;
+      max-width: 720px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       flex: 1;
     }
 
     .header {
       text-align: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      padding: 18px 8px 10px;
     }
 
-    .header h1 { font-size: 1.35rem; color: var(--accent); }
-    .header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+    .header h1 {
+      font-size: clamp(1.55rem, 4vw, 2.15rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+      color: var(--text);
+      font-weight: 850;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 7px;
+      font-weight: 520;
+    }
 
     .clock-banner {
       background: var(--surface-bg);
       border: 1px solid var(--border);
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-top: 10px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      margin-top: 14px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--accent);
-      font-weight: 600;
+      font-weight: 700;
+      backdrop-filter: blur(18px);
     }
 
     .card {
       background: var(--card-bg);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 22px;
+      padding: 18px;
       border: 1px solid var(--border);
       box-shadow: var(--card-shadow);
+      backdrop-filter: blur(26px);
+    }
+
+    .search-card {
+      position: relative;
+      z-index: 30;
+      overflow: visible;
     }
 
     .form-group {
@@ -172,31 +199,36 @@
       position: relative;
     }
 
-    label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    label { font-size: 0.72rem; font-weight: 780; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
 
     .input-wrapper { position: relative; width: 100%; }
 
     input {
       width: 100%;
-      padding: 12px 40px 12px 12px;
-      border-radius: 8px;
+      padding: 14px 42px 14px 14px;
+      border-radius: 14px;
       border: 1px solid var(--border);
       background: var(--surface-bg);
       color: var(--text);
-      font-size: 0.95rem;
+      font-size: 1rem;
       outline: none;
+      transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
     }
 
-    input:focus { border-color: var(--accent); }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+      background: var(--card-bg);
+    }
     input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--surface-hover); }
     input[readonly] { cursor: default; }
 
     .clear-input-btn {
       position: absolute;
       top: 50%;
-      right: 8px;
-      width: 26px;
-      height: 26px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
       border: 0;
       border-radius: 50%;
       background: transparent;
@@ -224,8 +256,8 @@
       margin-top: 8px;
       border: 1px solid var(--border);
       background: var(--surface-bg);
-      border-radius: 8px;
-      padding: 8px 10px;
+      border-radius: 14px;
+      padding: 10px 12px;
     }
 
     .source-toggle-label {
@@ -242,8 +274,8 @@
 
     .switch {
       position: relative;
-      width: 48px;
-      height: 26px;
+      width: 50px;
+      height: 30px;
       flex-shrink: 0;
     }
 
@@ -265,8 +297,8 @@
     .switch-slider::before {
       content: '';
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       left: 3px;
       top: 3px;
       background: var(--card-bg);
@@ -280,7 +312,7 @@
     }
 
     .switch input:checked + .switch-slider::before {
-      transform: translateX(22px);
+      transform: translateX(20px);
     }
 
     .autocomplete-results {
@@ -290,18 +322,19 @@
       right: 0;
       max-height: 220px;
       overflow-y: auto;
-      background: var(--surface-bg);
+      background: var(--dropdown-bg);
       border: 1px solid var(--accent);
       border-top: none;
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
-      z-index: 100;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      z-index: 1000;
       display: none;
       box-shadow: var(--dropdown-shadow);
+      backdrop-filter: blur(24px);
     }
 
     .autocomplete-item {
-      padding: 10px 14px;
+      padding: 12px 14px;
       cursor: pointer;
       font-size: 0.9rem;
       color: var(--text);
@@ -322,23 +355,1064 @@
 
     .gps-status { font-size: 0.8rem; color: var(--accent); margin-top: 6px; line-height: 1.3; }
 
+    .view-switcher {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+      padding: 5px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--surface-bg);
+    }
+
+    .view-switcher button {
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 10px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 800;
+      transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+
+    .view-switcher button.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(0, 122, 255, 0.20);
+    }
+
+    .map-card {
+      display: none;
+      overflow: hidden;
+      padding: 0;
+      border-radius: 24px;
+      position: relative;
+      z-index: 5;
+      background:
+        linear-gradient(180deg, var(--accent-soft), rgba(255,255,255,0.02)),
+        var(--card-bg);
+      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(26px);
+    }
+
+    .map-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, var(--card-bg), var(--surface-bg)),
+        linear-gradient(90deg, var(--accent-soft), rgba(52,199,89,0.08));
+      backdrop-filter: blur(22px);
+    }
+
+    .map-toolbar h2 {
+      font-size: 1.22rem;
+      line-height: 1.1;
+      color: var(--text);
+      letter-spacing: 0;
+      font-weight: 850;
+    }
+
+    .map-toolbar p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin-top: 5px;
+      font-weight: 550;
+    }
+
+    .map-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .map-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 900;
+      background: linear-gradient(145deg, #007aff, #34c759);
+      box-shadow: 0 10px 20px rgba(0, 122, 255, 0.26);
+      flex: 0 0 auto;
+    }
+
+    .map-status-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .map-live-pill {
+      align-self: flex-start;
+      white-space: nowrap;
+      border: 1px solid var(--highlight-border);
+      background: var(--highlight-soft);
+      color: var(--highlight);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .map-mini-stats {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .map-mini-stat {
+      border: 1px solid var(--border);
+      background: var(--surface-bg);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .metro-map-wrap {
+      width: 100%;
+      overflow: auto;
+      position: relative;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(110, 134, 82, 0.42), transparent 24%),
+        radial-gradient(circle at 74% 18%, rgba(67, 96, 78, 0.48), transparent 29%),
+        radial-gradient(circle at 60% 76%, rgba(93, 111, 82, 0.44), transparent 31%),
+        radial-gradient(circle at 28% 78%, rgba(54, 81, 78, 0.38), transparent 34%),
+        linear-gradient(31deg, transparent 0 45%, rgba(226, 218, 192, 0.25) 47% 49%, transparent 51% 100%),
+        linear-gradient(119deg, transparent 0 57%, rgba(229, 222, 196, 0.20) 59% 60%, transparent 62% 100%),
+        linear-gradient(180deg, #2f3a31 0%, #23322c 46%, #1d2b2b 100%);
+      background-size: auto, auto, auto, auto, 260px 260px, 310px 310px, auto;
+    }
+
+    .metro-map-wrap::before,
+    .metro-map-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -35%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .metro-map-wrap::before {
+      background:
+        repeating-linear-gradient(
+          28deg,
+          transparent 0px 42px,
+          rgba(243, 236, 208, 0.22) 44px 47px,
+          transparent 49px 118px
+        ),
+        repeating-linear-gradient(
+          115deg,
+          transparent 0px 72px,
+          rgba(244, 238, 214, 0.18) 74px 79px,
+          transparent 82px 174px
+        );
+      transform: translate3d(-7%, -3%, 0) rotate(0.001deg);
+      animation: mapCurrentFlow 18s linear infinite;
+      opacity: 0.45;
+    }
+
+    .metro-map-wrap::after {
+      background:
+        radial-gradient(ellipse at 22% 36%, rgba(255, 255, 255, 0.15), transparent 34%),
+        radial-gradient(ellipse at 76% 62%, rgba(255, 255, 255, 0.12), transparent 32%),
+        linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.10), transparent);
+      animation: mapCloudDrift 26s ease-in-out infinite alternate;
+      opacity: 0.42;
+    }
+
+    .metro-map {
+      display: none;
+      width: 100%;
+      min-height: 430px;
+      height: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .leaflet-metro-map {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: min(68vh, 620px);
+      min-height: 430px;
+      background: var(--surface-bg);
+      display: none;
+    }
+
+    .leaflet-metro-map.active {
+      display: block;
+    }
+
+    .leaflet-metro-map .leaflet-control-attribution {
+      font-size: 10px;
+    }
+
+    .leaflet-metro-map .leaflet-tooltip {
+      border: 1px solid rgba(15, 23, 42, 0.16);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--card-bg) 92%, transparent);
+      color: var(--text);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+      font-size: 0.68rem;
+      font-weight: 850;
+      line-height: 1;
+      padding: 5px 7px;
+      white-space: nowrap;
+    }
+
+    .leaflet-metro-map .leaflet-tooltip.route-station-label {
+      border-color: var(--accent-border);
+      background: color-mix(in srgb, var(--accent-soft) 72%, var(--card-bg));
+    }
+
+    .leaflet-metro-map .leaflet-tooltip.live-location-label {
+      border-color: var(--highlight-border);
+      background: color-mix(in srgb, var(--highlight-soft) 76%, var(--card-bg));
+      color: var(--highlight);
+    }
+
+    .leaflet-station-marker {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid var(--marker-color, #38bdf8);
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.30);
+    }
+
+    .leaflet-station-marker.selected {
+      width: 20px;
+      height: 20px;
+      border-width: 4px;
+    }
+
+    .leaflet-train-marker {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--highlight);
+      color: #ffffff;
+      font-size: 16px;
+      box-shadow: 0 8px 18px rgba(255, 45, 85, 0.35);
+      border: 2px solid #ffffff;
+    }
+
+    .html-metro-map {
+      position: relative;
+      z-index: 1;
+      padding: 14px;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(163, 173, 112, 0.20), transparent 24%),
+        radial-gradient(circle at 82% 16%, rgba(59, 101, 82, 0.22), transparent 28%),
+        linear-gradient(45deg, rgba(255,255,255,0.04) 0 24%, transparent 25% 100%),
+        rgba(16, 28, 25, 0.28);
+      background-size: auto, auto, 48px 48px, auto;
+    }
+
+    .html-map-empty,
+    .html-line-card,
+    .html-route-card {
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, var(--card-bg), var(--surface-bg)),
+        var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, 0.13);
+    }
+
+    .html-map-empty {
+      padding: 18px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .html-network-map {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(250px, 1fr));
+      gap: 14px;
+      min-width: 760px;
+    }
+
+    .html-line-card {
+      overflow: hidden;
+      border-top: 8px solid var(--line-color);
+    }
+
+    .html-line-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(90deg, color-mix(in srgb, var(--line-color) 18%, transparent), transparent 70%);
+    }
+
+    .html-line-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-size: 0.98rem;
+      font-weight: 900;
+    }
+
+    .html-line-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .html-line-count {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .html-station-list {
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 12px 14px 14px;
+    }
+
+    .html-station-row {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 11px;
+      min-height: 42px;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 850;
+      line-height: 1.22;
+      position: relative;
+      padding-bottom: 8px;
+    }
+
+    .html-station-row.live {
+      background: rgba(255, 45, 85, 0.12);
+      border-radius: 12px;
+      padding: 8px 8px 10px 0;
+      margin: -6px -4px 2px 0;
+    }
+
+    .html-station-row::before {
+      content: '';
+      position: absolute;
+      left: 9px;
+      top: 20px;
+      bottom: -10px;
+      width: 5px;
+      border-radius: 999px;
+      background: var(--line-color);
+      opacity: 0.4;
+    }
+
+    .html-station-row:last-child::before {
+      display: none;
+    }
+
+    .html-small-node {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 4px solid var(--line-color);
+      z-index: 1;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+      margin-top: 2px;
+    }
+
+    .html-station-row.live .html-small-node {
+      background: var(--highlight);
+      border-color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(255, 45, 85, 0.18), 0 8px 14px rgba(255, 45, 85, 0.26);
+    }
+
+    .html-station-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .html-station-name {
+      color: inherit;
+      overflow-wrap: anywhere;
+    }
+
+    .html-station-short {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 750;
+    }
+
+    .html-live-train {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: var(--highlight);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 950;
+      box-shadow: 0 8px 16px rgba(255, 45, 85, 0.28);
+      vertical-align: middle;
+    }
+
+    .html-map-canvas-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 20% 26%, rgba(139, 153, 94, 0.34), transparent 26%),
+        radial-gradient(circle at 78% 22%, rgba(58, 91, 78, 0.36), transparent 30%),
+        radial-gradient(circle at 62% 80%, rgba(83, 110, 86, 0.32), transparent 34%),
+        repeating-linear-gradient(37deg, transparent 0 72px, rgba(244, 238, 214, 0.18) 74px 78px, transparent 80px 170px),
+        repeating-linear-gradient(123deg, transparent 0 92px, rgba(244, 238, 214, 0.13) 94px 99px, transparent 101px 190px),
+        linear-gradient(180deg, #2f3a31 0%, #22342e 55%, #1c292b 100%);
+      background-size: auto, auto, auto, auto, auto, auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 16px 34px rgba(15, 23, 42, 0.12);
+    }
+
+    .html-map-canvas {
+      position: relative;
+      width: 1100px;
+      height: 760px;
+      min-width: 1100px;
+      overflow: hidden;
+    }
+
+    .html-map-canvas.route-zoom {
+      min-width: 0;
+      width: var(--canvas-width);
+      height: var(--canvas-height);
+    }
+
+    .html-map-canvas::before,
+    .html-map-canvas::after {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      pointer-events: none;
+    }
+
+    .html-map-canvas::before {
+      background:
+        radial-gradient(circle at 16% 20%, rgba(159, 170, 113, 0.28), transparent 25%),
+        radial-gradient(circle at 76% 72%, rgba(65, 94, 82, 0.32), transparent 28%),
+        repeating-linear-gradient(8deg, rgba(255,255,255,0.00) 0 11px, rgba(255,255,255,0.035) 12px 13px);
+      opacity: 0.62;
+    }
+
+    .html-map-canvas::after {
+      background:
+        linear-gradient(26deg, transparent 0 42%, rgba(240, 232, 200, 0.20) 43% 45%, transparent 46% 100%),
+        linear-gradient(112deg, transparent 0 62%, rgba(240, 232, 200, 0.16) 63% 64%, transparent 65% 100%);
+      opacity: 0.75;
+    }
+
+    .html-map-edge {
+      position: absolute;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--line-color);
+      left: var(--x);
+      top: var(--y);
+      width: var(--length);
+      transform: rotate(var(--angle));
+      transform-origin: left center;
+      opacity: 0.92;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+      z-index: 1;
+    }
+
+    .html-map-edge.muted {
+      opacity: 0.18;
+      height: 5px;
+      box-shadow: none;
+    }
+
+    .html-map-edge.active {
+      height: 11px;
+      opacity: 1;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.10), 0 10px 18px rgba(15, 23, 42, 0.22);
+      z-index: 2;
+    }
+
+    .html-map-node {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 4px solid var(--line-color);
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+    }
+
+    .html-map-node.selected {
+      width: 22px;
+      height: 22px;
+      border-width: 5px;
+      z-index: 6;
+    }
+
+    .html-map-node.interchange {
+      border-color: #f59e0b;
+    }
+
+    .html-map-node.live {
+      width: 28px;
+      height: 28px;
+      background: var(--highlight);
+      border-color: #ffffff;
+      z-index: 8;
+      box-shadow: 0 0 0 6px rgba(255, 45, 85, 0.18), 0 12px 20px rgba(255, 45, 85, 0.30);
+    }
+
+    .html-map-train {
+      position: absolute;
+      left: calc(var(--x) + 18px);
+      top: calc(var(--y) - 32px);
+      min-width: 34px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--highlight);
+      color: #ffffff;
+      font-size: 0.86rem;
+      z-index: 10;
+      box-shadow: 0 10px 18px rgba(255, 45, 85, 0.32);
+    }
+
+    .html-map-label {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      max-width: 150px;
+      transform: translate(-50%, calc(-100% - 14px));
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(8, 18, 15, 0.78);
+      color: var(--text);
+      padding: 4px 7px;
+      font-size: 0.72rem;
+      font-weight: 850;
+      line-height: 1.15;
+      text-align: center;
+      z-index: 7;
+      box-shadow: 0 8px 14px rgba(15, 23, 42, 0.12);
+      backdrop-filter: blur(14px);
+    }
+
+    .html-map-label.below {
+      transform: translate(-50%, 16px);
+    }
+
+    .html-map-label.live-label {
+      border-color: var(--highlight-border);
+      color: var(--highlight);
+      z-index: 11;
+    }
+
+    .html-map-route-title {
+      position: absolute;
+      left: 22px;
+      top: 18px;
+      max-width: 440px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(8, 18, 15, 0.82);
+      color: var(--text);
+      padding: 11px 13px;
+      z-index: 12;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
+      backdrop-filter: blur(18px);
+    }
+
+    .html-map-route-title strong {
+      display: block;
+      font-size: 0.98rem;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+
+    .html-map-route-title span {
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      font-weight: 750;
+    }
+
+    .html-station-live-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .html-station-row.interchange .html-small-node,
+    .html-route-step.interchange .html-route-node {
+      border-color: #f59e0b;
+    }
+
+    .html-route-map {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .html-route-card {
+      padding: 16px;
+      border-top: 8px solid var(--accent);
+    }
+
+    .html-route-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .html-route-heading {
+      color: var(--text);
+      font-size: 1.08rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .html-route-sub {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+
+    .html-route-badge {
+      color: #ffffff;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 0.72rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .html-route-steps {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .html-route-step {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      min-height: 66px;
+      position: relative;
+      color: var(--text);
+    }
+
+    .html-route-step::before {
+      content: '';
+      position: absolute;
+      left: 17px;
+      top: 32px;
+      bottom: -34px;
+      width: 7px;
+      border-radius: 999px;
+      background: var(--line-color);
+      opacity: 0.86;
+    }
+
+    .html-route-step:last-child::before {
+      display: none;
+    }
+
+    .html-route-node {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      border: 6px solid var(--line-color);
+      color: #111827;
+      font-size: 0.68rem;
+      font-weight: 950;
+      z-index: 1;
+      box-shadow: 0 6px 12px rgba(15, 23, 42, 0.18);
+    }
+
+    .html-route-step.live .html-route-node {
+      background: var(--highlight);
+      border-color: #ffffff;
+      color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.16), 0 8px 14px rgba(244, 63, 94, 0.26);
+    }
+
+    .html-route-step.live .html-route-node::after {
+      content: '🚆';
+      position: absolute;
+      transform: translate(24px, -22px);
+      width: 30px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--highlight);
+      color: #ffffff;
+      font-size: 0.8rem;
+      box-shadow: 0 8px 16px rgba(255, 45, 85, 0.30);
+    }
+
+    .html-route-body {
+      padding-bottom: 22px;
+      padding-top: 2px;
+    }
+
+    .html-route-name {
+      font-size: 1rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .html-route-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .html-tag {
+      border: 1px solid var(--border);
+      background: var(--surface-bg);
+      color: var(--text-muted);
+      border-radius: 999px;
+      padding: 3px 7px;
+      font-size: 0.68rem;
+      font-weight: 850;
+    }
+
+    .html-tag.important {
+      border-color: rgba(245, 158, 11, 0.35);
+      background: rgba(245, 158, 11, 0.12);
+      color: #92400e;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .html-map-empty,
+      .html-line-card,
+      .html-route-card {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06)),
+          rgba(5, 7, 11, 0.62);
+      }
+
+      .html-map-empty,
+      .html-line-title,
+      .html-station-row,
+      .html-route-heading,
+      .html-route-step {
+        color: var(--text);
+      }
+
+      .html-line-count,
+      .html-route-sub,
+      .html-tag,
+      .html-station-short {
+        color: var(--text-muted);
+      }
+
+      .html-route-badge {
+        background: rgba(255, 255, 255, 0.14);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .metro-map-wrap {
+        overflow-x: visible;
+      }
+
+      .html-metro-map {
+        padding: 10px;
+      }
+
+      .html-map-canvas {
+        width: 980px;
+        min-width: 980px;
+        height: 700px;
+      }
+
+      .html-map-canvas.route-zoom {
+        width: var(--canvas-width);
+        min-width: var(--canvas-width);
+        height: var(--canvas-height);
+      }
+
+      .html-network-map {
+        min-width: 0;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .html-station-list {
+        max-height: none;
+      }
+
+      .html-route-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .html-route-badge {
+        align-self: flex-start;
+      }
+    }
+
+    @keyframes mapCurrentFlow {
+      from { transform: translate3d(-10%, -4%, 0); }
+      to { transform: translate3d(10%, 4%, 0); }
+    }
+
+    @keyframes mapCloudDrift {
+      from { transform: translate3d(-5%, -2%, 0) scale(1); }
+      to { transform: translate3d(5%, 2%, 0) scale(1.04); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .metro-map-wrap::before,
+      .metro-map-wrap::after {
+        animation: none;
+      }
+    }
+
+    .map-line {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.92;
+    }
+
+    .map-line.map-muted {
+      opacity: 0.14;
+    }
+
+    .map-line.route-active {
+      filter: drop-shadow(0 0 6px rgba(15, 23, 42, 0.3));
+    }
+
+    .map-station {
+      fill: #fff;
+      stroke-width: 2.2;
+      cursor: pointer;
+    }
+
+    .map-station.selected {
+      stroke: #0f172a;
+      stroke-width: 3.5;
+    }
+
+    .map-station.live {
+      fill: #f43f5e;
+      stroke: #fff;
+      stroke-width: 3;
+      filter: drop-shadow(0 0 7px rgba(244, 63, 94, 0.75));
+    }
+
+    .map-label {
+      fill: #0f172a;
+      font-size: 13px;
+      font-weight: 800;
+      pointer-events: none;
+      paint-order: stroke;
+      stroke: #fff;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    .map-label.route-label {
+      font-size: 15px;
+      stroke-width: 5px;
+    }
+
+    .map-label-bg {
+      fill: rgba(255, 255, 255, 0.92);
+      stroke: rgba(15, 23, 42, 0.12);
+      stroke-width: 1;
+      pointer-events: none;
+    }
+
+    .map-label-leader {
+      stroke: rgba(15, 23, 42, 0.28);
+      stroke-width: 1.4;
+      stroke-dasharray: 3 3;
+      pointer-events: none;
+    }
+
+    .route-map-title {
+      fill: #0f172a;
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .route-map-subtitle {
+      fill: #586579;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .route-map-card {
+      fill: rgba(255, 255, 255, 0.88);
+      stroke: rgba(255, 255, 255, 0.92);
+      stroke-width: 1;
+      filter: drop-shadow(0 18px 28px rgba(15, 23, 42, 0.12));
+    }
+
+    .route-map-panel {
+      fill: rgba(255, 255, 255, 0.72);
+      stroke: rgba(148, 163, 184, 0.35);
+      stroke-width: 1;
+      filter: drop-shadow(0 16px 24px rgba(15, 23, 42, 0.09));
+    }
+
+    .route-track-shadow {
+      stroke: rgba(15, 23, 42, 0.16);
+      stroke-width: 20;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 10px 10px rgba(15, 23, 42, 0.14));
+    }
+
+    .route-track-glow {
+      stroke-width: 15;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.28;
+      filter: blur(2px);
+    }
+
+    .route-track-main {
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .route-station-label {
+      fill: #0f172a;
+      font-size: 15px;
+      font-weight: 800;
+      paint-order: stroke;
+      stroke: #fff;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    .route-station-meta {
+      fill: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .route-node-halo {
+      fill: rgba(255, 255, 255, 0.9);
+      filter: drop-shadow(0 7px 9px rgba(15, 23, 42, 0.22));
+    }
+
+    .route-node-core {
+      filter: drop-shadow(0 4px 5px rgba(15, 23, 42, 0.20));
+    }
+
+    .route-chip {
+      fill: rgba(15, 23, 42, 0.84);
+      filter: drop-shadow(0 8px 12px rgba(15, 23, 42, 0.18));
+    }
+
+    .route-chip-text {
+      fill: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .map-label-muted {
+      fill: #64748b;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .map-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px 16px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-bg);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .legend-line {
+      width: 26px;
+      height: 4px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
     .metric-card {
       background: var(--surface-bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 6px;
+      border-radius: 16px;
+      padding: 12px 8px;
       text-align: center;
     }
 
-    .metric-card .val { font-size: 1.1rem; font-weight: bold; color: var(--accent); }
+    .metric-card .val { font-size: 1.15rem; font-weight: 850; color: var(--accent); }
     .metric-card .lbl { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+    #unselected-card,
+    #result-card {
+      position: relative;
+      z-index: 1;
+    }
 
     /* Dual / Direction Train Box Styles */
     .dual-train-container {
@@ -351,8 +1425,8 @@
     .next-train-box {
       background: var(--accent-soft);
       border: 1px solid var(--accent-border);
-      padding: 10px 12px;
-      border-radius: 8px;
+      padding: 12px 13px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -422,7 +1496,7 @@
       color: var(--accent);
       background: var(--accent-soft);
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 999px;
       border: 1px solid var(--accent-border);
       white-space: nowrap;
     }
@@ -440,7 +1514,7 @@
       border-left: 4px solid var(--highlight);
       padding: 8px 10px 12px 10px;
       margin-left: -10px;
-      border-radius: 8px;
+      border-radius: 14px;
     }
 
     .step.live-location-active .badge { box-shadow: 0 0 10px var(--highlight); border: 2px solid var(--badge-ring); }
@@ -452,7 +1526,7 @@
       font-size: 0.65rem;
       font-weight: bold;
       padding: 2px 5px;
-      border-radius: 4px;
+      border-radius: 999px;
       margin-left: 6px;
       letter-spacing: 0.5px;
       animation: pulse 1.5s infinite;
@@ -463,7 +1537,7 @@
     .platform-tag {
       display: inline-block;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 999px;
       background: var(--accent-medium);
       color: var(--accent);
       font-size: 0.72rem;
@@ -477,7 +1551,7 @@
       border: 1px solid var(--warning-border);
       color: var(--warning);
       padding: 8px;
-      border-radius: 6px;
+      border-radius: 14px;
       font-size: 0.8rem;
       margin-top: 6px;
     }
@@ -491,7 +1565,7 @@
 
     footer {
       width: 100%;
-      max-width: 680px;
+      max-width: 720px;
       margin-top: 20px;
       padding: 16px;
       border-top: 1px solid var(--border);
@@ -517,6 +1591,8 @@
       body { padding: 10px; }
       .card { padding: 12px; }
       .header h1 { font-size: 1.2rem; }
+      .map-toolbar { flex-direction: column; }
+      .map-live-pill { align-self: flex-start; }
       .metric-card .val { font-size: 0.95rem; }
       .metric-card .lbl { font-size: 0.65rem; }
     }
@@ -533,7 +1609,7 @@
     </div>
   </header>
 
-  <main class="card">
+  <main class="card search-card">
     <div class="form-group">
       <label for="from-input">From (Boarding Station)</label>
       <div class="input-wrapper">
@@ -561,12 +1637,48 @@
       </div>
     </div>
 
+    <div class="view-switcher" aria-label="Journey display mode">
+      <button type="button" id="journey-view-btn" class="active">Journey View</button>
+      <button type="button" id="map-view-btn">Map View</button>
+    </div>
   </main>
+
+  <section id="map-card" class="card map-card" aria-label="Namma Metro schematic map">
+    <div class="map-toolbar">
+      <div class="map-title-row">
+        <div class="map-icon" aria-hidden="true">M</div>
+        <div>
+          <h2>Live Metro Map</h2>
+          <p id="map-summary">Allow GPS or choose stations to highlight your route.</p>
+        </div>
+      </div>
+      <div class="map-status-stack">
+        <div class="map-live-pill" id="map-live-pill">Live: waiting</div>
+        <div class="map-mini-stats" aria-label="Map route stats">
+          <span class="map-mini-stat" id="map-stops-stat">-- stops</span>
+          <span class="map-mini-stat" id="map-lines-stat">-- lines</span>
+        </div>
+      </div>
+    </div>
+    <div class="metro-map-wrap">
+      <div id="leaflet-map" class="leaflet-metro-map" aria-label="Interactive Namma Metro map"></div>
+      <div class="html-metro-map" id="html-metro-map" role="img" aria-label="Namma Metro route map"></div>
+      <svg class="metro-map" id="metro-map" viewBox="0 0 1100 760" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Namma Metro route map"></svg>
+    </div>
+    <div class="map-legend">
+      <span><i class="legend-line" style="background:var(--purple-line);"></i>Purple</span>
+      <span><i class="legend-line" style="background:var(--green-line);"></i>Green</span>
+      <span><i class="legend-line" style="background:var(--yellow-line);"></i>Yellow</span>
+      <span>🚆 live nearest station</span>
+      <span>Colored path: selected route</span>
+      <span>Free tiles: Esri satellite / OpenStreetMap</span>
+    </div>
+  </section>
 
   <!-- Unselected Mode Card: Shows Dual-Direction Timetable Estimates -->
   <section id="unselected-card" class="card" style="display: block;">
-    <h3 style="margin-bottom: 10px; font-size: 0.85rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px;">
-      📍 BOARDING STATION: BOTH UPCOMING DIRECTIONS
+    <h3 style="margin-bottom: 10px; font-size: 0.82rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em;">
+      BOARDING STATION: BOTH UPCOMING DIRECTIONS
     </h3>
     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
       Select a destination above to see your exact single journey route and BMRCL timetable estimate.
@@ -622,11 +1734,19 @@
   </p>
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   let watchId = null;
   let isTracking = false;
   let currentNearestStation = null;
   let fromStationSource = 'live';
+  let activeView = 'journey';
+  let currentPanel = 'unselected';
+  let currentRoutePath = [];
+  let currentMapView = { x: 0, y: 0, width: 1100, height: 760 };
+  let leafletMap = null;
+  let leafletLayerGroup = null;
+  let leafletBaseLayers = null;
 
   const STATIONS = {
     // PURPLE LINE
@@ -825,6 +1945,850 @@
 
   const stationNames = Object.keys(STATIONS).sort();
 
+  const LINE_COLORS = {
+    "Purple Line": "#a855f7",
+    "Green Line": "#22c55e",
+    "Yellow Line": "#eab308",
+    "Interchange": "#f59e0b"
+  };
+
+  function getMapPoint(stationName) {
+    const station = STATIONS[stationName];
+    const minLng = 77.45;
+    const maxLng = 77.77;
+    const minLat = 12.81;
+    const maxLat = 13.07;
+    const x = 70 + ((station.lng - minLng) / (maxLng - minLng)) * 960;
+    const y = 670 - ((station.lat - minLat) / (maxLat - minLat)) * 570;
+    return { x, y };
+  }
+
+  function shortMapLabel(name) {
+    return name
+      .replace("Nadaprabhu Kempegowda (Majestic)", "Majestic")
+      .replace("Rashtreeya Vidyalaya Road", "RV Road")
+      .replace("Balagangadharanatha Swamiji Station, Hosahalli", "Hosahalli")
+      .replace("Krantivira Sangolli Rayanna Railway Station", "KSR Station")
+      .replace("Sir M. Visvesvaraya Station, Central College", "Central College")
+      .replace("Dr. B. R. Ambedkar Station, Vidhana Soudha", "Vidhana Soudha")
+      .replace("Pantharapalya - Nayandahalli", "Nayandahalli")
+      .replace("Sri Sathya Sai Hospital", "Sathya Sai")
+      .replace("Hopefarm Channasandra", "Hopefarm")
+      .replace("Whitefield (Kadugodi)", "Whitefield")
+      .replace("Infosys Foundation Konappana Agrahara", "Konappana Agrahara")
+      .replace("Biocon Hebbagodi", "Hebbagodi")
+      .replace("Delta electronics Bommasandra", "Bommasandra");
+  }
+
+  function makeSvgEl(tag, attrs = {}) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+    return el;
+  }
+
+  function uniqueMapEdges() {
+    const edges = [];
+    const seen = new Set();
+    Object.entries(ADJACENCY).forEach(([from, neighbors]) => {
+      neighbors.forEach(to => {
+        const key = [from, to].sort().join("|");
+        if (!seen.has(key)) {
+          seen.add(key);
+          edges.push([from, to]);
+        }
+      });
+    });
+    return edges;
+  }
+
+  function isRouteEdge(from, to) {
+    for (let i = 0; i < currentRoutePath.length - 1; i++) {
+      const a = currentRoutePath[i];
+      const b = currentRoutePath[i + 1];
+      if ((a === from && b === to) || (a === to && b === from)) return true;
+    }
+    return false;
+  }
+
+  function getFocusedMapViewBox() {
+    if (currentRoutePath.length < 2) {
+      currentMapView = { x: 0, y: 0, width: 1100, height: 760 };
+      return "0 0 1100 760";
+    }
+
+    const points = currentRoutePath.map(getMapPoint);
+    const xs = points.map(p => p.x);
+    const ys = points.map(p => p.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const padding = 90;
+    const x = Math.max(0, minX - padding);
+    const y = Math.max(0, minY - padding);
+    const width = Math.min(1100 - x, Math.max(360, maxX - minX + padding * 2));
+    const height = Math.min(760 - y, Math.max(300, maxY - minY + padding * 2));
+    currentMapView = { x, y, width, height };
+    return `${x} ${y} ${width} ${height}`;
+  }
+
+  function doBoxesOverlap(a, b) {
+    return a.x < b.x + b.width &&
+      a.x + a.width > b.x &&
+      a.y < b.y + b.height &&
+      a.y + a.height > b.y;
+  }
+
+  function clampLabelBox(box) {
+    const minX = currentMapView.x + 10;
+    const minY = currentMapView.y + 10;
+    const maxX = currentMapView.x + currentMapView.width - 10 - box.width;
+    const maxY = currentMapView.y + currentMapView.height - 10 - box.height;
+    return {
+      ...box,
+      x: Math.max(minX, Math.min(maxX, box.x)),
+      y: Math.max(minY, Math.min(maxY, box.y))
+    };
+  }
+
+  function drawMapLabel(svg, occupiedLabels, request) {
+    const { point, text, fontSize, isRoute, routeIndex, priority } = request;
+    const width = Math.min(230, Math.max(58, text.length * fontSize * 0.58 + 18));
+    const height = fontSize + 12;
+    const routeAbove = routeIndex % 2 === 0;
+    const candidates = isRoute ? [
+      { x: point.x + 18, y: point.y + (routeAbove ? -46 : 22) },
+      { x: point.x - width - 18, y: point.y + (routeAbove ? -46 : 22) },
+      { x: point.x + 18, y: point.y + (routeAbove ? -74 : 48) },
+      { x: point.x - width - 18, y: point.y + (routeAbove ? -74 : 48) },
+      { x: point.x - width / 2, y: point.y + (routeAbove ? -62 : 36) }
+    ] : [
+      { x: point.x + 10, y: point.y - 26 },
+      { x: point.x + 10, y: point.y + 12 },
+      { x: point.x - width - 10, y: point.y - 26 }
+    ];
+
+    let chosen = null;
+    for (const candidate of candidates) {
+      const box = clampLabelBox({ ...candidate, width, height });
+      if (!occupiedLabels.some(existing => doBoxesOverlap(existing, box))) {
+        chosen = box;
+        break;
+      }
+    }
+
+    if (!chosen && priority) chosen = clampLabelBox({ ...candidates[0], width, height });
+    if (!chosen) return;
+
+    occupiedLabels.push(chosen);
+
+    if (isRoute) {
+      svg.appendChild(makeSvgEl('line', {
+        x1: point.x,
+        y1: point.y,
+        x2: chosen.x + width / 2,
+        y2: chosen.y + height / 2,
+        class: 'map-label-leader'
+      }));
+    }
+
+    svg.appendChild(makeSvgEl('rect', {
+      x: chosen.x,
+      y: chosen.y,
+      width,
+      height,
+      rx: 7,
+      class: 'map-label-bg'
+    }));
+
+    const label = makeSvgEl('text', {
+      x: chosen.x + 9,
+      y: chosen.y + fontSize + 2,
+      class: `map-label${isRoute ? ' route-label' : ''}`,
+      'font-size': fontSize
+    });
+    label.textContent = text;
+    svg.appendChild(label);
+  }
+
+  function getRouteLineAt(index) {
+    const current = currentRoutePath[index];
+    const next = currentRoutePath[index + 1] || currentRoutePath[index - 1];
+    if (!next) return STATIONS[current]?.line || "Purple Line";
+    return getLineForSegment(current, next);
+  }
+
+  function drawSelectedRouteMap(svg) {
+    const totalStops = currentRoutePath.length - 1;
+    const pointsPerRow = 6;
+    const rowGap = 170;
+    const startX = 92;
+    const stepX = 180;
+    const topY = 168;
+    const rows = Math.ceil(currentRoutePath.length / pointsPerRow);
+    const mapHeight = Math.max(520, topY + (rows - 1) * rowGap + 150);
+
+    svg.setAttribute('viewBox', `0 0 1100 ${mapHeight}`);
+    svg.style.height = `${Math.min(760, Math.max(470, mapHeight))}px`;
+    svg.innerHTML = '';
+
+    svg.appendChild(makeSvgEl('rect', { x: 0, y: 0, width: 1100, height: mapHeight, fill: 'url(#routeBg)', opacity: 0.72 }));
+    const defs = makeSvgEl('defs');
+    const bgGradient = makeSvgEl('linearGradient', { id: 'routeBg', x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
+    bgGradient.appendChild(makeSvgEl('stop', { offset: '0%', 'stop-color': '#f8fafc' }));
+    bgGradient.appendChild(makeSvgEl('stop', { offset: '52%', 'stop-color': '#eef6fb' }));
+    bgGradient.appendChild(makeSvgEl('stop', { offset: '100%', 'stop-color': '#ffffff' }));
+    defs.appendChild(bgGradient);
+    svg.appendChild(defs);
+    for (let x = 60; x < 1060; x += 40) {
+      svg.appendChild(makeSvgEl('line', { x1: x, y1: 130, x2: x, y2: mapHeight - 32, stroke: '#0f172a', 'stroke-width': 1, opacity: 0.025 }));
+    }
+    for (let y = 150; y < mapHeight - 32; y += 40) {
+      svg.appendChild(makeSvgEl('line', { x1: 48, y1: y, x2: 1052, y2: y, stroke: '#0f172a', 'stroke-width': 1, opacity: 0.025 }));
+    }
+    svg.appendChild(makeSvgEl('rect', { x: 34, y: 28, width: 1032, height: 92, rx: 18, class: 'route-map-card' }));
+    svg.appendChild(makeSvgEl('rect', { x: 44, y: 136, width: 1012, height: mapHeight - 168, rx: 26, class: 'route-map-panel' }));
+
+    const from = currentRoutePath[0];
+    const to = currentRoutePath[currentRoutePath.length - 1];
+    const title = makeSvgEl('text', { x: 64, y: 66, class: 'route-map-title' });
+    title.textContent = `${shortMapLabel(from)} to ${shortMapLabel(to)}`;
+    svg.appendChild(title);
+
+    const sub = makeSvgEl('text', { x: 64, y: 94, class: 'route-map-subtitle' });
+    sub.textContent = `${totalStops} stops • live station and transfers highlighted`;
+    svg.appendChild(sub);
+
+    const positions = currentRoutePath.map((stationName, index) => {
+      const row = Math.floor(index / pointsPerRow);
+      const colRaw = index % pointsPerRow;
+      const col = row % 2 === 1 ? pointsPerRow - 1 - colRaw : colRaw;
+      return { stationName, index, x: startX + col * stepX, y: topY + row * rowGap };
+    });
+
+    for (let i = 0; i < positions.length - 1; i++) {
+      const a = positions[i];
+      const b = positions[i + 1];
+      const lineName = getLineForSegment(a.stationName, b.stationName);
+      const color = LINE_COLORS[lineName] || '#38bdf8';
+      svg.appendChild(makeSvgEl('line', {
+        x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+        stroke: '#0f172a',
+        class: 'route-track-shadow'
+      }));
+      svg.appendChild(makeSvgEl('line', {
+        x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+        stroke: color,
+        class: 'route-track-glow'
+      }));
+      svg.appendChild(makeSvgEl('line', {
+        x1: a.x, y1: a.y, x2: b.x, y2: b.y,
+        stroke: color,
+        class: 'route-track-main'
+      }));
+    }
+
+    positions.forEach(({ stationName, index, x, y }) => {
+      const station = STATIONS[stationName];
+      const isStart = index === 0;
+      const isEnd = index === positions.length - 1;
+      const isTransfer = station.line === 'Interchange';
+      const isLive = currentNearestStation === stationName;
+      const lineName = getRouteLineAt(index);
+      const fill = isLive ? '#f43f5e' : (isTransfer ? '#f59e0b' : '#ffffff');
+      const stroke = isStart || isEnd ? '#0f172a' : (LINE_COLORS[lineName] || '#64748b');
+      const radius = isStart || isEnd || isTransfer || isLive ? 13 : 9;
+
+      svg.appendChild(makeSvgEl('circle', { cx: x, cy: y, r: radius + 7, class: 'route-node-halo' }));
+      svg.appendChild(makeSvgEl('circle', {
+        cx: x, cy: y, r: radius, fill, stroke, 'stroke-width': 4,
+        class: 'route-node-core',
+        filter: isLive ? 'drop-shadow(0 0 8px rgba(244, 63, 94, 0.75))' : ''
+      }));
+
+      if (isStart || isEnd || isTransfer || isLive) {
+        const badge = makeSvgEl('text', {
+          x, y: y + 5, 'text-anchor': 'middle',
+          fill: isTransfer ? '#0f172a' : (isLive ? '#ffffff' : '#0f172a'),
+          'font-size': 13, 'font-weight': 900
+        });
+        badge.textContent = isStart ? 'S' : (isEnd ? 'E' : (isLive ? 'L' : 'T'));
+        svg.appendChild(badge);
+      }
+
+      const labelAbove = index % 2 === 0;
+      const labelY = labelAbove ? y - 34 : y + 45;
+      const label = makeSvgEl('text', {
+        x, y: labelY, 'text-anchor': 'middle', class: 'route-station-label', 'font-size': 13
+      });
+      label.textContent = shortMapLabel(stationName);
+      svg.appendChild(label);
+
+      const meta = makeSvgEl('text', {
+        x, y: labelY + 18, 'text-anchor': 'middle', class: 'route-station-meta'
+      });
+      meta.textContent = isStart ? 'Start' : (isEnd ? 'Destination' : (isTransfer ? 'Transfer' : `${index} stop${index > 1 ? 's' : ''}`));
+      svg.appendChild(meta);
+
+      if (isStart || isEnd || isTransfer || isLive) {
+        const chipText = isLive ? 'LIVE' : (isTransfer ? 'SWITCH' : (isStart ? 'START' : 'END'));
+        const chipWidth = chipText.length * 8 + 20;
+        const chipY = labelAbove ? labelY - 31 : labelY + 28;
+        svg.appendChild(makeSvgEl('rect', {
+          x: x - chipWidth / 2,
+          y: chipY,
+          width: chipWidth,
+          height: 22,
+          rx: 11,
+          class: 'route-chip'
+        }));
+        const chipLabel = makeSvgEl('text', {
+          x,
+          y: chipY + 15,
+          'text-anchor': 'middle',
+          class: 'route-chip-text'
+        });
+        chipLabel.textContent = chipText;
+        svg.appendChild(chipLabel);
+      }
+    });
+  }
+
+  function updatePanelVisibility() {
+    document.getElementById('map-card').style.display = activeView === 'map' ? 'block' : 'none';
+    document.getElementById('unselected-card').style.display = activeView === 'journey' && currentPanel === 'unselected' ? 'block' : 'none';
+    document.getElementById('result-card').style.display = activeView === 'journey' && currentPanel === 'result' ? 'block' : 'none';
+    document.getElementById('journey-view-btn').classList.toggle('active', activeView === 'journey');
+    document.getElementById('map-view-btn').classList.toggle('active', activeView === 'map');
+  }
+
+  function setActiveView(view) {
+    activeView = view;
+    updatePanelVisibility();
+    renderMetroMap();
+  }
+
+  function updateMapStats() {
+    const stopsStat = document.getElementById('map-stops-stat');
+    const linesStat = document.getElementById('map-lines-stat');
+    if (!stopsStat || !linesStat) return;
+
+    if (currentRoutePath.length < 2) {
+      stopsStat.textContent = '-- stops';
+      linesStat.textContent = 'Overview';
+      return;
+    }
+
+    const lineNames = new Set();
+    for (let i = 0; i < currentRoutePath.length - 1; i++) {
+      lineNames.add(getLineForSegment(currentRoutePath[i], currentRoutePath[i + 1]));
+    }
+
+    const stops = currentRoutePath.length - 1;
+    stopsStat.textContent = `${stops} stop${stops === 1 ? '' : 's'}`;
+    linesStat.textContent = `${lineNames.size} line${lineNames.size === 1 ? '' : 's'}`;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function getLineOverviewPath(lineName) {
+    const endpoints = {
+      "Purple Line": ["Challaghatta", "Whitefield (Kadugodi)"],
+      "Green Line": ["Madavara", "Silk Institute"],
+      "Yellow Line": ["Rashtreeya Vidyalaya Road", "Delta electronics Bommasandra"]
+    };
+    const [start, end] = endpoints[lineName];
+    return findShortestPath(start, end) || [];
+  }
+
+  function mapPointForCanvas(stationName, viewport) {
+    const point = getMapPoint(stationName);
+    if (!viewport) return point;
+    return {
+      x: (point.x - viewport.minX) * viewport.scale + viewport.pad,
+      y: (point.y - viewport.minY) * viewport.scale + viewport.pad
+    };
+  }
+
+  function getRouteMapViewport(isRouteMap) {
+    if (!isRouteMap) return null;
+    const routePoints = currentRoutePath.map(getMapPoint);
+    if (currentNearestStation && STATIONS[currentNearestStation]) routePoints.push(getMapPoint(currentNearestStation));
+    const xs = routePoints.map(p => p.x);
+    const ys = routePoints.map(p => p.y);
+    const minX = Math.max(0, Math.min(...xs) - 100);
+    const maxX = Math.min(1100, Math.max(...xs) + 150);
+    const minY = Math.max(0, Math.min(...ys) - 115);
+    const maxY = Math.min(760, Math.max(...ys) + 125);
+    const width = Math.max(360, maxX - minX);
+    const height = Math.max(340, maxY - minY);
+    const pad = 72;
+    const maxCanvasWidth = 980;
+    const maxCanvasHeight = 680;
+    const scale = Math.min(1.55, Math.max(0.82, Math.min(maxCanvasWidth / width, maxCanvasHeight / height)));
+    return {
+      minX,
+      minY,
+      scale,
+      pad,
+      width: Math.ceil(width * scale + pad * 2),
+      height: Math.ceil(height * scale + pad * 2)
+    };
+  }
+
+  function mapSegmentHtml(from, to, state = '', viewport = null) {
+    const a = mapPointForCanvas(from, viewport);
+    const b = mapPointForCanvas(to, viewport);
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const length = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const lineName = getLineForSegment(from, to);
+    const color = LINE_COLORS[lineName] || LINE_COLORS.Interchange;
+    return `<div class="html-map-edge ${state}" style="--line-color:${color};--x:${a.x}px;--y:${a.y}px;--length:${length}px;--angle:${angle}deg"></div>`;
+  }
+
+  function shouldShowMapLabel(stationName, isRouteMap) {
+    const station = STATIONS[stationName];
+    const routeIndex = currentRoutePath.indexOf(stationName);
+    if (stationName === currentNearestStation) return true;
+    if (routeIndex === 0 || routeIndex === currentRoutePath.length - 1) return true;
+    if (station.line === 'Interchange') return true;
+    if (isRouteMap) return routeIndex > -1;
+    return station.order % 4 === 0 || stationName.includes('Whitefield') || stationName === 'Challaghatta';
+  }
+
+  function renderHtmlSpatialMap(container) {
+    const isRouteMap = currentRoutePath.length > 1;
+    const viewport = getRouteMapViewport(isRouteMap);
+    const routeSet = new Set(currentRoutePath);
+    const routeEdges = new Set();
+    for (let i = 0; i < currentRoutePath.length - 1; i++) {
+      routeEdges.add([currentRoutePath[i], currentRoutePath[i + 1]].sort().join('|'));
+    }
+
+    const edgeHtml = uniqueMapEdges().map(([from, to]) => {
+      const key = [from, to].sort().join('|');
+      const state = isRouteMap ? (routeEdges.has(key) ? 'active' : 'muted') : '';
+      return mapSegmentHtml(from, to, state, viewport);
+    }).join('');
+
+    const nodeHtml = Object.keys(STATIONS).map(stationName => {
+      const p = mapPointForCanvas(stationName, viewport);
+      const station = STATIONS[stationName];
+      const isSelected = routeSet.has(stationName);
+      const isLive = currentNearestStation === stationName;
+      const lineName = station.line === 'Interchange' ? getRouteLineAt(Math.max(0, currentRoutePath.indexOf(stationName))) : station.line;
+      const color = LINE_COLORS[lineName] || LINE_COLORS.Interchange;
+      const hiddenInRoute = isRouteMap && !isSelected && !isLive && station.line !== 'Interchange';
+      if (hiddenInRoute) return '';
+      return `
+        <div class="html-map-node ${isSelected ? 'selected' : ''} ${station.line === 'Interchange' ? 'interchange' : ''} ${isLive ? 'live' : ''}" style="--line-color:${color};--x:${p.x}px;--y:${p.y}px" title="${escapeHtml(stationName)}"></div>
+        ${isLive ? `<div class="html-map-train" style="--x:${p.x}px;--y:${p.y}px" aria-label="Live nearest train">🚆</div>` : ''}
+      `;
+    }).join('');
+
+    const labelHtml = Object.keys(STATIONS).map((stationName) => {
+      if (!shouldShowMapLabel(stationName, isRouteMap)) return '';
+      const p = mapPointForCanvas(stationName, viewport);
+      const routeIndex = currentRoutePath.indexOf(stationName);
+      const below = routeIndex > -1 ? routeIndex % 2 === 1 : STATIONS[stationName].order % 2 === 0;
+      const isLive = currentNearestStation === stationName;
+      return `<div class="html-map-label ${below ? 'below' : ''} ${isLive ? 'live-label' : ''}" style="--x:${p.x}px;--y:${p.y}px">${escapeHtml(shortMapLabel(stationName))}</div>`;
+    }).join('');
+
+    const titleHtml = isRouteMap ? (() => {
+      const from = currentRoutePath[0];
+      const to = currentRoutePath[currentRoutePath.length - 1];
+      const stops = currentRoutePath.length - 1;
+      const lineNames = new Set();
+      for (let i = 0; i < currentRoutePath.length - 1; i++) lineNames.add(getLineForSegment(currentRoutePath[i], currentRoutePath[i + 1]));
+      return `
+        <div class="html-map-route-title">
+          <strong>${escapeHtml(shortMapLabel(from))} to ${escapeHtml(shortMapLabel(to))}</strong>
+          <span>${stops} stop${stops === 1 ? '' : 's'} • ${lineNames.size} line${lineNames.size === 1 ? '' : 's'} • selected route highlighted</span>
+        </div>
+      `;
+    })() : `
+      <div class="html-map-route-title">
+        <strong>Namma Metro network</strong>
+        <span>Spatial schematic with live nearest station marker</span>
+      </div>
+    `;
+
+    container.innerHTML = `
+      <div class="html-map-canvas-wrap">
+        <div class="html-map-canvas ${isRouteMap ? 'route-zoom' : ''}" style="${viewport ? `--canvas-width:${viewport.width}px;--canvas-height:${viewport.height}px;` : ''}">
+          ${edgeHtml}
+          ${nodeHtml}
+          ${labelHtml}
+          ${titleHtml}
+        </div>
+      </div>
+    `;
+
+    const wrap = container.querySelector('.html-map-canvas-wrap');
+    if (wrap) {
+      requestAnimationFrame(() => {
+        if (isRouteMap) {
+          wrap.scrollLeft = Math.max(0, (wrap.scrollWidth - wrap.clientWidth) / 2);
+          wrap.scrollTop = 0;
+        } else {
+          wrap.scrollLeft = Math.max(0, (wrap.scrollWidth - wrap.clientWidth) / 2);
+        }
+      });
+    }
+  }
+
+  function renderHtmlMetroMap() {
+    const container = document.getElementById('html-metro-map');
+    if (!container) return;
+
+    updateMapStats();
+    const summary = document.getElementById('map-summary');
+    const livePill = document.getElementById('map-live-pill');
+    const from = normalizeStationName(document.getElementById('from-input')?.value || '');
+    const to = normalizeStationName(document.getElementById('to-input')?.value || '');
+
+    if (currentRoutePath.length > 1) {
+      renderHtmlSpatialMap(container);
+      if (summary) summary.textContent = `${from} to ${to} • ${currentRoutePath.length - 1} stops highlighted`;
+    } else {
+      renderHtmlSpatialMap(container);
+      if (summary) {
+        summary.textContent = STATIONS[from]
+          ? `Boarding station selected: ${from}`
+          : 'Allow GPS or choose stations to highlight your route.';
+      }
+    }
+
+    if (livePill) livePill.textContent = currentNearestStation ? `Live: ${currentNearestStation}` : 'Live: waiting';
+  }
+
+  function canUseLeafletMap() {
+    return typeof L !== 'undefined' && Boolean(document.getElementById('leaflet-map'));
+  }
+
+  function stationLatLng(stationName) {
+    const station = STATIONS[stationName];
+    return station ? [station.lat, station.lng] : null;
+  }
+
+  function initLeafletMap() {
+    if (!canUseLeafletMap()) return false;
+    if (leafletMap) return true;
+
+    leafletMap = L.map('leaflet-map', {
+      zoomControl: true,
+      attributionControl: true
+    }).setView([12.9716, 77.5946], 11);
+
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+    });
+
+    const street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    });
+
+    satellite.addTo(leafletMap);
+    leafletBaseLayers = {
+      'Satellite': satellite,
+      'Street map': street
+    };
+    L.control.layers(leafletBaseLayers, null, { position: 'topright' }).addTo(leafletMap);
+    leafletLayerGroup = L.layerGroup().addTo(leafletMap);
+    setTimeout(() => leafletMap.invalidateSize(), 0);
+    return true;
+  }
+
+  function renderLeafletMetroMap() {
+    if (!initLeafletMap()) return false;
+
+    const leafletEl = document.getElementById('leaflet-map');
+    const htmlMap = document.getElementById('html-metro-map');
+    if (leafletEl) leafletEl.classList.add('active');
+    if (htmlMap) htmlMap.style.display = 'none';
+
+    updateMapStats();
+    leafletLayerGroup.clearLayers();
+
+    const summary = document.getElementById('map-summary');
+    const livePill = document.getElementById('map-live-pill');
+    const from = normalizeStationName(document.getElementById('from-input')?.value || '');
+    const to = normalizeStationName(document.getElementById('to-input')?.value || '');
+    const isRouteMap = currentRoutePath.length > 1;
+    const bounds = [];
+    const routeEdgeKeys = new Set();
+
+    if (isRouteMap) {
+      for (let i = 0; i < currentRoutePath.length - 1; i++) {
+        routeEdgeKeys.add([currentRoutePath[i], currentRoutePath[i + 1]].sort().join('|'));
+      }
+    }
+
+    const edges = isRouteMap
+      ? currentRoutePath.slice(0, -1).map((stationName, index) => [stationName, currentRoutePath[index + 1]])
+      : uniqueMapEdges();
+
+    edges.forEach(([fromStation, toStation]) => {
+      const fromLatLng = stationLatLng(fromStation);
+      const toLatLng = stationLatLng(toStation);
+      if (!fromLatLng || !toLatLng) return;
+
+      const lineName = getLineForSegment(fromStation, toStation);
+      const color = LINE_COLORS[lineName] || '#38bdf8';
+      const edgeKey = [fromStation, toStation].sort().join('|');
+      const highlighted = !isRouteMap || routeEdgeKeys.has(edgeKey);
+      L.polyline([fromLatLng, toLatLng], {
+        color,
+        weight: highlighted ? 6 : 3,
+        opacity: highlighted ? 0.95 : 0.35,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(leafletLayerGroup);
+      bounds.push(fromLatLng, toLatLng);
+    });
+
+    const stationList = isRouteMap
+      ? Array.from(new Set([...currentRoutePath, currentNearestStation].filter(Boolean)))
+      : Object.keys(STATIONS);
+
+    stationList.forEach((stationName) => {
+      const latLng = stationLatLng(stationName);
+      const station = STATIONS[stationName];
+      if (!latLng || !station) return;
+
+      const routeIndex = currentRoutePath.indexOf(stationName);
+      const selected = routeIndex > -1;
+      const lineName = selected ? getRouteLineAt(routeIndex) : station.line;
+      const color = LINE_COLORS[lineName] || LINE_COLORS.Interchange;
+      const size = selected ? 20 : 16;
+      const markerIcon = L.divIcon({
+        className: '',
+        html: `<div class="leaflet-station-marker ${selected ? 'selected' : ''}" style="--marker-color:${color}"></div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2]
+      });
+
+      L.marker(latLng, { icon: markerIcon, title: stationName })
+        .bindTooltip(shortMapLabel(stationName), {
+          direction: 'top',
+          offset: [0, -9],
+          opacity: 0.95,
+          permanent: true,
+          className: selected ? 'route-station-label' : 'station-label'
+        })
+        .addTo(leafletLayerGroup);
+      bounds.push(latLng);
+    });
+
+    if (currentNearestStation && STATIONS[currentNearestStation]) {
+      const liveLatLng = stationLatLng(currentNearestStation);
+      const trainIcon = L.divIcon({
+        className: '',
+        html: '<div class="leaflet-train-marker">🚆</div>',
+        iconSize: [34, 28],
+        iconAnchor: [17, 14]
+      });
+      L.marker(liveLatLng, { icon: trainIcon, title: `Live nearest: ${currentNearestStation}`, zIndexOffset: 1000 })
+        .bindTooltip(`Live nearest: ${shortMapLabel(currentNearestStation)}`, {
+          direction: 'bottom',
+          offset: [0, 10],
+          opacity: 0.98,
+          permanent: true,
+          className: 'live-location-label'
+        })
+        .addTo(leafletLayerGroup);
+      bounds.push(liveLatLng);
+    }
+
+    if (summary) {
+      if (isRouteMap) {
+        summary.textContent = `${from} to ${to} • ${currentRoutePath.length - 1} stops highlighted on real map`;
+      } else {
+        summary.textContent = STATIONS[from]
+          ? `Boarding station selected: ${from}`
+          : 'Allow GPS or choose stations to highlight your route.';
+      }
+    }
+    if (livePill) livePill.textContent = currentNearestStation ? `Live: ${currentNearestStation}` : 'Live: waiting';
+
+    const focusBounds = isRouteMap
+      ? currentRoutePath.map(stationLatLng).filter(Boolean)
+      : bounds;
+
+    setTimeout(() => {
+      leafletMap.invalidateSize();
+      if (focusBounds.length) {
+        leafletMap.fitBounds(focusBounds, {
+          padding: isRouteMap ? [18, 18] : [28, 28],
+          maxZoom: isRouteMap ? 16 : 12
+        });
+      } else {
+        leafletMap.setView([12.9716, 77.5946], 11);
+      }
+    }, 0);
+    return true;
+  }
+
+  function renderMetroMap() {
+    if (renderLeafletMetroMap()) return;
+
+    const leafletEl = document.getElementById('leaflet-map');
+    const htmlMap = document.getElementById('html-metro-map');
+    if (leafletEl) leafletEl.classList.remove('active');
+    if (htmlMap) htmlMap.style.display = '';
+
+    renderHtmlMetroMap();
+    return;
+
+    const svg = document.getElementById('metro-map');
+    if (!svg) return;
+    updateMapStats();
+
+    if (currentRoutePath.length > 1) {
+      drawSelectedRouteMap(svg);
+      const from = normalizeStationName(document.getElementById('from-input')?.value || '');
+      const to = normalizeStationName(document.getElementById('to-input')?.value || '');
+      const summary = document.getElementById('map-summary');
+      const livePill = document.getElementById('map-live-pill');
+      if (summary) summary.textContent = `${from} to ${to} • ${currentRoutePath.length - 1} stops highlighted`;
+      if (livePill) livePill.textContent = currentNearestStation ? `Live: ${currentNearestStation}` : 'Live: waiting';
+      return;
+    }
+
+    svg.innerHTML = '';
+    svg.style.height = '';
+    svg.setAttribute('viewBox', getFocusedMapViewBox());
+    svg.classList.toggle('route-focused', currentRoutePath.length > 1);
+
+    const bg = makeSvgEl('rect', { x: 0, y: 0, width: 1100, height: 760, fill: '#f8fafc', opacity: 0.68 });
+    svg.appendChild(bg);
+
+    const title = makeSvgEl('text', { x: 68, y: 60, class: 'map-label', 'font-size': 22 });
+    title.textContent = 'Namma Metro Live Route Map';
+    svg.appendChild(title);
+
+    const north = makeSvgEl('text', { x: 1010, y: 54, class: 'map-label-muted', 'font-size': 13 });
+    north.textContent = 'N';
+    svg.appendChild(north);
+    svg.appendChild(makeSvgEl('path', { d: 'M1016 66 L1030 102 L1016 92 L1002 102 Z', fill: 'none', stroke: '#0369a1', 'stroke-width': 3 }));
+
+    uniqueMapEdges().forEach(([from, to]) => {
+      const a = getMapPoint(from);
+      const b = getMapPoint(to);
+      const lineName = getLineForSegment(from, to);
+      const active = isRouteEdge(from, to);
+      const path = makeSvgEl('line', {
+        x1: a.x,
+        y1: a.y,
+        x2: b.x,
+        y2: b.y,
+        class: `map-line${active ? ' route-active' : ''}${currentRoutePath.length > 1 && !active ? ' map-muted' : ''}`,
+        stroke: active ? '#0f172a' : (LINE_COLORS[lineName] || '#94a3b8'),
+        'stroke-width': active ? 12 : 5
+      });
+      svg.appendChild(path);
+
+      if (active) {
+        const colorLine = makeSvgEl('line', {
+          x1: a.x,
+          y1: a.y,
+          x2: b.x,
+          y2: b.y,
+          class: 'map-line route-active',
+          stroke: LINE_COLORS[lineName] || '#38bdf8',
+          'stroke-width': 7
+        });
+        svg.appendChild(colorLine);
+      }
+    });
+
+    const labelRequests = [];
+
+    Object.keys(STATIONS).forEach((stationName) => {
+      const p = getMapPoint(stationName);
+      const station = STATIONS[stationName];
+      const isSelected = currentRoutePath.includes(stationName);
+      const isLive = currentNearestStation === stationName;
+      const routeIndex = currentRoutePath.indexOf(stationName);
+      const circle = makeSvgEl('circle', {
+        cx: p.x,
+        cy: p.y,
+        r: isLive ? 10 : (isSelected ? 8 : 4.5),
+        class: `map-station${isSelected ? ' selected' : ''}${isLive ? ' live' : ''}`,
+        opacity: currentRoutePath.length > 1 && !isSelected && !isLive ? 0.25 : 1,
+        stroke: LINE_COLORS[station.line] || '#64748b'
+      });
+      circle.appendChild(makeSvgEl('title'));
+      circle.querySelector('title').textContent = stationName;
+      circle.addEventListener('click', () => {
+        const toInput = document.getElementById('to-input');
+        if (document.getElementById('from-input').value.trim() && normalizeStationName(document.getElementById('from-input').value) !== stationName) {
+          toInput.value = stationName;
+        } else {
+          document.getElementById('from-input').value = stationName;
+          setFromStationSource('manual');
+        }
+        updateRouteFromInputs(true);
+      });
+      svg.appendChild(circle);
+
+      const isRouteKeyStop = routeIndex === 0 ||
+        routeIndex === currentRoutePath.length - 1 ||
+        station.line === 'Interchange' ||
+        isLive;
+      const shouldLabel = currentRoutePath.length > 1
+        ? (isSelected && (isRouteKeyStop || routeIndex % 2 === 0))
+        : (isSelected || isLive || station.line === 'Interchange' || station.order % 3 === 0);
+
+      if (shouldLabel) {
+        labelRequests.push({
+          point: p,
+          text: shortMapLabel(stationName),
+          fontSize: currentRoutePath.length > 1 ? 15 : (isLive || station.line === 'Interchange' ? 13 : 11),
+          isRoute: currentRoutePath.length > 1 && isSelected,
+          routeIndex: Math.max(0, routeIndex),
+          priority: currentRoutePath.length > 1 ? isRouteKeyStop : (isLive || station.line === 'Interchange')
+        });
+      }
+    });
+
+    const occupiedLabels = [];
+    labelRequests
+      .sort((a, b) => Number(b.priority) - Number(a.priority))
+      .forEach(request => drawMapLabel(svg, occupiedLabels, request));
+
+    const from = normalizeStationName(document.getElementById('from-input')?.value || '');
+    const to = normalizeStationName(document.getElementById('to-input')?.value || '');
+    const summary = document.getElementById('map-summary');
+    const livePill = document.getElementById('map-live-pill');
+
+    if (summary) {
+      if (currentRoutePath.length > 1) {
+        summary.textContent = `${from} to ${to} • ${currentRoutePath.length - 1} stops highlighted`;
+      } else if (STATIONS[from]) {
+        summary.textContent = `Boarding station selected: ${from}`;
+      } else {
+        summary.textContent = 'Allow GPS or choose stations to highlight your route.';
+      }
+    }
+
+    if (livePill) {
+      livePill.textContent = currentNearestStation ? `Live: ${currentNearestStation}` : 'Live: waiting';
+    }
+  }
+
   function normalizeStationName(name) {
     const trimmed = name.trim();
     return STATION_ALIASES[trimmed] || trimmed;
@@ -937,6 +2901,11 @@
   setupAutocomplete('from-input', 'from-results');
   setupAutocomplete('to-input', 'to-results');
   setFromStationSource('live');
+  updatePanelVisibility();
+  renderMetroMap();
+
+  document.getElementById('journey-view-btn').addEventListener('click', () => setActiveView('journey'));
+  document.getElementById('map-view-btn').addEventListener('click', () => setActiveView('map'));
 
   document.getElementById('from-source-toggle').addEventListener('change', (e) => {
     setFromStationSource(e.target.checked ? 'live' : 'manual');
@@ -1007,6 +2976,7 @@
           } else {
             statusDiv.innerHTML = `Live GPS nearby: <strong>${nearestStation}</strong> (${distInMeters}m away). Using your typed boarding station.`;
           }
+          renderMetroMap();
         }
       },
       (err) => {
@@ -1241,6 +3211,10 @@
   function renderUnselectedDualDirections(boardingStation) {
     const container = document.getElementById('unselected-dual-container');
     container.innerHTML = '';
+    currentPanel = 'unselected';
+    currentRoutePath = [];
+    updatePanelVisibility();
+    renderMetroMap();
 
     if (!STATIONS[boardingStation]) return;
 
@@ -1299,11 +3273,13 @@
   }
 
   function showBoardingDirections() {
-    document.getElementById('result-card').style.display = 'none';
-    document.getElementById('unselected-card').style.display = 'block';
+    currentPanel = 'unselected';
+    currentRoutePath = [];
+    updatePanelVisibility();
 
     const currentFrom = normalizeStationName(document.getElementById('from-input').value);
     if (currentFrom) renderUnselectedDualDirections(currentFrom);
+    renderMetroMap();
   }
 
   function updateRouteFromInputs(isDynamicUpdate = false) {
@@ -1320,8 +3296,10 @@
       return;
     }
 
-    document.getElementById('result-card').style.display = 'none';
-    document.getElementById('unselected-card').style.display = 'block';
+    currentPanel = 'unselected';
+    currentRoutePath = [];
+    updatePanelVisibility();
+    renderMetroMap();
   }
 
   function calculateRoute(isGpsUpdate = false) {
@@ -1345,10 +3323,12 @@
 
     const path = findShortestPath(start, end);
     if (!path) return;
+    currentRoutePath = path;
 
     // Switch view from Unselected (Dual) to Selected (Single Path)
-    document.getElementById('unselected-card').style.display = 'none';
-    document.getElementById('result-card').style.display = 'block';
+    currentPanel = 'result';
+    updatePanelVisibility();
+    renderMetroMap();
 
     const totalStops = path.length - 1;
     const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("Rashtreeya Vidyalaya Road");
