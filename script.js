@@ -1362,6 +1362,9 @@ function setupAutocomplete(inputId, resultsId) {
   input.addEventListener('focus', () => {
     if (!input.disabled && !input.readOnly) {
       suppressLiveAutoFillUntilBlur = true;
+      if (inputId === 'from-input') {
+        setFromStationSource('manual');
+      }
       renderResults(input.value);
     }
   });
@@ -1371,7 +1374,7 @@ function setupAutocomplete(inputId, resultsId) {
     results.style.display = 'none';
     updateClearButton();
     if (inputId === 'from-input') {
-      setFromStationSource('live');
+      setFromStationSource('manual');
       suppressLiveAutoFillUntilBlur = true;
       if (currentNearestStation) {
         const statusDiv = document.getElementById('gps-status');
@@ -1392,13 +1395,11 @@ function setupAutocomplete(inputId, resultsId) {
       renderResults(input.value);
       const normalizedInput = normalizeStationName(input.value);
       if (inputId === 'from-input') {
+        setFromStationSource('manual');
+        suppressLiveAutoFillUntilBlur = true;
         if (input.value.trim()) {
-          setFromStationSource('manual');
           suppressLiveAutoFillUntilBlur = false;
           if (STATIONS[normalizedInput]) renderUnselectedDualDirections(normalizedInput);
-        } else {
-          setFromStationSource('live');
-          suppressLiveAutoFillUntilBlur = true;
         }
       }
       if (STATIONS[normalizedInput]) requestLeafletAutoFit(true);
@@ -1408,11 +1409,6 @@ function setupAutocomplete(inputId, resultsId) {
   input.addEventListener('blur', () => {
     setTimeout(() => {
       results.style.display = 'none';
-      if (inputId === 'from-input' && fromStationSource === 'live' && currentNearestStation && !input.value.trim() && suppressLiveAutoFillUntilBlur) {
-        input.value = currentNearestStation;
-        renderUnselectedDualDirections(currentNearestStation);
-        updateRouteFromInputs(true);
-      }
       updateClearButton();
       suppressLiveAutoFillUntilBlur = false;
     }, 150);
