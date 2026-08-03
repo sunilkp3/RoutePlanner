@@ -15,6 +15,7 @@ let lastLeafletRenderKey = '';
 let leafletUserTouched = false;
 let leafletProgrammaticFit = false;
 let leafletAutoFitRequested = true;
+let suppressLiveAutoFillUntilBlur = false;
 
 // Track selected departure train schedule index
 let selectedTrainIndex = 0;
@@ -1342,6 +1343,7 @@ function setupAutocomplete(inputId, resultsId) {
         
         if (inputId === 'from-input') {
           setFromStationSource('manual');
+          suppressLiveAutoFillUntilBlur = false;
           renderUnselectedDualDirections(st);
         } else {
           setFromStationSource('manual');
@@ -1357,7 +1359,12 @@ function setupAutocomplete(inputId, resultsId) {
     results.style.display = 'block';
   }
 
-  input.addEventListener('focus', () => { if (!input.disabled && !input.readOnly) renderResults(input.value); });
+  input.addEventListener('focus', () => {
+    if (!input.disabled && !input.readOnly) {
+      suppressLiveAutoFillUntilBlur = true;
+      renderResults(input.value);
+    }
+  });
   clearBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
     input.value = '';
@@ -1365,6 +1372,7 @@ function setupAutocomplete(inputId, resultsId) {
     updateClearButton();
     if (inputId === 'from-input') {
       setFromStationSource('live');
+      suppressLiveAutoFillUntilBlur = true;
       if (currentNearestStation) {
         const statusDiv = document.getElementById('gps-status');
         if (statusDiv) {
@@ -1386,9 +1394,11 @@ function setupAutocomplete(inputId, resultsId) {
       if (inputId === 'from-input') {
         if (input.value.trim()) {
           setFromStationSource('manual');
+          suppressLiveAutoFillUntilBlur = false;
           if (STATIONS[normalizedInput]) renderUnselectedDualDirections(normalizedInput);
         } else {
           setFromStationSource('live');
+          suppressLiveAutoFillUntilBlur = true;
         }
       }
       if (STATIONS[normalizedInput]) requestLeafletAutoFit(true);
@@ -1398,12 +1408,13 @@ function setupAutocomplete(inputId, resultsId) {
   input.addEventListener('blur', () => {
     setTimeout(() => {
       results.style.display = 'none';
-      if (inputId === 'from-input' && fromStationSource === 'live' && currentNearestStation) {
+      if (inputId === 'from-input' && fromStationSource === 'live' && currentNearestStation && !input.value.trim() && suppressLiveAutoFillUntilBlur) {
         input.value = currentNearestStation;
         renderUnselectedDualDirections(currentNearestStation);
         updateRouteFromInputs(true);
       }
       updateClearButton();
+      suppressLiveAutoFillUntilBlur = false;
     }, 150);
   });
   updateClearButton();
