@@ -599,6 +599,16 @@ function renderSingleSelectedRouteTrain(platInfo, schedules) {
   return activeSchedule;
 }
 
+function refreshSelectedRouteJourney() {
+  const path = currentRoutePath;
+  if (!path || path.length < 2) return;
+
+  const firstPlatInfo = getPlatformDetails(path[0], path[1]);
+  const schedules = getMultipleUpcomingTrainArrivals(firstPlatInfo, 5);
+  renderQuickSchedulesBar(firstPlatInfo, schedules);
+  updateRouteScheduleView(schedules);
+}
+
 function updateRouteScheduleView(schedules) {
   const path = currentRoutePath;
   if (!path || path.length < 2) return;
@@ -786,6 +796,11 @@ function calculateRoute(isGpsUpdate = false) {
   updateRouteScheduleView(schedules);
 }
 
+function updateCurrentRouteScheduleFromSelection() {
+  if (!currentRoutePath || currentRoutePath.length < 2) return;
+  refreshSelectedRouteJourney();
+}
+
 function updateRouteFromInputs(isDynamicUpdate = false) {
   const start = normalizeStationName(document.getElementById('from-input').value);
   const end = normalizeStationName(document.getElementById('to-input').value);
@@ -959,7 +974,10 @@ function applyDetectedPosition(position, statusDiv) {
     } else {
       statusDiv.innerHTML = `Live location nearby: <strong>${nearestStation}</strong> (${distanceLabel} away). Using your selected station.`;
     }
-    if (nearestChanged) renderMetroMap();
+    if (nearestChanged) {
+      renderMetroMap();
+      updateCurrentRouteScheduleFromSelection();
+    }
   }
 }
 
@@ -1350,6 +1368,7 @@ function setupAutocomplete(inputId, resultsId) {
         }
         requestLeafletAutoFit(true);
         updateRouteFromInputs(false);
+        updateCurrentRouteScheduleFromSelection();
         input.blur();
       });
 
