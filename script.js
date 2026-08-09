@@ -16,9 +16,11 @@ let leafletUserTouched = false;
 let leafletProgrammaticFit = false;
 let leafletAutoFitRequested = true;
 let suppressLiveAutoFillUntilBlur = false;
+let fromInputIdleAutoFillTimer = null;
 
 // Track selected departure train schedule index
 let selectedTrainIndex = 0;
+const JOURNEY_REFRESH_INTERVAL_MS = 15000;
 
 const STATIONS = {
   // PURPLE LINE
@@ -957,24 +959,34 @@ function applyDetectedPosition(position, statusDiv) {
     currentNearestStationDistanceMeters = minDistance * 1000;
     const distanceLabel = getDistanceLabel(currentNearestStationDistanceMeters);
 
+    const fromInput = document.getElementById('from-input');
+    const toInput = document.getElementById('to-input');
+    const fromValue = normalizeStationName(fromInput?.value || '');
+    const toValue = normalizeStationName(toInput?.value || '');
+    const hasManualFromSelection = Boolean(fromValue && STATIONS[fromValue]);
+    const hasSelectedRoute = Boolean(STATIONS[fromValue] && STATIONS[toValue] && fromValue !== toValue);
+
     if (fromStationSource === 'live') {
-      const fromInput = document.getElementById('from-input');
-      const hasManualSelection = Boolean(fromInput.value.trim() && STATIONS[normalizeStationName(fromInput.value)]);
       const appliedLiveValue = syncFromFieldWithLiveLocation(nearestStation, false);
-      if (nearestChanged || !hasManualSelection || appliedLiveValue) {
+      if (nearestChanged || !hasManualFromSelection || appliedLiveValue) {
         const destination = normalizeStationName(document.getElementById('to-input')?.value || '');
         if (!STATIONS[destination]) renderUnselectedDualDirections(nearestStation);
         updateRouteFromInputs(true);
       }
-      if (hasManualSelection) {
+      if (hasManualFromSelection) {
         statusDiv.innerHTML = `Live location nearby: <strong>${nearestStation}</strong> (${distanceLabel} away). Using your selected station.`;
       } else {
         updateLiveDistanceStatus(distanceLabel, nearestStation);
       }
+    } else if (hasSelectedRoute) {
+      const statusMessage = `Live journey position: <strong>${nearestStation}</strong> (${distanceLabel} away). Current route still follows your selected trip.`;
+      if (statusDiv) statusDiv.innerHTML = statusMessage;
     } else {
       statusDiv.innerHTML = `Live location nearby: <strong>${nearestStation}</strong> (${distanceLabel} away). Using your selected station.`;
     }
-    if (nearestChanged) {
+
+    const shouldRefreshRouteView = nearestChanged || hasSelectedRoute;
+    if (shouldRefreshRouteView) {
       renderMetroMap();
       updateCurrentRouteScheduleFromSelection();
     }
@@ -1028,6 +1040,38 @@ function stopGPSLiveTracking() {
     watchId = null;
   }
   isTracking = false;
+}
+
+function clearFromInputIdleAutoFillTimer() {
+  if (fromInputIdleAutoFillTimer) {
+    clearTimeout(fromInputIdleAutoFillTimer);
+    fromInputIdleAutoFillTimer = null;
+  }
+}
+
+function scheduleFromFieldLiveAutoFill() {
+  const fromInput = document.getElementById('from-input');
+  if (!fromInput) return;
+
+  clearFromInputIdleAutoFillTimer();
+
+  if (fromInput.value.trim()) {
+    return;
+  }
+
+  fromInputIdleAutoFillTimer = setTimeout(() => {
+    const activeFromValue = normalizeStationName(fromInput.value || '');
+    if (activeFromValue) return;
+
+    if (!('geolocation' in navigator)) return;
+
+    setFromStationSource('live');
+    if (currentNearestStation) {
+      syncFromFieldWithLiveLocation(currentNearestStation, true);
+    } else {
+      startGPSLiveTracking();
+    }
+  }, 10000);
 }
 
 function setFromStationSource(source) {
@@ -1383,6 +1427,9 @@ function setupAutocomplete(inputId, resultsId) {
       suppressLiveAutoFillUntilBlur = true;
       if (inputId === 'from-input') {
         setFromStationSource('manual');
+        if (!input.value.trim()) {
+          scheduleFromFieldLiveAutoFill();
+        }
       }
       renderResults(input.value);
     }
@@ -1395,6 +1442,7 @@ function setupAutocomplete(inputId, resultsId) {
     if (inputId === 'from-input') {
       setFromStationSource('manual');
       suppressLiveAutoFillUntilBlur = true;
+      scheduleFromFieldLiveAutoFill();
       if (currentNearestStation) {
         const statusDiv = document.getElementById('gps-status');
         if (statusDiv) {
@@ -1414,11 +1462,14 @@ function setupAutocomplete(inputId, resultsId) {
       renderResults(input.value);
       const normalizedInput = normalizeStationName(input.value);
       if (inputId === 'from-input') {
+        clearFromInputIdleAutoFillTimer();
         setFromStationSource('manual');
         suppressLiveAutoFillUntilBlur = true;
         if (input.value.trim()) {
           suppressLiveAutoFillUntilBlur = false;
           if (STATIONS[normalizedInput]) renderUnselectedDualDirections(normalizedInput);
+        } else {
+          scheduleFromFieldLiveAutoFill();
         }
       }
       if (STATIONS[normalizedInput]) requestLeafletAutoFit(true);
@@ -1429,6 +1480,9 @@ function setupAutocomplete(inputId, resultsId) {
     setTimeout(() => {
       results.style.display = 'none';
       updateClearButton();
+      if (inputId === 'from-input' && !input.value.trim()) {
+        scheduleFromFieldLiveAutoFill();
+      }
       suppressLiveAutoFillUntilBlur = false;
     }, 150);
   });
@@ -1438,6 +1492,21 @@ function setupAutocomplete(inputId, resultsId) {
 function updateLiveClock() {
   const now = new Date();
   document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function refreshJourneyView() {
+  if (currentRoutePath.length > 1) {
+    renderMetroMap();
+    updateCurrentRouteScheduleFromSelection();
+  }
+
+  if ('geolocation' in navigator && fromStationSource === 'live') {
+    navigator.geolocation.getCurrentPosition(
+      (position) => applyDetectedPosition(position, document.getElementById('gps-status')),
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 }
+    );
+  }
 }
 
 // Global Initialization
@@ -1472,6 +1541,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('map-view-btn').addEventListener('click', () => setActiveView('map'));
 
   setInterval(updateLiveClock, 1000);
+  setInterval(refreshJourneyView, JOURNEY_REFRESH_INTERVAL_MS);
   updateLiveClock();
   document.getElementById('year').innerText = new Date().getFullYear();
 
