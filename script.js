@@ -342,11 +342,6 @@ function getLiveStatusTag(station) {
   }
 }
 
-/**
- * Search OpenStreetMap Places via Nominatim.
- * @param {string} query Search string
- * @param {boolean} restrictToBengaluru If true, bounds strictly to Bengaluru; if false, searches nationwide across all districts in India.
- */
 async function searchOSMPlaces(query, restrictToBengaluru = true) {
   if (!query || typeof query !== 'string' || query.trim().length < 3) return [];
 
@@ -650,9 +645,6 @@ function renderUnselectedDualDirections(boardingStation) {
   });
 }
 
-/**
- * Renders quick schedules bar while respecting user's previously selected schedule.
- */
 function renderQuickSchedulesBar(platInfo, schedules) {
   const container = document.getElementById('quick-schedules-container');
   const list = document.getElementById('quick-schedules-list');
@@ -666,14 +658,11 @@ function renderQuickSchedulesBar(platInfo, schedules) {
 
   const visibleSchedules = schedules.slice(0, 5);
 
-  // Preserve user selection by matching timestamps across periodic updates
   if (selectedTrainTimestamp != null) {
-    // Look for a schedule departing within a 1-minute window of the stored timestamp
     const matchIdx = visibleSchedules.findIndex(s => s.dateObj && Math.abs(s.dateObj.getTime() - selectedTrainTimestamp) < 60000);
     if (matchIdx !== -1) {
       selectedTrainIndex = matchIdx;
     } else {
-      // If selected train has already departed, auto-advance to the next immediate upcoming train
       selectedTrainIndex = 0;
       if (visibleSchedules[0] && visibleSchedules[0].dateObj) {
         selectedTrainTimestamp = visibleSchedules[0].dateObj.getTime();
@@ -696,7 +685,7 @@ function renderQuickSchedulesBar(platInfo, schedules) {
     chip.addEventListener('click', () => {
       selectedTrainIndex = idx;
       if (schedule.dateObj) {
-        selectedTrainTimestamp = schedule.dateObj.getTime(); // Lock timestamp on click
+        selectedTrainTimestamp = schedule.dateObj.getTime();
       }
       document.querySelectorAll('.quick-schedule-chip').forEach((c, i) => {
         c.classList.toggle('active', i === idx);
@@ -935,14 +924,12 @@ function calculateRoute(isGpsUpdate = false) {
     return;
   }
 
-  // Check if route endpoints actually changed
   const routeChanged = !currentRoutePath || currentRoutePath.length === 0 || 
                        currentRoutePath[0] !== start || 
                        currentRoutePath[currentRoutePath.length - 1] !== end;
 
   currentRoutePath = path;
 
-  // ONLY reset selection if the user actually selected a new route!
   if (routeChanged && !isGpsUpdate) {
     selectedTrainIndex = 0;
     selectedTrainTimestamp = null;
@@ -988,6 +975,10 @@ function updateRouteFromInputs(isDynamicUpdate = false) {
 
   if (start && end && STATIONS[start] && STATIONS[end] && start !== end) {
     calculateRoute(isDynamicUpdate);
+    return;
+  }
+
+  if (isDynamicUpdate && currentRoutePath && currentRoutePath.length > 1) {
     return;
   }
 
@@ -1073,23 +1064,18 @@ function applyDetectedPosition(position, statusDiv) {
     currentNearestStationDistanceMeters = minDistance * 1000;
     const distanceLabel = getDistanceLabel(currentNearestStationDistanceMeters);
 
-    const fromInput = document.getElementById('from-input');
-    const toInput = document.getElementById('to-input');
-
-    // Check if the 'To' station field already contains a value
-    const destination = normalizeStationName(toInput?.value || '');
     if (fromStationSource === 'live') {
-      syncFromFieldWithLiveLocation(nearestStation, false);
-      renderUnselectedDualDirections(nearestStation);
-      updateRouteFromInputs(true);
+      if (nearestChanged) {
+        syncFromFieldWithLiveLocation(nearestStation, false);
+        updateRouteFromInputs(true);
+      }
       updateLiveDistanceStatus(distanceLabel, nearestStation);
     } else {
-      // Update status text without overwriting the 'From' station field
       updateLiveDistanceStatus(distanceLabel, nearestStation);
     }
 
-    renderMetroMap();
-    if (nearestChanged || (fromInput?.value && toInput?.value)) {
+    if (nearestChanged) {
+      renderMetroMap();
       updateCurrentRouteScheduleFromSelection();
     }
   }
@@ -1396,7 +1382,7 @@ function renderLeafletMetroMap() {
   }
 
   const focusBounds = isRouteMap ? currentRoutePath.map(stationLatLng).filter(Boolean) : bounds;
-  const shouldAutoFitMap = activeView === 'map' && leafletAutoFitRequested && (!leafletUserTouched || isRouteMap);
+  const shouldAutoFitMap = activeView === 'map' && leafletAutoFitRequested && !leafletUserTouched;
 
   setTimeout(() => {
     if (activeView !== 'map' || !leafletMap) return;
@@ -1661,8 +1647,7 @@ function updateLiveClock() {
 
 function refreshJourneyView() {
   if (currentRoutePath && currentRoutePath.length > 1) {
-    renderMetroMap();
-    refreshSelectedRouteJourney(); // Refresh schedule directly without wiping route state
+    refreshSelectedRouteJourney();
   }
 
   if ('geolocation' in navigator && isTracking) {
@@ -1679,10 +1664,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAutocomplete('from-input', 'from-results', 'from-source-helper');
   setupAutocomplete('to-input', 'to-results', 'to-source-helper');
 
-  // Set up Toggle Switch for Live Location / Manual Entry (Affects only From Station auto-fill)
   const toggleCheckbox = document.getElementById('location-toggle');
   if (toggleCheckbox) {
-    toggleCheckbox.checked = true; // Default ON
+    toggleCheckbox.checked = true;
     toggleCheckbox.addEventListener('change', (e) => {
       if (e.target.checked) {
         setFromStationSource('live');
@@ -1732,6 +1716,5 @@ document.addEventListener('DOMContentLoaded', () => {
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.innerText = new Date().getFullYear();
 
-  // GPS tracking runs globally
   startGPSLiveTracking();
 });
