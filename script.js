@@ -2,28 +2,47 @@ let watchId = null;
 let isTracking = false;
 let currentNearestStation = null;
 let currentNearestStationDistanceMeters = null;
+let currentLiveStatus = null; // 'HERE' | 'LEAVING' | 'APPROACHING' | null
+let currentStationIndexOnRoute = 0; // Index along currentRoutePath
+
+// Device GPS Motion & Vector Tracking
+let lastUserLat = null;
+let lastUserLng = null;
+let lastGPSFixTime = null;
+
 let fromStationSource = 'live';
 let activeView = 'journey';
 let currentPanel = 'unselected';
 let currentRoutePath = [];
 let leafletMap = null;
 let leafletLayerGroup = null;
+let leafletMapPickLayer = null;
 let leafletBaseLayers = null;
 let lastLeafletRenderKey = '';
 let leafletUserTouched = false;
 let leafletProgrammaticFit = false;
 let leafletAutoFitRequested = true;
 
-// Track selected mapped station objects for From/To if a landmark was chosen
+// Track selected mapped station objects for From/To
 let mappedFromStation = null;
 let mappedToStation = null;
+let selectedMapCoordinates = null;
 
 // Track selected departure train schedule index & timestamp
 let selectedTrainIndex = 0;
-let selectedTrainTimestamp = null; // Remembers exact departure time across refreshes
+let selectedTrainTimestamp = null;
 
 const JOURNEY_REFRESH_INTERVAL_MS = 15000;
-const INSIDE_STATION_THRESHOLD_METERS = 200;
+const PROXIMITY_THRESHOLD_METERS = 200; // 200m threshold for APPROACHING
+const HERE_THRESHOLD_METERS = 75; // 75m threshold for YOU ARE HERE
+
+// Destination Alarm State
+const DESTINATION_ALARM_KEY = 'namma_metro_destination_alarm_active';
+const DESTINATION_ALARM_THRESHOLD_METERS = 1000;
+let isDestinationAlarmSet = localStorage.getItem(DESTINATION_ALARM_KEY) === 'true';
+let alarmTriggered = false;
+let alarmAudioContext = null;
+let alarmIntervalId = null;
 
 const STATIONS = {
   // PURPLE LINE
@@ -293,7 +312,27 @@ const BMRC_TIMETABLES = {
   }
 };
 
-// Distance Utilities (Haversine Formula)
+// Distance & Bearing Utilities
+function calculateBearing(lat1, lon1, lat2, lon2) {
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+            Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+  const brng = Math.atan2(y, x) * 180 / Math.PI;
+  return (brng + 360) % 360;
+}
+
+function isMovingTowardsStation(previousLat, previousLng, currentLat, currentLng, station) {
+  if (previousLat == null || previousLng == null || !station) return false;
+  const movementMeters = getDistanceInKm(previousLat, previousLng, currentLat, currentLng) * 1000;
+  if (movementMeters < 12) return false;
+
+  const movementBearing = calculateBearing(previousLat, previousLng, currentLat, currentLng);
+  const targetBearing = calculateBearing(currentLat, currentLng, station.lat, station.lng);
+  const bearingDifference = Math.abs(((movementBearing - targetBearing + 540) % 360) - 180);
+  return bearingDifference <= 75;
+}
+
 function getDistanceInKm(lat1, lon1, lat2, lon2) {
   if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return Infinity;
   const R = 6371; // Earth radius in KM
@@ -331,15 +370,25 @@ function findNearestStationForCoordinates(lat, lng) {
   return nearestStation ? { station: nearestStation, distanceMeters: minDistance * 1000 } : null;
 }
 
-// Helper to determine station proximity tag
+// Render dynamic status tag for timeline steps
 function getLiveStatusTag(station) {
-  if (currentNearestStation !== station) return '';
-  const dist = currentNearestStationDistanceMeters != null ? currentNearestStationDistanceMeters : Infinity;
-  if (dist <= INSIDE_STATION_THRESHOLD_METERS) {
-    return '<span class="live-tag">YOU ARE HERE</span>';
-  } else {
+  if (!currentLiveStatus) return '';
+  const activeStation = currentRoutePath[currentStationIndexOnRoute];
+  const nextStation = currentRoutePath[currentStationIndexOnRoute + 1];
+
+  if (currentLiveStatus === 'LEAVING' && station === activeStation) {
+    return '<span class="live-tag approaching">LEAVING</span>';
+  }
+  if (currentLiveStatus === 'LEAVING' && station === nextStation) {
     return '<span class="live-tag approaching">APPROACHING</span>';
   }
+  if (currentNearestStation !== station) return '';
+  if (currentLiveStatus === 'HERE') {
+    return '<span class="live-tag">YOU ARE HERE</span>';
+  } else if (currentLiveStatus === 'APPROACHING') {
+    return '<span class="live-tag approaching">APPROACHING</span>';
+  }
+  return '';
 }
 
 async function searchOSMPlaces(query, restrictToBengaluru = true) {
@@ -744,6 +793,9 @@ function refreshSelectedRouteJourney() {
   updateRouteScheduleView(schedules);
 }
 
+/**
+ * JOURNEY VIEW TIMELINE RENDERER WITH LIVE PROXIMITY HIGHLIGHTS
+ */
 function updateRouteScheduleView(schedules) {
   const path = currentRoutePath;
   if (!path || !Array.isArray(path) || path.length < 2) return;
@@ -925,14 +977,18 @@ function calculateRoute(isGpsUpdate = false) {
   }
 
   const routeChanged = !currentRoutePath || currentRoutePath.length === 0 || 
-                       currentRoutePath[0] !== start || 
-                       currentRoutePath[currentRoutePath.length - 1] !== end;
+                        currentRoutePath[0] !== start || 
+                        currentRoutePath[currentRoutePath.length - 1] !== end;
 
   currentRoutePath = path;
 
-  if (routeChanged && !isGpsUpdate) {
-    selectedTrainIndex = 0;
-    selectedTrainTimestamp = null;
+  if (routeChanged) {
+    stopActiveAlarm(); // Stop active alarm sound/modal when destination/route changes
+    currentStationIndexOnRoute = 0;
+    if (!isGpsUpdate) {
+      selectedTrainIndex = 0;
+      selectedTrainTimestamp = null;
+    }
   }
 
   if (!isGpsUpdate) requestLeafletAutoFit(true);
@@ -953,6 +1009,8 @@ function calculateRoute(isGpsUpdate = false) {
   if (metricFare) metricFare.innerText = `₹${calculatedFare}`;
   if (metricTime) metricTime.innerText = `~${Math.round(estTimeMinutes)} mins`;
   if (metricStops) metricStops.innerText = totalStops;
+
+  updateAlarmButtonUI();
 
   const firstPlatInfo = getPlatformDetails(path[0], path[1]);
   const schedules = getMultipleUpcomingTrainArrivals(firstPlatInfo, 5);
@@ -982,6 +1040,8 @@ function updateRouteFromInputs(isDynamicUpdate = false) {
     return;
   }
 
+  stopActiveAlarm();
+
   if (start && STATIONS[start]) {
     showBoardingDirections();
     return;
@@ -990,6 +1050,7 @@ function updateRouteFromInputs(isDynamicUpdate = false) {
   currentPanel = 'unselected';
   currentRoutePath = [];
   selectedTrainTimestamp = null;
+  currentStationIndexOnRoute = 0;
   const quickContainer = document.getElementById('quick-schedules-container');
   if (quickContainer) quickContainer.style.display = 'none';
 
@@ -1001,6 +1062,7 @@ function showBoardingDirections() {
   currentPanel = 'unselected';
   currentRoutePath = [];
   selectedTrainTimestamp = null;
+  currentStationIndexOnRoute = 0;
   updatePanelVisibility();
 
   const fromInput = document.getElementById('from-input');
@@ -1015,6 +1077,11 @@ function syncFromFieldWithLiveLocation(nearestStation, shouldUpdateRoute = true)
   if (!fromInput || !fromClear) return false;
 
   if (fromStationSource !== 'live' || !nearestStation) return false;
+
+  // Preserve user's planned From station
+  if (currentRoutePath && currentRoutePath.length > 1 && fromInput.value.trim().length > 0) {
+    return false;
+  }
 
   fromInput.value = nearestStation;
   if (fromClear) fromClear.style.display = 'none';
@@ -1031,50 +1098,134 @@ function updateLiveDistanceStatus(distanceLabel, nearestStation) {
   const statusDiv = document.getElementById('gps-status');
   if (!statusDiv) return;
   if (nearestStation) {
-    const isInside = currentNearestStationDistanceMeters != null && currentNearestStationDistanceMeters <= INSIDE_STATION_THRESHOLD_METERS;
-    const statusText = isInside ? 'You are at' : 'Approaching';
+    let statusText = 'Nearest station:';
+    if (currentLiveStatus === 'HERE') {
+      statusText = 'You are at';
+    } else if (currentLiveStatus === 'LEAVING') {
+      const currentStation = currentRoutePath[currentStationIndexOnRoute];
+      const nextStation = currentRoutePath[currentStationIndexOnRoute + 1] || nearestStation;
+      statusDiv.innerHTML = `Leaving <strong>${currentStation}</strong> and approaching <strong>${nextStation}</strong> (${distanceLabel} away).`;
+      return;
+    } else if (currentLiveStatus === 'APPROACHING') {
+      statusText = 'Approaching';
+    } else {
+      statusText = 'In transit towards';
+    }
     statusDiv.innerHTML = `${statusText} <strong>${nearestStation}</strong> (${distanceLabel} away).`;
   } else {
     statusDiv.innerHTML = `Live location active, searching for nearest metro station...`;
   }
 }
 
+/**
+ * PURE DEVICE-BASED LIVE MOTION & DIRECTION VECTOR ENGINE
+ */
 function applyDetectedPosition(position, statusDiv) {
   if (!position || !position.coords) return;
   const userLat = position.coords.latitude;
   const userLng = position.coords.longitude;
+  const currentTime = Date.now();
+  const previousUserLat = lastUserLat;
+  const previousUserLng = lastUserLng;
 
   if (userLat == null || userLng == null) return;
 
-  let nearestStation = null;
-  let minDistance = Infinity;
+  lastUserLat = userLat;
+  lastUserLng = userLng;
+  lastGPSFixTime = currentTime;
 
-  for (const [station, coords] of Object.entries(STATIONS)) {
-    if (!coords || coords.lat == null || coords.lng == null) continue;
-    const dist = getDistanceInKm(userLat, userLng, coords.lat, coords.lng);
-    if (dist < minDistance) {
-      minDistance = dist;
-      nearestStation = station;
+  let nearestStation = null;
+  let minDistanceMeters = Infinity;
+  let computedStatus = null;
+
+  // Device-Pure Route Tracking
+  if (currentRoutePath && currentRoutePath.length > 1) {
+    let activeIdx = currentStationIndexOnRoute;
+
+    const currStation = currentRoutePath[activeIdx];
+    const currCoords = STATIONS[currStation];
+    const currDist = currCoords ? (getDistanceInKm(userLat, userLng, currCoords.lat, currCoords.lng) * 1000) : Infinity;
+
+    const nextIdx = Math.min(activeIdx + 1, currentRoutePath.length - 1);
+    const nextStation = currentRoutePath[nextIdx];
+    const nextCoords = STATIONS[nextStation];
+    const nextDist = nextCoords ? (getDistanceInKm(userLat, userLng, nextCoords.lat, nextCoords.lng) * 1000) : Infinity;
+    const movingTowardsNext = nextCoords && isMovingTowardsStation(previousUserLat, previousUserLng, userLat, userLng, nextCoords);
+
+    if (nextIdx > activeIdx && nextDist <= PROXIMITY_THRESHOLD_METERS) {
+      currentStationIndexOnRoute = nextIdx;
+      nearestStation = nextStation;
+      minDistanceMeters = nextDist;
+
+      if (nextDist <= HERE_THRESHOLD_METERS) {
+        computedStatus = 'HERE';
+      } else {
+        computedStatus = 'APPROACHING';
+      }
+    } 
+    else if (currDist <= PROXIMITY_THRESHOLD_METERS) {
+      nearestStation = currStation;
+      minDistanceMeters = currDist;
+
+      if (currDist <= HERE_THRESHOLD_METERS) {
+        computedStatus = 'HERE';
+      } else {
+        computedStatus = movingTowardsNext ? 'LEAVING' : null;
+        if (movingTowardsNext) {
+          nearestStation = nextStation;
+          minDistanceMeters = nextDist;
+        }
+      }
+    } 
+    else {
+      nearestStation = nextStation;
+      minDistanceMeters = nextDist;
+
+      if (nextDist <= PROXIMITY_THRESHOLD_METERS) {
+        computedStatus = 'APPROACHING';
+      } else if (movingTowardsNext) {
+        computedStatus = 'LEAVING';
+      } else {
+        computedStatus = null;
+      }
+    }
+  } else {
+    // Standard standalone GPS fallback
+    const match = findNearestStationForCoordinates(userLat, userLng);
+    if (match) {
+      nearestStation = match.station;
+      minDistanceMeters = match.distanceMeters;
+
+      if (minDistanceMeters <= HERE_THRESHOLD_METERS) {
+        computedStatus = 'HERE';
+      } else if (minDistanceMeters <= PROXIMITY_THRESHOLD_METERS) {
+        computedStatus = 'APPROACHING';
+      } else {
+        computedStatus = null;
+      }
     }
   }
 
   if (nearestStation) {
-    const nearestChanged = nearestStation !== currentNearestStation;
+    const statusChanged = nearestStation !== currentNearestStation || computedStatus !== currentLiveStatus;
     currentNearestStation = nearestStation;
-    currentNearestStationDistanceMeters = minDistance * 1000;
+    currentNearestStationDistanceMeters = minDistanceMeters;
+    currentLiveStatus = computedStatus;
+
     const distanceLabel = getDistanceLabel(currentNearestStationDistanceMeters);
 
     if (fromStationSource === 'live') {
-      if (nearestChanged) {
-        syncFromFieldWithLiveLocation(nearestStation, false);
-        updateRouteFromInputs(true);
+      if (statusChanged && (!currentRoutePath || currentRoutePath.length < 2)) {
+        syncFromFieldWithLiveLocation(nearestStation, true);
       }
       updateLiveDistanceStatus(distanceLabel, nearestStation);
     } else {
       updateLiveDistanceStatus(distanceLabel, nearestStation);
     }
 
-    if (nearestChanged) {
+    checkDestinationAlarm(currentNearestStation, currentNearestStationDistanceMeters);
+
+    if (statusChanged) {
       renderMetroMap();
       updateCurrentRouteScheduleFromSelection();
     }
@@ -1244,6 +1395,8 @@ function initLeafletMap() {
     leafletBaseLayers = { 'Street map': street, 'Satellite': satellite };
     L.control.layers(leafletBaseLayers, null, { position: 'topright' }).addTo(leafletMap);
     leafletLayerGroup = L.layerGroup().addTo(leafletMap);
+    leafletMapPickLayer = L.layerGroup().addTo(leafletMap);
+    leafletMap.on('click', handleLeafletMapPick);
     leafletMap.on('dragstart zoomstart', () => {
       if (!leafletProgrammaticFit) leafletUserTouched = true;
     });
@@ -1253,6 +1406,121 @@ function initLeafletMap() {
     console.error("Leaflet initialization error:", e);
     return false;
   }
+}
+
+function hideMapPickOverlay() {
+  const overlay = document.getElementById('map-pick-overlay');
+  if (overlay) overlay.hidden = true;
+  selectedMapCoordinates = null;
+  if (leafletMapPickLayer) leafletMapPickLayer.clearLayers();
+}
+
+function openMapPickOverlay() {
+  const overlay = document.getElementById('map-pick-overlay');
+  const coordinates = document.getElementById('map-pick-coordinates');
+  const station = document.getElementById('map-pick-station');
+  if (!overlay) return;
+  overlay.hidden = false;
+  if (coordinates) coordinates.textContent = 'Search a place or click anywhere on the map';
+  if (station) station.textContent = 'Select a result to find its nearest metro station.';
+  document.getElementById('map-place-search')?.focus();
+}
+
+function showMapPickOverlay(lat, lng, nearestMatch) {
+  const overlay = document.getElementById('map-pick-overlay');
+  const coordinates = document.getElementById('map-pick-coordinates');
+  const station = document.getElementById('map-pick-station');
+  if (!overlay || !coordinates || !station || !nearestMatch) return;
+
+  selectedMapCoordinates = { lat, lng };
+  coordinates.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  station.innerHTML = `Nearest metro: <strong>${nearestMatch.station}</strong><span> ${getDistanceLabel(nearestMatch.distanceMeters)} away</span>`;
+  overlay.hidden = false;
+
+  if (leafletMapPickLayer) {
+    leafletMapPickLayer.clearLayers();
+    L.circleMarker([lat, lng], {
+      radius: 7,
+      color: '#ffffff',
+      weight: 3,
+      fillColor: '#ff375f',
+      fillOpacity: 1
+    }).addTo(leafletMapPickLayer);
+  }
+}
+
+function handleLeafletMapPick(event) {
+  if (!event || !event.latlng) return;
+  const nearestMatch = findNearestStationForCoordinates(event.latlng.lat, event.latlng.lng);
+  if (nearestMatch) showMapPickOverlay(event.latlng.lat, event.latlng.lng, nearestMatch);
+}
+
+function selectMapPlace(place) {
+  const lat = parseFloat(place?.lat);
+  const lng = parseFloat(place?.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !leafletMap) return;
+
+  const nearestMatch = findNearestStationForCoordinates(lat, lng);
+  if (!nearestMatch) return;
+  leafletMap.setView([lat, lng], Math.max(leafletMap.getZoom(), 15), { animate: true });
+  showMapPickOverlay(lat, lng, nearestMatch);
+  const results = document.getElementById('map-place-results');
+  if (results) results.innerHTML = '';
+}
+
+function setupMapPlaceSearch() {
+  const input = document.getElementById('map-place-search');
+  const results = document.getElementById('map-place-results');
+  if (!input || !results) return;
+
+  const search = debounce(async () => {
+    const query = input.value.trim();
+    results.innerHTML = '';
+    if (query.length < 3) return;
+
+    const places = await searchOSMPlaces(query, true);
+    places.forEach((place) => {
+      const result = document.createElement('button');
+      result.type = 'button';
+      result.className = 'map-place-result';
+      result.textContent = place.display_name || query;
+      result.addEventListener('click', () => selectMapPlace(place));
+      results.appendChild(result);
+    });
+  }, 450);
+
+  input.addEventListener('input', search);
+}
+
+function applyMapPickToField(inputId) {
+  if (!selectedMapCoordinates) return;
+  const nearestMatch = findNearestStationForCoordinates(selectedMapCoordinates.lat, selectedMapCoordinates.lng);
+  const input = document.getElementById(inputId);
+  const helper = document.getElementById(inputId === 'from-input' ? 'from-source-helper' : 'to-source-helper');
+  if (!nearestMatch || !input) return;
+
+  input.value = nearestMatch.station;
+  if (inputId === 'to-input') {
+    const destinationClear = document.getElementById('to-clear');
+    if (destinationClear) destinationClear.style.display = 'flex';
+  }
+  if (inputId === 'from-input') {
+    setFromStationSource('manual');
+    if (helper) helper.textContent = `Map location mapped to ${nearestMatch.station} (${getDistanceLabel(nearestMatch.distanceMeters)} away).`;
+    renderUnselectedDualDirections(nearestMatch.station);
+  } else {
+    stopActiveAlarm();
+    if (helper) helper.textContent = `Map location mapped to ${nearestMatch.station} (${getDistanceLabel(nearestMatch.distanceMeters)} away).`;
+  }
+
+  hideMapPickOverlay();
+  requestLeafletAutoFit(true);
+  updateRouteFromInputs(false);
+  updateCurrentRouteScheduleFromSelection();
+  setActiveView('journey');
+  requestAnimationFrame(() => {
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 }
 
 function renderLeafletMetroMap() {
@@ -1345,10 +1613,10 @@ function renderLeafletMetroMap() {
   if (currentNearestStation && STATIONS[currentNearestStation]) {
     const liveLatLng = stationLatLng(currentNearestStation);
     if (liveLatLng) {
-      const isInside = currentNearestStationDistanceMeters != null && currentNearestStationDistanceMeters <= INSIDE_STATION_THRESHOLD_METERS;
+      const isInside = currentLiveStatus === 'HERE';
       const liveLabelText = isInside
         ? `Live (You are here): ${shortMapLabel(currentNearestStation)}`
-        : `Live (Approaching): ${shortMapLabel(currentNearestStation)}`;
+        : (currentLiveStatus === 'APPROACHING' ? `Live (Approaching): ${shortMapLabel(currentNearestStation)}` : `Live: En-route near ${shortMapLabel(currentNearestStation)}`);
 
       const trainIcon = L.divIcon({
         className: '',
@@ -1375,9 +1643,9 @@ function renderLeafletMetroMap() {
       : (STATIONS[from] ? `Boarding station selected: ${from}` : 'Allow GPS or choose places/stations to highlight your route.');
   }
   if (livePill) {
-    const isInside = currentNearestStationDistanceMeters != null && currentNearestStationDistanceMeters <= INSIDE_STATION_THRESHOLD_METERS;
+    const isInside = currentLiveStatus === 'HERE';
     livePill.textContent = currentNearestStation
-      ? (isInside ? `Live: ${currentNearestStation}` : `Approaching: ${currentNearestStation}`)
+      ? (isInside ? `Live: ${currentNearestStation}` : (currentLiveStatus === 'APPROACHING' ? `Approaching: ${currentNearestStation}` : `En-route near: ${currentNearestStation}`))
       : 'Live: waiting';
   }
 
@@ -1423,9 +1691,9 @@ function renderHtmlMetroMap() {
   }
 
   if (livePill) {
-    const isInside = currentNearestStationDistanceMeters != null && currentNearestStationDistanceMeters <= INSIDE_STATION_THRESHOLD_METERS;
+    const isInside = currentLiveStatus === 'HERE';
     livePill.textContent = currentNearestStation
-      ? (isInside ? `Live: ${currentNearestStation}` : `Approaching: ${currentNearestStation}`)
+      ? (isInside ? `Live: ${currentNearestStation}` : (currentLiveStatus === 'APPROACHING' ? `Approaching: ${currentNearestStation}` : `En-route near: ${currentNearestStation}`))
       : 'Live: waiting';
   }
 }
@@ -1450,7 +1718,11 @@ function setupAutocomplete(inputId, resultsId, helperId) {
   if (!input || !results || !clearBtn) return;
 
   function updateClearButton() {
-    if (inputId === 'from-input' && fromStationSource === 'live') {
+    if (inputId === 'to-input') {
+      clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+      return;
+    }
+    if (fromStationSource === 'live') {
       clearBtn.style.display = 'none';
       return;
     }
@@ -1468,7 +1740,7 @@ function setupAutocomplete(inputId, resultsId, helperId) {
     results.innerHTML = '';
     const qLower = query.toLowerCase();
 
-    // 1. Direct Metro Station Matches
+    // Direct Metro Station Matches
     const directStationMatches = stationNames.filter(name => name.toLowerCase().includes(qLower));
 
     directStationMatches.forEach(st => {
@@ -1490,11 +1762,12 @@ function setupAutocomplete(inputId, resultsId, helperId) {
         results.style.display = 'none';
         updateClearButton();
 
-        if (inputId === 'from-input') {
+        if (inputId === 'to-input') {
+          stopActiveAlarm();
+          updateDestinationHelperLabel();
+        } else if (inputId === 'from-input') {
           renderUnselectedDualDirections(st);
           if (helper) helper.innerText = `Boarding station set to ${st}.`;
-        } else {
-          if (helper) helper.innerText = `Destination station set to ${st}.`;
         }
 
         requestLeafletAutoFit(true);
@@ -1506,7 +1779,7 @@ function setupAutocomplete(inputId, resultsId, helperId) {
       results.appendChild(item);
     });
 
-    // 2. Search OpenStreetMap Places (To-input = Bengaluru bounded; From-input = Nationwide)
+    // OpenStreetMap Places
     if (query.length >= 3) {
       const isToField = inputId === 'to-input';
       const places = await searchOSMPlaces(query, isToField);
@@ -1539,11 +1812,12 @@ function setupAutocomplete(inputId, resultsId, helperId) {
           results.style.display = 'none';
           updateClearButton();
 
-          if (inputId === 'from-input') {
+          if (inputId === 'to-input') {
+            stopActiveAlarm();
+            if (helper) helper.innerText = `Mapped to ${placeTag} → Destination station: ${station} (~${distLabel} away).`;
+          } else if (inputId === 'from-input') {
             renderUnselectedDualDirections(station);
             if (helper) helper.innerText = `Mapped from ${placeTag} → Boarding station: ${station} (~${distLabel} away).`;
-          } else {
-            if (helper) helper.innerText = `Mapped to ${placeTag} → Destination station: ${station} (~${distLabel} away).`;
           }
 
           requestLeafletAutoFit(true);
@@ -1576,7 +1850,9 @@ function setupAutocomplete(inputId, resultsId, helperId) {
     if (helper) helper.innerText = '';
     updateClearButton();
 
-    if (inputId === 'from-input') {
+    if (inputId === 'to-input') {
+      stopActiveAlarm();
+    } else if (inputId === 'from-input') {
       if (fromStationSource === 'live') {
         if (currentNearestStation) {
           syncFromFieldWithLiveLocation(currentNearestStation, true);
@@ -1598,9 +1874,8 @@ function setupAutocomplete(inputId, resultsId, helperId) {
       } else if (currentNearestStation) {
         const statusDiv = document.getElementById('gps-status');
         if (statusDiv) {
-          const isInside = currentNearestStationDistanceMeters != null && currentNearestStationDistanceMeters <= INSIDE_STATION_THRESHOLD_METERS;
-          const statusText = isInside ? 'You are at' : 'Approaching';
-          statusDiv.innerHTML = `${statusText} <strong>${currentNearestStation}</strong> (${getDistanceLabel(currentNearestStationDistanceMeters)} away).`;
+          const distanceLabel = getDistanceLabel(currentNearestStationDistanceMeters);
+          updateLiveDistanceStatus(distanceLabel, currentNearestStation);
         }
       }
     }
@@ -1616,7 +1891,9 @@ function setupAutocomplete(inputId, resultsId, helperId) {
       handleSearch();
       const normalizedInput = normalizeStationName(input.value);
 
-      if (inputId === 'from-input') {
+      if (inputId === 'to-input') {
+        stopActiveAlarm();
+      } else if (inputId === 'from-input') {
         if (input.value.trim() && STATIONS[normalizedInput]) {
           renderUnselectedDualDirections(normalizedInput);
         }
@@ -1663,6 +1940,20 @@ function refreshJourneyView() {
 document.addEventListener('DOMContentLoaded', () => {
   setupAutocomplete('from-input', 'from-results', 'from-source-helper');
   setupAutocomplete('to-input', 'to-results', 'to-source-helper');
+
+  document.getElementById('map-pick-from')?.addEventListener('click', () => applyMapPickToField('from-input'));
+  document.getElementById('map-pick-to')?.addEventListener('click', () => applyMapPickToField('to-input'));
+  document.getElementById('map-pick-dismiss')?.addEventListener('click', hideMapPickOverlay);
+  document.getElementById('map-pick-overlay')?.addEventListener('click', (event) => event.stopPropagation());
+  setupMapPlaceSearch();
+  document.getElementById('choose-to-on-map')?.addEventListener('click', () => {
+    setActiveView('map');
+    const mapCard = document.getElementById('map-card');
+    requestAnimationFrame(() => {
+      mapCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      openMapPickOverlay();
+    });
+  });
 
   const toggleCheckbox = document.getElementById('location-toggle');
   if (toggleCheckbox) {
@@ -1718,3 +2009,174 @@ document.addEventListener('DOMContentLoaded', () => {
 
   startGPSLiveTracking();
 });
+
+function initAudioContext() {
+  if (!alarmAudioContext) {
+    alarmAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (alarmAudioContext.state === 'suspended') {
+    alarmAudioContext.resume();
+  }
+}
+
+function playAlarmSound() {
+  initAudioContext();
+  if (alarmIntervalId) return;
+
+  const beep = () => {
+    if (!alarmAudioContext) return;
+    const startTime = alarmAudioContext.currentTime;
+    const tone = (frequency, offset = 0) => {
+      const osc = alarmAudioContext.createOscillator();
+      const gain = alarmAudioContext.createGain();
+      osc.connect(gain);
+      gain.connect(alarmAudioContext.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(frequency, startTime + offset);
+      gain.gain.setValueAtTime(0.0001, startTime + offset);
+      gain.gain.exponentialRampToValueAtTime(0.8, startTime + offset + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + offset + 0.28);
+      osc.start(startTime + offset);
+      osc.stop(startTime + offset + 0.3);
+    };
+
+    tone(1046);
+    tone(1318, 0.32);
+  };
+
+  beep();
+  alarmIntervalId = setInterval(beep, 700);
+}
+
+function stopAlarmSound() {
+  if (alarmIntervalId) {
+    clearInterval(alarmIntervalId);
+    alarmIntervalId = null;
+  }
+}
+
+function stopActiveAlarm() {
+  stopAlarmSound();
+  alarmTriggered = false;
+  const modal = document.getElementById('destination-alarm-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function toggleDestinationAlarm() {
+  isDestinationAlarmSet = !isDestinationAlarmSet;
+  localStorage.setItem(DESTINATION_ALARM_KEY, String(isDestinationAlarmSet));
+
+  if (isDestinationAlarmSet) {
+    initAudioContext();
+    alarmTriggered = false;
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  } else {
+    stopActiveAlarm();
+  }
+
+  updateAlarmButtonUI();
+  updateDestinationHelperLabel();
+}
+
+function updateDestinationHelperLabel() {
+  const toInput = document.getElementById('to-input');
+  const helper = document.getElementById('to-source-helper');
+  if (!toInput || !helper) return;
+
+  const destination = normalizeStationName(toInput.value);
+  if (!destination || !STATIONS[destination]) return;
+
+  let baseMessage = `Destination station set to ${destination}.`;
+
+  if (isDestinationAlarmSet) {
+    baseMessage += ` (Alarm will be triggered ${DESTINATION_ALARM_THRESHOLD_METERS} meters before station)`;
+  }
+
+  helper.innerText = baseMessage;
+}
+
+function checkDestinationAlarm(nearestStation, distanceMeters) {
+  if (!isDestinationAlarmSet || alarmTriggered) return;
+  if (!currentRoutePath || !Array.isArray(currentRoutePath) || currentRoutePath.length < 2) return;
+
+  const destinationStation = currentRoutePath[currentRoutePath.length - 1];
+
+  if (nearestStation === destinationStation && distanceMeters <= DESTINATION_ALARM_THRESHOLD_METERS) {
+    triggerDestinationAlarm(destinationStation);
+  }
+}
+
+async function triggerDestinationAlarm(stationName) {
+  alarmTriggered = true;
+  playAlarmSound();
+
+  showAlarmModal(stationName);
+
+  if ("Notification" in window && Notification.permission === "granted") {
+    try {
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        if (registration && registration.showNotification) {
+          await registration.showNotification("Namma Metro Alert 🚆", {
+            body: `Approaching destination station: ${stationName}! Get ready to disembark.`,
+            tag: "destination-alert",
+            renotify: true,
+            vibrate: [200, 100, 200, 100, 200]
+          });
+          return;
+        }
+      }
+
+      new Notification("Namma Metro Alert 🚆", {
+        body: `Approaching destination station: ${stationName}! Get ready to disembark.`,
+        requireInteraction: true
+      });
+    } catch (err) {
+      console.warn("Notification display warning:", err);
+    }
+  }
+}
+
+function showAlarmModal(stationName) {
+  let modal = document.getElementById('destination-alarm-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'destination-alarm-modal';
+    modal.className = 'alarm-modal';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div class="alarm-modal-content">
+      <div class="alarm-icon">🔔</div>
+      <h2>Approaching Destination!</h2>
+      <p>You are approaching <strong>${stationName}</strong>. Please prepare to exit the train.</p>
+      <button type="button" class="dismiss-alarm-btn" id="dismiss-alarm-btn">Dismiss Alarm</button>
+    </div>
+  `;
+  modal.style.display = 'flex';
+
+  document.getElementById('dismiss-alarm-btn')?.addEventListener('click', dismissDestinationAlarm);
+}
+
+function dismissDestinationAlarm() {
+  stopActiveAlarm();
+  isDestinationAlarmSet = false;
+  localStorage.setItem(DESTINATION_ALARM_KEY, 'false');
+  updateAlarmButtonUI();
+  updateDestinationHelperLabel();
+}
+
+function updateAlarmButtonUI() {
+  const btn = document.getElementById('destination-alarm-btn');
+  if (!btn) return;
+
+  if (isDestinationAlarmSet) {
+    btn.classList.add('alarm-active');
+    btn.innerHTML = '🔔 Alarm Set';
+  } else {
+    btn.classList.remove('alarm-active');
+    btn.innerHTML = '🔕 Set Alarm';
+  }
+}

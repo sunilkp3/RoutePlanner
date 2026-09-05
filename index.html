@@ -160,7 +160,15 @@
 
     <!-- Destination Field -->
     <div class="form-group">
-      <label for="to-input">To (Destination Station or Place)</label>
+      <div class="destination-header-row">
+        <label for="to-input">To (Destination Station or Place)</label>
+        <div class="destination-actions">
+          <button type="button" class="map-picker-btn" id="choose-to-on-map">Choose on map</button>
+          <button type="button" class="alarm-btn inline-alarm-btn" id="destination-alarm-btn" onclick="toggleDestinationAlarm()">
+            🔕 Set Alarm
+          </button>
+        </div>
+      </div>
       <div class="input-wrapper">
         <input 
           type="text" 
@@ -206,6 +214,20 @@
     <div class="metro-map-wrap">
       <div id="leaflet-map" class="leaflet-metro-map" aria-label="Interactive Namma Metro map"></div>
       <div class="html-metro-map" id="html-metro-map" role="img" aria-label="Namma Metro route map"></div>
+      <div id="map-pick-overlay" class="map-pick-overlay" hidden>
+        <div class="map-pick-kicker">Selected map location</div>
+        <div class="map-pick-search">
+          <input type="search" id="map-place-search" placeholder="Search a place in Bengaluru" autocomplete="off" />
+          <div id="map-place-results" class="map-place-results"></div>
+        </div>
+        <div class="map-pick-coordinates" id="map-pick-coordinates"></div>
+        <div class="map-pick-station" id="map-pick-station"></div>
+        <div class="map-pick-actions">
+          <button type="button" id="map-pick-from">Use as From</button>
+          <button type="button" id="map-pick-to">Use as To</button>
+          <button type="button" class="map-pick-dismiss" id="map-pick-dismiss" aria-label="Close map location selection">×</button>
+        </div>
+      </div>
     </div>
     <div class="map-legend">
       <span><i class="legend-line purple"></i>Purple</span>
