@@ -505,6 +505,87 @@ input[readonly] { cursor: default; }
   box-shadow: 0 8px 18px rgba(0, 122, 255, 0.20);
 }
 
+.sponsor-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--accent-border);
+  background:
+    linear-gradient(90deg, rgba(100, 210, 255, 0.18), rgba(52, 199, 89, 0.12)),
+    var(--card-bg);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(22px);
+}
+
+.sponsor-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--green-line));
+}
+
+.sponsor-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px 10px 8px 14px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.sponsor-label,
+.sponsor-action {
+  display: inline-grid;
+  place-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.sponsor-label {
+  padding: 0 7px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--surface-bg);
+  text-transform: uppercase;
+}
+
+.sponsor-text {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 620;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sponsor-text strong {
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.sponsor-action {
+  padding: 0 10px;
+  border: 1px solid var(--accent-border-strong);
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(0, 122, 255, 0.18);
+}
+
+.sponsor-card:hover,
+.sponsor-card:focus-within {
+  border-color: var(--accent-border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+}
+
 /* Map Card */
 .map-card {
   display: none;
@@ -1070,6 +1151,17 @@ footer a:hover, footer a:focus { text-decoration: underline; }
   body { padding: 10px; }
   .card { padding: 12px; }
   .header h1 { font-size: 1.2rem; }
+  .sponsor-link {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 42px;
+    padding: 8px 9px 8px 13px;
+  }
+  .sponsor-text {
+    font-size: 0.76rem;
+  }
+  .sponsor-action {
+    justify-self: end;
+  }
   .map-toolbar { flex-direction: column; }
   .map-live-pill { align-self: flex-start; }
   .metric-card .val { font-size: 0.95rem; }
