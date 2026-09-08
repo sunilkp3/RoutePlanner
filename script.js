@@ -4,6 +4,8 @@ let currentNearestStation = null;
 let currentNearestStationDistanceMeters = null;
 let currentLiveStatus = null; // 'HERE' | 'LEAVING' | 'APPROACHING' | null
 let currentStationIndexOnRoute = 0; // Index along currentRoutePath
+let lastRouteMovementDirection = null; // 'FORWARD' while moving towards the next route station
+let lastRenderedLiveStatusText = '';
 
 // Device GPS Motion & Vector Tracking
 let lastUserLat = null;
@@ -43,6 +45,7 @@ let isDestinationAlarmSet = localStorage.getItem(DESTINATION_ALARM_KEY) === 'tru
 let alarmTriggered = false;
 let alarmAudioContext = null;
 let alarmIntervalId = null;
+let alarmVibrationIntervalId = null;
 
 const STATIONS = {
   // PURPLE LINE
@@ -377,7 +380,7 @@ function getLiveStatusTag(station) {
   const nextStation = currentRoutePath[currentStationIndexOnRoute + 1];
 
   if (currentLiveStatus === 'LEAVING' && station === activeStation) {
-    return '<span class="live-tag approaching">LEAVING</span>';
+    return '<span class="live-tag approaching">LEFT</span>';
   }
   if (currentLiveStatus === 'LEAVING' && station === nextStation) {
     return '<span class="live-tag approaching">APPROACHING</span>';
@@ -1097,6 +1100,8 @@ function syncFromFieldWithLiveLocation(nearestStation, shouldUpdateRoute = true)
 function updateLiveDistanceStatus(distanceLabel, nearestStation) {
   const statusDiv = document.getElementById('gps-status');
   if (!statusDiv) return;
+  let nextStatusText = '';
+
   if (nearestStation) {
     let statusText = 'Nearest station:';
     if (currentLiveStatus === 'HERE') {
@@ -1104,16 +1109,23 @@ function updateLiveDistanceStatus(distanceLabel, nearestStation) {
     } else if (currentLiveStatus === 'LEAVING') {
       const currentStation = currentRoutePath[currentStationIndexOnRoute];
       const nextStation = currentRoutePath[currentStationIndexOnRoute + 1] || nearestStation;
-      statusDiv.innerHTML = `Leaving <strong>${currentStation}</strong> and approaching <strong>${nextStation}</strong> (${distanceLabel} away).`;
-      return;
+      nextStatusText = `Left <strong>${currentStation}</strong> and approaching <strong>${nextStation}</strong> (${distanceLabel} away).`;
     } else if (currentLiveStatus === 'APPROACHING') {
       statusText = 'Approaching';
     } else {
       statusText = 'In transit towards';
     }
-    statusDiv.innerHTML = `${statusText} <strong>${nearestStation}</strong> (${distanceLabel} away).`;
+    if (!nextStatusText) {
+      nextStatusText = `${statusText} <strong>${nearestStation}</strong> (${distanceLabel} away).`;
+    }
   } else {
-    statusDiv.innerHTML = `Live location active, searching for nearest metro station...`;
+    nextStatusText = 'Live location active, searching for nearest metro station...';
+  }
+
+  // GPS fixes arrive frequently; avoid repainting the status when its value is unchanged.
+  if (nextStatusText !== lastRenderedLiveStatusText) {
+    statusDiv.innerHTML = nextStatusText;
+    lastRenderedLiveStatusText = nextStatusText;
   }
 }
 
@@ -1152,38 +1164,29 @@ function applyDetectedPosition(position, statusDiv) {
     const nextDist = nextCoords ? (getDistanceInKm(userLat, userLng, nextCoords.lat, nextCoords.lng) * 1000) : Infinity;
     const movingTowardsNext = nextCoords && isMovingTowardsStation(previousUserLat, previousUserLng, userLat, userLng, nextCoords);
 
-    if (nextIdx > activeIdx && nextDist <= PROXIMITY_THRESHOLD_METERS) {
+    if (nextIdx > activeIdx && nextDist <= HERE_THRESHOLD_METERS) {
       currentStationIndexOnRoute = nextIdx;
       nearestStation = nextStation;
       minDistanceMeters = nextDist;
-
-      if (nextDist <= HERE_THRESHOLD_METERS) {
-        computedStatus = 'HERE';
-      } else {
-        computedStatus = 'APPROACHING';
-      }
-    } 
-    else if (currDist <= PROXIMITY_THRESHOLD_METERS) {
+      computedStatus = 'HERE';
+      lastRouteMovementDirection = null;
+    } else if (currDist <= HERE_THRESHOLD_METERS) {
       nearestStation = currStation;
       minDistanceMeters = currDist;
 
-      if (currDist <= HERE_THRESHOLD_METERS) {
-        computedStatus = 'HERE';
-      } else {
-        computedStatus = movingTowardsNext ? 'LEAVING' : null;
-        if (movingTowardsNext) {
-          nearestStation = nextStation;
-          minDistanceMeters = nextDist;
-        }
-      }
-    } 
-    else {
+      computedStatus = 'HERE';
+      lastRouteMovementDirection = null;
+    } else {
       nearestStation = nextStation;
       minDistanceMeters = nextDist;
 
-      if (nextDist <= PROXIMITY_THRESHOLD_METERS) {
-        computedStatus = 'APPROACHING';
-      } else if (movingTowardsNext) {
+      if (movingTowardsNext) {
+        lastRouteMovementDirection = 'FORWARD';
+      }
+
+      // Keep a confirmed direction through GPS jitter. The active station only
+      // changes after the next station's HERE threshold is reached.
+      if (lastRouteMovementDirection === 'FORWARD') {
         computedStatus = 'LEAVING';
       } else {
         computedStatus = null;
@@ -2048,6 +2051,14 @@ function playAlarmSound() {
   alarmIntervalId = setInterval(beep, 700);
 }
 
+function startAlarmVibration() {
+  if (!navigator.vibrate || alarmVibrationIntervalId) return;
+
+  const vibrate = () => navigator.vibrate([200, 100, 200, 100, 200]);
+  vibrate();
+  alarmVibrationIntervalId = setInterval(vibrate, 900);
+}
+
 function stopAlarmSound() {
   if (alarmIntervalId) {
     clearInterval(alarmIntervalId);
@@ -2055,8 +2066,17 @@ function stopAlarmSound() {
   }
 }
 
+function stopAlarmVibration() {
+  if (alarmVibrationIntervalId) {
+    clearInterval(alarmVibrationIntervalId);
+    alarmVibrationIntervalId = null;
+  }
+  if (navigator.vibrate) navigator.vibrate(0);
+}
+
 function stopActiveAlarm() {
   stopAlarmSound();
+  stopAlarmVibration();
   alarmTriggered = false;
   const modal = document.getElementById('destination-alarm-modal');
   if (modal) modal.style.display = 'none';
@@ -2111,6 +2131,7 @@ function checkDestinationAlarm(nearestStation, distanceMeters) {
 async function triggerDestinationAlarm(stationName) {
   alarmTriggered = true;
   playAlarmSound();
+  startAlarmVibration();
 
   showAlarmModal(stationName);
 
