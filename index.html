@@ -194,13 +194,7 @@
     </div>
   </main>
 
-  <aside class="sponsor-card" aria-label="Sponsored link">
-    <a class="sponsor-link" href="https://plansip.com/" target="_blank" rel="noopener noreferrer sponsored">
-      <span class="sponsor-label">Ad</span>
-      <span class="sponsor-text"><strong>PlanSIP</strong> - SIP calculators, mutual fund research & NSE stock screeners</span>
-      <span class="sponsor-action" aria-hidden="true">Open</span>
-    </a>
-  </aside>
+
 
   <section id="map-card" class="card map-card" aria-label="Namma Metro schematic map">
     <div class="map-toolbar">
@@ -291,6 +285,28 @@
   </section>
 </div>
 
+  <aside class="sponsor-list" aria-label="Advertisements">
+    <a class="promo promo-sip" href="https://plansip.com/?utm_source=blrmetro&amp;utm_medium=display&amp;utm_campaign=commute&amp;utm_content=sip" target="_blank" rel="noopener noreferrer sponsored">
+      <span class="promo-top"><span>PLANSIP · MONEY GOALS</span><span class="promo-label">Ad</span></span>
+      <span class="promo-headline">Your next stop?<br>A bigger savings goal.</span>
+      <span class="promo-copy">See what a monthly SIP could grow into. Try different amounts and timelines.</span>
+      <span class="promo-bottom"><span class="promo-action">Calculate my SIP ↗</span><span class="promo-art" aria-hidden="true">₹ <i></i><i></i><i></i></span></span>
+      <span class="promo-note">Illustrations only. Investment returns are not guaranteed.</span>
+    </a>
+    <a class="promo promo-nubi" href="https://blrgo.com/nubi/?utm_source=blrmetro&amp;utm_medium=display&amp;utm_campaign=commute&amp;utm_content=nubi" target="_blank" rel="noopener noreferrer sponsored">
+      <span class="promo-top"><span>BLRGO · NUBI</span><span class="promo-label">Ad</span></span>
+      <span class="promo-headline">A little scoop.<br>A lovely start.</span>
+      <span class="promo-copy">Meet your nut &amp; seed powder mix. Stir into milk, oats or your favourite smoothie.</span>
+      <span class="promo-bottom"><span class="promo-action">Explore NUBI ↗</span><span class="promo-symbol" aria-hidden="true">✳</span></span>
+    </a>
+    <a class="promo promo-ebooks" href="https://blrgo.com/ebooks?utm_source=blrmetro&amp;utm_medium=display&amp;utm_campaign=commute&amp;utm_content=ebooks" target="_blank" rel="noopener noreferrer sponsored">
+      <span class="promo-top"><span>BLRGO · EBOOKS</span><span class="promo-label">Ad</span></span>
+      <span class="promo-headline">Next station.<br>New inspiration.</span>
+      <span class="promo-copy">Make room for your next idea with ebooks, planners and creative activities.</span>
+      <span class="promo-bottom"><span class="promo-action">Find my next read ↗</span><span class="promo-symbol" aria-hidden="true">✦</span></span>
+    </a>
+  </aside>
+
 <section class="card seo-content" aria-label="Bengaluru Metro route finder information">
   <button class="collapsible-toggle" type="button" aria-expanded="false">
     <h2>Bengaluru Namma Metro Route Finder Additional Information</h2>
@@ -336,6 +352,15 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<dialog id="promo-dialog" class="promo-dialog" aria-labelledby="promo-dialog-title">
+  <div class="promo-dialog-header">
+    <h2 id="promo-dialog-title">A little discovery for your journey</h2>
+    <button type="button" id="promo-close" aria-label="Close advertisement" autofocus>×</button>
+  </div>
+  <div id="promo-dialog-content"></div>
+  <button type="button" id="promo-continue">Continue to route planner</button>
+</dialog>
 <script src="script.js"></script>
+<script src="promotions.js"></script>
 </body>
 </html>
