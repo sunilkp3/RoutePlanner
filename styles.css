@@ -1153,3 +1153,9 @@ footer a:hover, footer a:focus { text-decoration: underline; }
 #promo-continue { width: 100%; min-height: 48px; margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-bg); color: var(--text); font-size: 0.9rem; font-weight: 700; cursor: pointer; }
 #promo-close:focus-visible, #promo-continue:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 html.promo-open { overflow: hidden; }
+
+/* Keep the travel guide readable with and without JavaScript. */
+.seo-content p, .seo-content li { font-size: 1rem; line-height: 1.7; }
+.seo-content h3 { font-size: 1.1rem; }
+.seo-content ol { padding-left: 24px; }
+.seo-content li + li { margin-top: 8px; }
