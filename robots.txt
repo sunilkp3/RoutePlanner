@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.blrmetro.com/sitemap.xml
+Sitemap: https://blrmetro.com/sitemap.xml
