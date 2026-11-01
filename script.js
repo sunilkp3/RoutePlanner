@@ -6,6 +6,7 @@ let currentLiveStatus = null; // 'HERE' | 'LEAVING' | 'APPROACHING' | null
 let currentStationIndexOnRoute = 0; // Index along currentRoutePath
 let lastRouteMovementDirection = null; // 'FORWARD' while moving towards the next route station
 let lastRenderedLiveStatusText = '';
+let pendingRouteRecoveryIndex = null; // Later route station awaiting a second GPS fix before we jump to it
 
 // Device GPS Motion & Vector Tracking
 let lastUserLat = null;
@@ -37,6 +38,9 @@ let selectedTrainTimestamp = null;
 const JOURNEY_REFRESH_INTERVAL_MS = 15000;
 const PROXIMITY_THRESHOLD_METERS = 200; // 200m threshold for APPROACHING
 const HERE_THRESHOLD_METERS = 75; // 75m threshold for YOU ARE HERE
+const ROUTE_RECOVERY_MAX_ACCURACY_METERS = 150; // Coarser fixes can't move route progress past a station
+const ROUTE_CORRIDOR_METERS = 300; // Max distance from the route line to count as riding on it
+const ROUTE_PASSED_MARGIN_METERS = 100; // Distance beyond a station before it counts as passed
 
 // Destination Alarm State
 const DESTINATION_ALARM_KEY = 'namma_metro_destination_alarm_active';
@@ -69,34 +73,34 @@ const STATIONS = {
   "Cubbon Park": { line: "Purple Line", order: 18, lat: 12.9809006, lng: 77.5974655 },
   "MG Road": { line: "Purple Line", order: 19, lat: 12.9755000, lng: 77.6068000 },
   "Trinity": { line: "Purple Line", order: 20, lat: 12.9730000, lng: 77.6170000 },
-  "Halasuru": { line: "Purple Line", order: 21, lat: 12.9756600, lng: 77.6262800 },
+  "Halasuru": { line: "Purple Line", order: 21, lat: 12.976431, lng: 77.6267 },
   "Indiranagar": { line: "Purple Line", order: 22, lat: 12.9783300, lng: 77.6386500 },
   "Swami Vivekananda Road": { line: "Purple Line", order: 23, lat: 12.9859103, lng: 77.6450043 },
   "Baiyappanahalli": { line: "Purple Line", order: 24, lat: 12.9906651, lng: 77.6525903 },
   "Benniganahalli": { line: "Purple Line", order: 25, lat: 12.9964275, lng: 77.6683160 },
   "K. R. Pura": { line: "Purple Line", order: 26, lat: 12.9999900, lng: 77.6779400 },
-  "Singayyanapalya": { line: "Purple Line", order: 27, lat: 12.9967800, lng: 77.6921700 },
+  "Singayyanapalya": { line: "Purple Line", order: 27, lat: 12.996551, lng: 77.692713 },
   "Garudacharpalya": { line: "Purple Line", order: 28, lat: 12.9935600, lng: 77.7037600 },
   "Hoodi": { line: "Purple Line", order: 29, lat: 12.9887300, lng: 77.7112700 },
   "Seetharampalya": { line: "Purple Line", order: 30, lat: 12.9809200, lng: 77.7088700 },
   "Kundalahalli": { line: "Purple Line", order: 31, lat: 12.9774610, lng: 77.7157610 },
   "Nallur Halli": { line: "Purple Line", order: 32, lat: 12.9765280, lng: 77.7247630 },
   "Sri Sathya Sai Hospital": { line: "Purple Line", order: 33, lat: 12.9810200, lng: 77.7276200 },
-  "Pattandur Agrahara": { line: "Purple Line", order: 34, lat: 12.9876130, lng: 77.7382110 },
+  "Pattandur Agrahara": { line: "Purple Line", order: 34, lat: 12.987631, lng: 77.737754 },
   "Kadugodi Tree Park": { line: "Purple Line", order: 35, lat: 12.9856500, lng: 77.7469000 },
-  "Hopefarm Channasandra": { line: "Purple Line", order: 36, lat: 12.9879300, lng: 77.7540900 },
-  "Whitefield (Kadugodi)": { line: "Purple Line", order: 37, lat: 12.9950700, lng: 77.7577700 },
+  "Hopefarm Channasandra": { line: "Purple Line", order: 36, lat: 12.987322, lng: 77.75384 },
+  "Whitefield (Kadugodi)": { line: "Purple Line", order: 37, lat: 12.995684, lng: 77.757877 },
 
   // GREEN LINE
   "Madavara": { line: "Green Line", order: 1, lat: 13.0574214, lng: 77.4728055 },
-  "Chikkabidarakallu": { line: "Green Line", order: 2, lat: 13.0519444, lng: 77.4863889 },
+  "Chikkabidarakallu": { line: "Green Line", order: 2, lat: 13.052389, lng: 77.487905 },
   "Manjunathnagar": { line: "Green Line", order: 3, lat: 13.0502778, lng: 77.4944444 },
   "Nagasandra": { line: "Green Line", order: 4, lat: 13.0481315, lng: 77.5001257 },
   "Dasarahalli": { line: "Green Line", order: 5, lat: 13.0435416, lng: 77.5123791 },
   "Jalahalli": { line: "Green Line", order: 6, lat: 13.0395842, lng: 77.5198377 },
   "Peenya Industry": { line: "Green Line", order: 7, lat: 13.0363220, lng: 77.5257170 },
   "Peenya": { line: "Green Line", order: 8, lat: 13.0329868, lng: 77.5334693 },
-  "Goraguntepalya": { line: "Green Line", order: 9, lat: 13.0284000, lng: 77.5402000 },
+  "Goraguntepalya": { line: "Green Line", order: 9, lat: 13.028409, lng: 77.540858 },
   "Yeshwanthpur": { line: "Green Line", order: 10, lat: 13.0232000, lng: 77.5499000 },
   "Sandal Soap Factory": { line: "Green Line", order: 11, lat: 13.0148000, lng: 77.5539000 },
   "Mahalakshmi": { line: "Green Line", order: 12, lat: 13.0083374, lng: 77.5488344 },
@@ -105,7 +109,7 @@ const STATIONS = {
   "Srirampura": { line: "Green Line", order: 15, lat: 12.9965259, lng: 77.5633565 },
   "Mantri Square Sampige Road": { line: "Green Line", order: 16, lat: 12.9905455, lng: 77.5708050 },
   "Chickpet": { line: "Green Line", order: 18, lat: 12.9675484, lng: 77.5747975 },
-  "Krishna Rajendra Market": { line: "Green Line", order: 19, lat: 12.9564453, lng: 77.5735999 },
+  "Krishna Rajendra Market": { line: "Green Line", order: 19, lat: 12.96071, lng: 77.574734 },
   "National College": { line: "Green Line", order: 20, lat: 12.9506136, lng: 77.5737360 },
   "Lalbagh": { line: "Green Line", order: 21, lat: 12.9462868, lng: 77.5800613 },
   "South End Circle": { line: "Green Line", order: 22, lat: 12.9383210, lng: 77.5800747 },
@@ -373,6 +377,48 @@ function findNearestStationForCoordinates(lat, lng) {
   return nearestStation ? { station: nearestStation, distanceMeters: minDistance * 1000 } : null;
 }
 
+// A station's GPS radius can be missed (tunnels, weak fixes, off coordinates). Finds the
+// furthest route station the rider has clearly reached or passed, or -1 if still on track.
+function findRouteRecoveryIndex(lat, lng, activeIdx) {
+  for (let i = currentRoutePath.length - 1; i >= activeIdx + 2; i--) {
+    const coords = STATIONS[currentRoutePath[i]];
+    if (coords && getDistanceInKm(lat, lng, coords.lat, coords.lng) * 1000 <= HERE_THRESHOLD_METERS) return i;
+  }
+
+  // Otherwise locate the rider on the route line, station to station.
+  const metersPerDegLat = 111320;
+  const metersPerDegLng = metersPerDegLat * Math.cos(lat * Math.PI / 180);
+  let nearestSegment = -1;
+  let nearestOffset = Infinity;
+  let nearestAlong = 0;
+
+  for (let i = activeIdx; i < currentRoutePath.length - 1; i++) {
+    const start = STATIONS[currentRoutePath[i]];
+    const end = STATIONS[currentRoutePath[i + 1]];
+    if (!start || !end) continue;
+
+    const segX = (end.lng - start.lng) * metersPerDegLng;
+    const segY = (end.lat - start.lat) * metersPerDegLat;
+    const userX = (lng - start.lng) * metersPerDegLng;
+    const userY = (lat - start.lat) * metersPerDegLat;
+    const segLength = Math.hypot(segX, segY);
+    if (!segLength) continue;
+
+    const along = Math.max(0, Math.min(segLength, (userX * segX + userY * segY) / segLength));
+    const offset = Math.hypot(userX - (segX / segLength) * along, userY - (segY / segLength) * along);
+    if (offset < nearestOffset) {
+      nearestOffset = offset;
+      nearestSegment = i;
+      nearestAlong = along;
+    }
+  }
+
+  const passedStation = nearestSegment > activeIdx
+    && nearestOffset <= ROUTE_CORRIDOR_METERS
+    && nearestAlong >= ROUTE_PASSED_MARGIN_METERS;
+  return passedStation ? nearestSegment : -1;
+}
+
 // Render dynamic status tag for timeline steps
 function getLiveStatusTag(station) {
   if (!currentLiveStatus) return '';
@@ -545,82 +591,93 @@ function getPlatformDetails(current, next) {
 }
 
 // Timetable Calculation Engines
-function getNextTrainArrival(routeInfo, offsetMinutes = 0) {
+// BMRCL bands are departures from the line's end. 2 min per station matches the
+// published 11:30 PM last trains at Majestic.
+const MINUTES_PER_STATION = 2;
+const DIRECTION_ORIGIN_TERMINALS = {
+  toWhitefield: "Challaghatta",
+  toChallaghatta: "Whitefield (Kadugodi)",
+  toSilkInstitute: "Madavara",
+  toMadavara: "Silk Institute",
+  toBommasandra: "Rashtreeya Vidyalaya Road",
+  toRvRoad: "Delta electronics Bommasandra"
+};
+
+function getMinutesFromOriginTerminal(station, directionKey) {
+  const path = station ? findShortestPath(DIRECTION_ORIGIN_TERMINALS[directionKey], station) : null;
+  return path ? (path.length - 1) * MINUTES_PER_STATION : 0;
+}
+
+// Departure times (minutes from that day's midnight) at the boarding station
+function getDayDepartures(bands, travelMinutes) {
+  const departures = [];
+  (bands || []).forEach(([start, end, headway], i) => {
+    for (let t = start; t < end; t += headway) {
+      // A tick just before the band's end would duplicate the train leaving at the end.
+      if (t > start && end - t < headway / 2) break;
+      departures.push(t + travelMinutes);
+    }
+    const nextBand = bands[i + 1];
+    if (!nextBand || nextBand[0] > end) departures.push(end + travelMinutes);
+  });
+  return departures;
+}
+
+function getMultipleUpcomingTrainArrivals(routeInfo, count = 3) {
   if (!routeInfo) {
-    return { mins: "See BMRCL", minsNumeric: 0, detail: "Check BMRCL official timetable", dateObj: null, isAvailable: false };
+    return [{ mins: "See BMRCL", minsNumeric: 0, detail: "Check BMRCL official timetable", dateObj: null, isAvailable: false }];
   }
 
   const directionText = typeof routeInfo === "string" ? routeInfo : (routeInfo.direction || '');
   const line = typeof routeInfo === "string" ? null : (routeInfo.line || null);
-  const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const totalMins = hours * 60 + minutes + offsetMinutes;
   const timetable = line ? BMRC_TIMETABLES[line] : null;
   const directionKey = timetable ? getDirectionKey(line, directionText) : null;
-  const bands = directionKey ? timetable[getScheduleKey(now)]?.[directionKey] : null;
-
-  if (!bands || !Array.isArray(bands)) {
-    return { mins: "See BMRCL", minsNumeric: 0, detail: `Check BMRCL official timetable (${directionText})`, dateObj: null, isAvailable: false };
+  if (!directionKey) {
+    return [{ mins: "See BMRCL", minsNumeric: 0, detail: `Check BMRCL official timetable (${directionText})`, dateObj: null, isAvailable: false }];
   }
 
-  let activeBand = bands.find(([start, end]) => totalMins >= start && totalMins <= end);
-  let nextMins;
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const nowMins = (now.getTime() - midnight.getTime()) / 60000;
+  const travelMinutes = getMinutesFromOriginTerminal(routeInfo.station, directionKey);
+  const dayOffsetDate = days => new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
+  const departuresFor = days => getDayDepartures(timetable[getScheduleKey(dayOffsetDate(days))]?.[directionKey], travelMinutes);
 
-  if (activeBand) {
-    const [start, end, headway] = activeBand;
-    const elapsed = Math.max(0, totalMins - start);
-    nextMins = headway - (elapsed % headway);
-    if (nextMins <= 0) nextMins += headway;
-    const serviceEnd = minutesToTime(end);
-    const depTime = new Date(now.getTime() + (totalMins - (hours * 60 + minutes) + nextMins) * 60000);
+  // Late trains on the Yellow Line run past midnight, so last night's service can still be running.
+  const lastNight = departuresFor(-1).map(t => ({ t: t - 1440, end: Math.max(...departuresFor(-1)) - 1440 }));
+  const today = departuresFor(0).map(t => ({ t, end: Math.max(...departuresFor(0)) }));
+  const upcoming = [...lastNight, ...today].filter(d => d.t > nowMins).sort((x, y) => x.t - y.t);
+
+  if (!upcoming.length) {
+    const tomorrow = departuresFor(1);
+    const firstTomorrow = tomorrow.length ? minutesToTime(Math.min(...tomorrow)) : '--:--';
+    return [{ mins: "No Service", minsNumeric: 0, detail: `Last train has left (${directionText}). First train tomorrow at ${firstTomorrow}`, dateObj: null, isAvailable: false }];
+  }
+
+  return upcoming.slice(0, count).map((departure, i) => {
+    const next = upcoming[i + 1];
+    const isLastOfNight = !next || next.end !== departure.end;
+    const isFirstOfDay = i === 0 && !lastNight.some(d => d.t > nowMins) && today[0]?.t === departure.t && !today.some(d => d.t <= nowMins);
+    const headway = !isLastOfNight ? next.t - departure.t : 0;
+    const depTime = new Date(midnight.getTime() + departure.t * 60000);
     const depTimeString = depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const waitMins = Math.ceil(departure.t - nowMins);
+    let detail = `Expected at ${depTimeString} (${directionText}) • BMRCL ${Math.round(headway)} min frequency until ${minutesToTime(departure.end)}`;
+    if (isFirstOfDay) detail = `First train leaves the end of the line at ${minutesToTime(departure.t - travelMinutes)}, about ${depTimeString} here (${directionText}) • BMRCL timetable`;
+    if (isLastOfNight) detail = `Last train at ${depTimeString} (${directionText}) • BMRCL timetable`;
     return {
-      mins: `${Math.ceil(nextMins + offsetMinutes)} min${Math.ceil(nextMins + offsetMinutes) > 1 ? 's' : ''}`,
-      minsNumeric: Math.ceil(nextMins + offsetMinutes),
-      detail: `Expected at ${depTimeString} (${directionText}) • BMRCL ${headway} min frequency until ${serviceEnd}`,
+      mins: `${waitMins} min${waitMins > 1 ? 's' : ''}`,
+      minsNumeric: waitMins,
+      detail,
       dateObj: depTime,
       isAvailable: true,
       headway
     };
-  }
-
-  const upcomingBand = bands.find(([start]) => totalMins < start);
-  if (!upcomingBand) {
-    const firstStart = bands[0] ? minutesToTime(bands[0][0]) : '05:00';
-    const lastEnd = bands[bands.length - 1] ? minutesToTime(bands[bands.length - 1][1]) : '23:00';
-    return { mins: "No Service", minsNumeric: 0, detail: `${line} ${directionText}: BMRCL timetable window is ${firstStart} - ${lastEnd}`, dateObj: null, isAvailable: false };
-  }
-
-  nextMins = upcomingBand[0] - totalMins;
-  const depTime = new Date(now.getTime() + (totalMins - (hours * 60 + minutes) + nextMins) * 60000);
-  const depTimeString = depTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  return {
-    mins: `${Math.ceil(nextMins + offsetMinutes)} min${Math.ceil(nextMins + offsetMinutes) > 1 ? 's' : ''}`,
-    minsNumeric: Math.ceil(nextMins + offsetMinutes),
-    detail: `First scheduled service at ${depTimeString} (${directionText}) • BMRCL timetable`,
-    dateObj: depTime,
-    isAvailable: true,
-    headway: upcomingBand[2] || 10
-  };
+  });
 }
 
-function getMultipleUpcomingTrainArrivals(routeInfo, count = 3) {
-  const results = [];
-  let cumulativeOffset = 0;
-
-  for (let i = 0; i < count; i++) {
-    const schedule = getNextTrainArrival(routeInfo, cumulativeOffset);
-    if (!schedule || !schedule.isAvailable) {
-      if (i === 0 && schedule) results.push(schedule);
-      break;
-    }
-    results.push(schedule);
-    const headway = schedule.headway || 10;
-    cumulativeOffset += headway;
-  }
-  return results;
+function getNextTrainArrival(routeInfo) {
+  return getMultipleUpcomingTrainArrivals(routeInfo, 1)[0];
 }
 
 function findShortestPath(start, goal) {
@@ -661,28 +718,39 @@ function renderUnselectedDualDirections(boardingStation) {
 
   if (!boardingStation || !STATIONS[boardingStation]) return;
 
-  const line = STATIONS[boardingStation]?.line === "Interchange" ? "Purple Line" : STATIONS[boardingStation]?.line;
-  let directions = [];
-
-  if (line === "Purple Line") {
-    directions = [
-      { label: "Platform 1", dir: "Towards Whitefield (Kadugodi)", line, offset: 0 },
-      { label: "Platform 2", dir: "Towards Challaghatta", line, offset: 3 }
-    ];
-  } else if (line === "Green Line") {
-    directions = [
-      { label: "Platform 2", dir: "Towards Silk Institute", line, offset: 0 },
-      { label: "Platform 1", dir: "Towards Madavara", line, offset: 4 }
-    ];
-  } else {
-    directions = [
-      { label: "Platform 2", dir: "Towards Delta electronics Bommasandra", line, offset: 0 },
-      { label: "Platform 1", dir: "Towards Rashtreeya Vidyalaya Road", line, offset: 3 }
-    ];
-  }
+  const stationLine = STATIONS[boardingStation]?.line;
+  const directionsByLine = {
+    "Purple Line": [
+      { label: "Platform 1", dir: "Towards Whitefield (Kadugodi)", line: "Purple Line" },
+      { label: "Platform 2", dir: "Towards Challaghatta", line: "Purple Line" }
+    ],
+    "Green Line": [
+      { label: "Platform 2", dir: "Towards Silk Institute", line: "Green Line" },
+      { label: "Platform 1", dir: "Towards Madavara", line: "Green Line" }
+    ],
+    "Yellow Line": [
+      { label: "Platform 2", dir: "Towards Delta electronics Bommasandra", line: "Yellow Line" },
+      { label: "Platform 1", dir: "Towards Rashtreeya Vidyalaya Road", line: "Yellow Line" }
+    ]
+  };
+  const INTERCHANGE_DIRECTIONS = {
+    "Nadaprabhu Kempegowda (Majestic)": [
+      { ...directionsByLine["Purple Line"][0], label: "Platform 1 (Level 1)" },
+      { ...directionsByLine["Purple Line"][1], label: "Platform 2 (Level 1)" },
+      { ...directionsByLine["Green Line"][0], label: "Platform 4 (Level 2)" },
+      { ...directionsByLine["Green Line"][1], label: "Platform 3 (Level 2)" }
+    ],
+    "Rashtreeya Vidyalaya Road": [
+      { ...directionsByLine["Green Line"][0], label: "Platform 2 (Green Line)" },
+      { ...directionsByLine["Green Line"][1], label: "Platform 1 (Green Line)" },
+      { ...directionsByLine["Yellow Line"][0], label: "Platform 3 (Yellow Line Concourse)" }
+    ]
+  };
+  const directions = (INTERCHANGE_DIRECTIONS[boardingStation] || directionsByLine[stationLine] || [])
+    .filter(d => !d.dir.endsWith(boardingStation)); // No train runs towards the station you're already at
 
   directions.forEach(d => {
-    const schedule = getNextTrainArrival({ direction: d.dir, line: d.line }, d.offset);
+    const schedule = getNextTrainArrival({ direction: d.dir, line: d.line, station: boardingStation });
     if (!schedule) return;
     const box = document.createElement('div');
     box.className = 'next-train-box';
@@ -791,7 +859,7 @@ function refreshSelectedRouteJourney() {
   if (!path || !Array.isArray(path) || path.length < 2) return;
 
   const firstPlatInfo = getPlatformDetails(path[0], path[1]);
-  const schedules = getMultipleUpcomingTrainArrivals(firstPlatInfo, 5);
+  const schedules = getMultipleUpcomingTrainArrivals({ ...firstPlatInfo, station: path[0] }, 5);
   renderQuickSchedulesBar(firstPlatInfo, schedules);
   updateRouteScheduleView(schedules);
 }
@@ -988,6 +1056,7 @@ function calculateRoute(isGpsUpdate = false) {
   if (routeChanged) {
     stopActiveAlarm(); // Stop active alarm sound/modal when destination/route changes
     currentStationIndexOnRoute = 0;
+    pendingRouteRecoveryIndex = null;
     if (!isGpsUpdate) {
       selectedTrainIndex = 0;
       selectedTrainTimestamp = null;
@@ -1016,7 +1085,7 @@ function calculateRoute(isGpsUpdate = false) {
   updateAlarmButtonUI();
 
   const firstPlatInfo = getPlatformDetails(path[0], path[1]);
-  const schedules = getMultipleUpcomingTrainArrivals(firstPlatInfo, 5);
+  const schedules = getMultipleUpcomingTrainArrivals({ ...firstPlatInfo, station: path[0] }, 5);
 
   renderQuickSchedulesBar(firstPlatInfo, schedules);
   updateRouteScheduleView(schedules);
@@ -1054,6 +1123,7 @@ function updateRouteFromInputs(isDynamicUpdate = false) {
   currentRoutePath = [];
   selectedTrainTimestamp = null;
   currentStationIndexOnRoute = 0;
+  pendingRouteRecoveryIndex = null;
   const quickContainer = document.getElementById('quick-schedules-container');
   if (quickContainer) quickContainer.style.display = 'none';
 
@@ -1066,6 +1136,7 @@ function showBoardingDirections() {
   currentRoutePath = [];
   selectedTrainTimestamp = null;
   currentStationIndexOnRoute = 0;
+  pendingRouteRecoveryIndex = null;
   updatePanelVisibility();
 
   const fromInput = document.getElementById('from-input');
@@ -1153,6 +1224,19 @@ function applyDetectedPosition(position, statusDiv) {
   // Device-Pure Route Tracking
   if (currentRoutePath && currentRoutePath.length > 1) {
     let activeIdx = currentStationIndexOnRoute;
+
+    // Jumps can't be undone, so a recovery needs an accurate fix confirmed by the next one.
+    const accuracy = position.coords.accuracy;
+    const fixIsAccurate = accuracy == null || accuracy <= ROUTE_RECOVERY_MAX_ACCURACY_METERS;
+    const recoveryIdx = fixIsAccurate ? findRouteRecoveryIndex(userLat, userLng, activeIdx) : -1;
+    if (recoveryIdx >= 0 && pendingRouteRecoveryIndex !== null && recoveryIdx >= pendingRouteRecoveryIndex) {
+      activeIdx = recoveryIdx;
+      currentStationIndexOnRoute = recoveryIdx;
+      lastRouteMovementDirection = 'FORWARD';
+      pendingRouteRecoveryIndex = null;
+    } else {
+      pendingRouteRecoveryIndex = recoveryIdx >= 0 ? recoveryIdx : null;
+    }
 
     const currStation = currentRoutePath[activeIdx];
     const currCoords = STATIONS[currStation];
