@@ -1074,6 +1074,20 @@ input:checked + .slider:before {
   margin-bottom: 12px;
 }
 
+.upcoming-line {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 12px;
+  padding: 10px 12px;
+  border: 1px solid #e0218a;
+  border-left-width: 4px;
+  border-radius: 14px;
+  background: rgba(224, 33, 138, 0.1);
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
 .seo-content {
   width: 100%;
   max-width: 720px;
