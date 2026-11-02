@@ -139,7 +139,14 @@ const STATIONS = {
   "Infosys Foundation Konappana Agrahara": { line: "Yellow Line", order: 13, lat: 12.8464900, lng: 77.6711200 },
   "Huskur Road": { line: "Yellow Line", order: 14, lat: 12.8390100, lng: 77.6775400 },
   "Biocon Hebbagodi": { line: "Yellow Line", order: 15, lat: 12.8290900, lng: 77.6813300 },
-  "Delta electronics Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8193300, lng: 77.6883400 }
+  "Delta electronics Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8193300, lng: 77.6883400 },
+
+  // PINK LINE (upcoming). Jayadeva Hospital is the change to the Yellow Line.
+  "Kalena Agrahara": { line: "Pink Line", order: 1, lat: 12.8715800, lng: 77.5936300 },
+  "Hulimavu": { line: "Pink Line", order: 2, lat: 12.8810800, lng: 77.5957900 },
+  "IIM Bangalore": { line: "Pink Line", order: 3, lat: 12.8956378, lng: 77.5996666 },
+  "JP Nagar 4th Phase": { line: "Pink Line", order: 4, lat: 12.9098410, lng: 77.6002370 },
+  "Tavarekere": { line: "Pink Line", order: 6, lat: 12.9294200, lng: 77.6004900 }
 };
 
 const ADJACENCY = {
@@ -214,7 +221,7 @@ const ADJACENCY = {
   "Silk Institute": ["Thalaghattapura"],
 
   "Ragigudda": ["Rashtreeya Vidyalaya Road", "Jayadeva Hospital"],
-  "Jayadeva Hospital": ["Ragigudda", "BTM Layout"],
+  "Jayadeva Hospital": ["Ragigudda", "BTM Layout", "JP Nagar 4th Phase", "Tavarekere"],
   "BTM Layout": ["Jayadeva Hospital", "Central Silk Board"],
   "Central Silk Board": ["BTM Layout", "Bommanahalli"],
   "Bommanahalli": ["Central Silk Board", "Hongasandra"],
@@ -227,7 +234,13 @@ const ADJACENCY = {
   "Infosys Foundation Konappana Agrahara": ["Electronic City", "Huskur Road"],
   "Huskur Road": ["Infosys Foundation Konappana Agrahara", "Biocon Hebbagodi"],
   "Biocon Hebbagodi": ["Huskur Road", "Delta electronics Bommasandra"],
-  "Delta electronics Bommasandra": ["Biocon Hebbagodi"]
+  "Delta electronics Bommasandra": ["Biocon Hebbagodi"],
+
+  "Kalena Agrahara": ["Hulimavu"],
+  "Hulimavu": ["Kalena Agrahara", "IIM Bangalore"],
+  "IIM Bangalore": ["Hulimavu", "JP Nagar 4th Phase"],
+  "JP Nagar 4th Phase": ["IIM Bangalore", "Jayadeva Hospital"],
+  "Tavarekere": ["Jayadeva Hospital"]
 };
 
 const STATION_ALIASES = {
@@ -247,15 +260,25 @@ const STATION_ALIASES = {
   "Hebbagodi": "Biocon Hebbagodi",
   "Bommasandra": "Delta electronics Bommasandra",
   "Delta Electronics Bommasandra": "Delta electronics Bommasandra",
-  "Majestic": "Nadaprabhu Kempegowda (Majestic)"
+  "Majestic": "Nadaprabhu Kempegowda (Majestic)",
+  "IIMB": "IIM Bangalore"
 };
 
 const stationNames = Object.keys(STATIONS).sort();
+
+// Upcoming: selectable as a route preview, but never picked as a nearest station and
+// has no timetable. Remove these checks when the line opens.
+const PINK_UPCOMING_NOTE = 'Pink Line is upcoming. Opening expected around 15 Nov 2026, date not final. This route is a preview and you can\'t travel it yet. Fare and time are estimates, and train timings aren\'t published.';
+
+function isUpcomingRoute(path) {
+  return Array.isArray(path) && path.some(station => STATIONS[station]?.line === "Pink Line");
+}
 
 const LINE_COLORS = {
   "Purple Line": "#a855f7",
   "Green Line": "#22c55e",
   "Yellow Line": "#eab308",
+  "Pink Line": "#ec4899",
   "Interchange": "#f59e0b"
 };
 
@@ -366,7 +389,7 @@ function findNearestStationForCoordinates(lat, lng) {
   let minDistance = Infinity;
 
   for (const [station, coords] of Object.entries(STATIONS)) {
-    if (!coords || coords.lat == null || coords.lng == null) continue;
+    if (!coords || coords.lat == null || coords.lng == null || coords.line === "Pink Line") continue;
     const dist = getDistanceInKm(lat, lng, coords.lat, coords.lng);
     if (dist < minDistance) {
       minDistance = dist;
@@ -536,6 +559,7 @@ function getLineForSegment(current, next) {
   if (!current || !STATIONS[current]) return "Purple Line";
   if (!next || !STATIONS[next]) return STATIONS[current].line || "Purple Line";
 
+  if (STATIONS[next].line === "Pink Line") return "Pink Line";
   if (STATIONS[current].line !== "Interchange") return STATIONS[current].line;
   if (STATIONS[next].line !== "Interchange") return STATIONS[next].line;
   return STATIONS[next].line || "Purple Line";
@@ -547,6 +571,13 @@ function getPlatformDetails(current, next) {
   }
 
   const line = getLineForSegment(current, next);
+
+  if (line === "Pink Line") {
+    const pinkOrder = ["Kalena Agrahara", "Hulimavu", "IIM Bangalore", "JP Nagar 4th Phase", "Jayadeva Hospital", "Tavarekere"];
+    return pinkOrder.indexOf(next) > pinkOrder.indexOf(current)
+      ? { platform: "Platform not announced", direction: "Towards Tavarekere", line }
+      : { platform: "Platform not announced", direction: "Towards Kalena Agrahara", line };
+  }
 
   if (current === "Nadaprabhu Kempegowda (Majestic)") {
     if (line === "Purple Line") {
@@ -718,6 +749,11 @@ function renderUnselectedDualDirections(boardingStation) {
 
   if (!boardingStation || !STATIONS[boardingStation]) return;
 
+  if (STATIONS[boardingStation].line === "Pink Line") {
+    container.innerHTML = `<div class="next-train-box"><div><div class="time-title">Upcoming station</div><div class="time-sub">${PINK_UPCOMING_NOTE}</div></div></div>`;
+    return;
+  }
+
   const stationLine = STATIONS[boardingStation]?.line;
   const directionsByLine = {
     "Purple Line": [
@@ -859,7 +895,7 @@ function refreshSelectedRouteJourney() {
   if (!path || !Array.isArray(path) || path.length < 2) return;
 
   const firstPlatInfo = getPlatformDetails(path[0], path[1]);
-  const schedules = getMultipleUpcomingTrainArrivals({ ...firstPlatInfo, station: path[0] }, 5);
+  const schedules = isUpcomingRoute(path) ? [] : getMultipleUpcomingTrainArrivals({ ...firstPlatInfo, station: path[0] }, 5);
   renderQuickSchedulesBar(firstPlatInfo, schedules);
   updateRouteScheduleView(schedules);
 }
@@ -872,11 +908,22 @@ function updateRouteScheduleView(schedules) {
   if (!path || !Array.isArray(path) || path.length < 2) return;
 
   const firstPlatInfo = getPlatformDetails(path[0], path[1]);
-  const activeSchedule = renderSingleSelectedRouteTrain(firstPlatInfo, schedules);
+  const upcomingRoute = isUpcomingRoute(path);
+  const activeSchedule = upcomingRoute ? null : renderSingleSelectedRouteTrain(firstPlatInfo, schedules);
+
+  const upcomingBanner = document.getElementById('upcoming-route-banner');
+  if (upcomingBanner) {
+    upcomingBanner.textContent = upcomingRoute ? PINK_UPCOMING_NOTE : '';
+    upcomingBanner.style.display = upcomingRoute ? 'block' : 'none';
+  }
+  if (upcomingRoute) {
+    const trainContainer = document.getElementById('single-route-train-container');
+    if (trainContainer) trainContainer.innerHTML = '';
+  }
 
   const noServiceBanner = document.getElementById('no-service-banner');
   if (noServiceBanner) {
-    if (!activeSchedule || !activeSchedule.isAvailable) {
+    if (!upcomingRoute && (!activeSchedule || !activeSchedule.isAvailable)) {
       noServiceBanner.style.display = 'block';
     } else {
       noServiceBanner.style.display = 'none';
@@ -907,7 +954,9 @@ function updateRouteScheduleView(schedules) {
       runningTime = new Date(runningTime.getTime() + extraMins * 60000);
     }
 
-    const timeTagHTML = (activeSchedule && activeSchedule.isAvailable)
+    const timeTagHTML = upcomingRoute
+      ? (STATIONS[station].line === "Pink Line" ? `<span class="arrival-time-tag upcoming-tag">Upcoming</span>` : '')
+      : (activeSchedule && activeSchedule.isAvailable)
       ? `<span class="arrival-time-tag">${isStart ? 'Dep:' : 'Arr:'} ${runningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`
       : `<span class="arrival-time-tag no-service-tag">No Service</span>`;
 
@@ -917,7 +966,7 @@ function updateRouteScheduleView(schedules) {
     if (isStart) {
       const platInfo = getPlatformDetails(station, nextStation);
       currentLine = platInfo.line;
-      const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : "green");
+      const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : (currentLine === "Pink Line" ? "pink" : "green"));
 
       stepDiv.innerHTML = `
         <div class="badge ${colorClass}">1</div>
@@ -934,7 +983,7 @@ function updateRouteScheduleView(schedules) {
         </div>
       `;
     } else if (isEnd) {
-      const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : "green");
+      const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : (currentLine === "Pink Line" ? "pink" : "green"));
       stepDiv.innerHTML = `
         <div class="badge ${colorClass}">✓</div>
         <div class="step-content">
@@ -948,13 +997,13 @@ function updateRouteScheduleView(schedules) {
           <div class="step-desc">Exit through fare gates. Journey complete.</div>
         </div>
       `;
-    } else if (STATIONS[station].line === "Interchange") {
+    } else if (STATIONS[station].line === "Interchange" || station === "Jayadeva Hospital") {
       const nextPlat = getPlatformDetails(station, nextStation);
       const lineChanged = currentLine !== nextPlat.line;
       currentLine = nextPlat.line;
 
       if (!lineChanged) {
-        const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : "green");
+        const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : (currentLine === "Pink Line" ? "pink" : "green"));
         stepDiv.innerHTML = `
           <div class="badge ${colorClass}">•</div>
           <div class="step-content">
@@ -985,7 +1034,7 @@ function updateRouteScheduleView(schedules) {
         `;
       }
     } else {
-      const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : "green");
+      const colorClass = currentLine === "Purple Line" ? "purple" : (currentLine === "Yellow Line" ? "yellow" : (currentLine === "Pink Line" ? "pink" : "green"));
       stepDiv.innerHTML = `
         <div class="badge ${colorClass}">•</div>
         <div class="step-content">
@@ -1070,7 +1119,10 @@ function calculateRoute(isGpsUpdate = false) {
   renderMetroMap();
 
   const totalStops = path.length - 1;
-  const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("Rashtreeya Vidyalaya Road");
+  const jayadevaIdx = path.indexOf("Jayadeva Hospital");
+  const changesAtJayadeva = jayadevaIdx > 0 && jayadevaIdx < path.length - 1 &&
+    getLineForSegment(path[jayadevaIdx - 1], "Jayadeva Hospital") !== getLineForSegment("Jayadeva Hospital", path[jayadevaIdx + 1]);
+  const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("Rashtreeya Vidyalaya Road") || changesAtJayadeva;
   const estTimeMinutes = totalStops * 2.5 + (isInterchange ? 5 : 0);
   const calculatedFare = Math.min(90, Math.max(10, Math.ceil(totalStops * 5.2)));
 
@@ -1085,7 +1137,7 @@ function calculateRoute(isGpsUpdate = false) {
   updateAlarmButtonUI();
 
   const firstPlatInfo = getPlatformDetails(path[0], path[1]);
-  const schedules = getMultipleUpcomingTrainArrivals({ ...firstPlatInfo, station: path[0] }, 5);
+  const schedules = isUpcomingRoute(path) ? [] : getMultipleUpcomingTrainArrivals({ ...firstPlatInfo, station: path[0] }, 5);
 
   renderQuickSchedulesBar(firstPlatInfo, schedules);
   updateRouteScheduleView(schedules);
@@ -1657,6 +1709,7 @@ function renderLeafletMetroMap() {
       color,
       weight: highlighted ? 6 : 3,
       opacity: highlighted ? 0.95 : 0.35,
+      dashArray: lineName === "Pink Line" ? '8 10' : null,
       lineCap: 'round',
       lineJoin: 'round'
     }).addTo(leafletLayerGroup);
@@ -1840,7 +1893,7 @@ function setupAutocomplete(inputId, resultsId, helperId) {
           <span>🚆 ${st}</span>
           <span class="line-badge-sm ${lineType}">${lineType}</span>
         </div>
-        <span class="station-match-badge">Direct Metro Station</span>
+        <span class="station-match-badge">${STATIONS[st].line === "Pink Line" ? 'Upcoming station' : 'Direct Metro Station'}</span>
       `;
 
       item.addEventListener('mousedown', (e) => {

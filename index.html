@@ -129,7 +129,7 @@
   </header>
 
   <p class="upcoming-line" role="note">
-    <strong>Upcoming: Pink Line.</strong> Kalena Agrahara to Tavarekere, 6 stations. Opening expected around 15 Nov 2026, date not final. Not in the route finder until it opens.
+    <strong>Upcoming: Pink Line.</strong> Kalena Agrahara to Tavarekere, 6 stations. Opening expected around 15 Nov 2026, date not final. Pick a Pink Line station to preview the route.
   </p>
 
   <main class="card search-card">
@@ -239,6 +239,7 @@
       <span><i class="legend-line purple"></i>Purple</span>
       <span><i class="legend-line green"></i>Green</span>
       <span><i class="legend-line yellow"></i>Yellow</span>
+      <span><i class="legend-line pink"></i>Pink (upcoming)</span>
       <span>🚆 live nearest station</span>
       <span>Colored path: selected route</span>
       <span>Free tiles: Esri satellite / OpenStreetMap</span>
@@ -277,6 +278,8 @@
       NEXT SELECTED TRAIN SCHEDULES FOR YOUR CHOSEN ROUTE
     </h3>
     <div class="dual-train-container" id="single-route-train-container"></div>
+
+    <div id="upcoming-route-banner" class="alert upcoming-alert" style="display: none;"></div>
 
     <div id="no-service-banner" class="alert danger" style="display: none;">
       <strong>Metro Services Closed:</strong> Train operations are outside the current BMRCL timetable window for this line and direction. Timestamps along the route are unavailable during non-operational hours.
