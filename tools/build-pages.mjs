@@ -77,7 +77,7 @@ function serviceSummary(line, key, day) {
 
 const NAV = [['index.html', 'Route Finder'], ['guides.html', 'Guides'], ['namma-metro-timings.html', 'Timings'], ['namma-metro-fares-tickets.html', 'Fares & Tickets'], ['about.html', 'About']];
 
-function page({ file, title, description, h1, lede, body, type = 'article', schema = [] }) {
+function page({ file, title, description, h1, lede, body, type = 'article', schema = [], updated = BUILT }) {
   const url = `${SITE}/${file === 'index.html' ? '' : file}`;
   const crumbs = { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` }, { '@type': 'ListItem', position: 2, name: h1, item: url }] };
   const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': [crumbs, ...schema] });
@@ -112,7 +112,7 @@ function page({ file, title, description, h1, lede, body, type = 'article', sche
   <article>
     <h1>${esc(h1)}</h1>
     ${lede ? `<p class="lede">${lede}</p>` : ''}
-    <p class="updated">Updated ${BUILT} · Independent guide, not an official BMRCL page</p>
+    <p class="updated">Updated ${updated} · Independent guide, not an official BMRCL page</p>
 ${body}
   </article>
 </main>
@@ -211,7 +211,7 @@ for (const [line, meta] of Object.entries(LINES)) {
     <section><h2>First and last trains</h2><p>These times are when trains leave the end of the line. Stations in the middle see the first train a little later and the last train a little later too. BMRCL timetable data for this line was last updated ${BMRC_TIMETABLES[line].updated}.</p>${timingTable(line)}${bandDetails(line)}</section>
     <section><h2>All ${line} stations in order</h2><p>Listed from ${esc(meta.from)} to ${esc(meta.to)}. To travel the other way, board the platform marked towards ${esc(meta.from)}.</p>${stationList(stations)}</section>
     <section><h2>Tips for riding the ${line}</h2><ul>${copy.tips.map(t => `<li>${t}</li>`).join('')}</ul></section>
-    <section><h2>Other lines</h2><p>${others.map(l => `<a href="${LINES[l].slug}.html">${l}</a>`).join(' · ')} · <a href="namma-metro-timings.html">All timings</a> · <a href="index.html">Plan a route</a></p></section>
+    <section><h2>Other lines</h2><p>${others.map(l => `<a href="${LINES[l].slug}.html">${l}</a>`).join(' · ')} · <a href="pink-line.html">Pink Line (upcoming)</a> · <a href="namma-metro-timings.html">All timings</a> · <a href="index.html">Plan a route</a></p></section>
     ${faqHtml(qa)}`
   });
 }
@@ -357,6 +357,43 @@ pages.push({
     <section><h2>Next steps</h2><p><a href="purple-line.html">Purple Line</a> · <a href="green-line.html">Green Line</a> · <a href="yellow-line.html">Yellow Line</a> · <a href="namma-metro-timings.html">Timings</a></p></section>`
 });
 
+// ---------- Upcoming Pink Line ----------
+{
+  const pinkStations = ['Kalena Agrahara', 'Hulimavu', 'IIM Bangalore', 'JP Nagar 4th Phase', 'Jayadeva Hospital', 'Tavarekere'];
+  const pinkTrips = [['Kalena Agrahara', 'Tavarekere'], ['Hulimavu', 'Jayadeva Hospital'], ['Hulimavu', MAJESTIC], ['Hulimavu', 'Central Silk Board'], ['Kalena Agrahara', 'Electronic City'], ['Hulimavu', 'Whitefield (Kadugodi)']];
+  const tripRow = ([a, b]) => {
+    const path = findShortestPath(a, b);
+    const changes = legs(path).map(l => l.line.replace(' Line', '')).join(' → ');
+    return `<tr><td>${esc(a)} to ${esc(b)}</td><td>${path.length - 1}</td><td>${changes}</td><td>about ₹${fareFor(pathKm(path))}</td></tr>`;
+  };
+  const qa = [
+    ['Is the Namma Metro Pink Line open now?', 'Not yet. The Kalena Agrahara to Tavarekere stretch has been reported as cleared by the safety commissioner, but passenger service has not started.'],
+    ['When will the Pink Line open?', 'The Chief Minister has said the Prime Minister will inaugurate it on 15 November 2026. That date is not final, and public service may start after the inauguration. We will update this page when BMRCL confirms it.'],
+    ['Which stations open first on the Pink Line?', 'Six elevated stations: Kalena Agrahara, Hulimavu, IIM Bangalore (IIMB), JP Nagar 4th Phase, Jayadeva Hospital and Tavarekere.'],
+    ['How long is the first stretch of the Pink Line?', 'About 7.5 km. The full line is planned to run about 21 km from Kalena Agrahara to Nagawara. The rest opens later, and that section has no confirmed date.'],
+    ['Where does the Pink Line connect to other metro lines?', 'At Jayadeva Hospital, where you can change to the Yellow Line. To reach the Green Line, take the Yellow Line to RV Road.'],
+    ['What will the Pink Line fare be?', 'BMRCL has not published Pink Line fares. If the current distance slabs apply, a ride along the whole first stretch would cost about ₹' + fareFor(pathKm(findShortestPath('Kalena Agrahara', 'Tavarekere'))) + '.'],
+    ['Does the Pink Line go to MG Road?', 'Not in this first stretch. The planned route reaches MG Road in the later underground section.']
+  ];
+  pages.push({
+    file: 'pink-line.html',
+    updated: '2026-11-02',
+    title: 'Namma Metro Pink Line: Opening Date, Stations & Route | Bengaluru',
+    description: 'Is the Bengaluru Metro Pink Line open? Latest opening date, the 6 stations from Kalena Agrahara to Tavarekere, expected fares, connections and sample routes.',
+    h1: 'Namma Metro Pink Line: opening date, stations and route',
+    lede: '<strong>Upcoming, not open yet.</strong> The first stretch runs along Bannerghatta Road from Kalena Agrahara to Tavarekere, with opening expected around 15 November 2026. The date is not final.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>6</strong><span>stations in the first stretch</span></div><div><strong>7.5 km</strong><span>elevated section</span></div><div><strong>~15 Nov</strong><span>expected, date not final</span></div><div><strong>~21 km</strong><span>planned full line to Nagawara</span></div></div>
+    <section><h2>Latest status</h2><p>The elevated section has been reported as cleared by the safety commissioner, and the Chief Minister has said the Prime Minister will inaugurate it on 15 November 2026. BMRCL has not published the timetable or fares that we could confirm, so check <a href="https://www.bmrc.co.in/" target="_blank" rel="noopener noreferrer">bmrc.co.in</a> before you plan around it.</p></section>
+    <section><h2>Pink Line stations in order</h2><p>Listed from south to north. You change to the Yellow Line at Jayadeva Hospital.</p><ol class="stops">${pinkStations.map(st => `<li>${esc(st)}${st === 'Jayadeva Hospital' ? ' <span class="tag">Yellow Line change</span>' : ''}</li>`).join('')}</ol></section>
+    <section><h2>Where it could take you</h2><p>These are previews from the current network. Fares are our estimates from today's distance slabs, not published Pink Line fares.</p><div class="table-wrap"><table><thead><tr><th>Trip</th><th>Stops</th><th>Lines</th><th>Estimated fare</th></tr></thead><tbody>${pinkTrips.map(tripRow).join('')}</tbody></table></div><p><a href="index.html">Preview your own Pink Line route</a> in the route finder by picking a Pink Line station.</p></section>
+    <section><h2>What opens later</h2><p>The rest of the line continues north to Nagawara, including the underground section through the city centre. Dates for that section have changed several times and aren't confirmed, so we don't list one here.</p></section>
+    ${faqHtml(qa)}
+    <section><h2>Other lines</h2><p>${Object.entries(LINES).map(([l, m]) => `<a href="${m.slug}.html">${l}</a>`).join(' · ')} · <a href="namma-metro-fares-tickets.html">Fares and tickets</a></p></section>`
+  });
+}
+
 // ---------- Guides hub ----------
 pages.push({
   file: 'guides.html',
@@ -368,6 +405,7 @@ pages.push({
   body: `
     <section><h2>Getting started</h2><ul class="cards"><li><a href="how-to-use-namma-metro.html">How to use Namma Metro</a><span>Tickets, security, platforms and changing lines for first-time riders.</span></li><li><a href="namma-metro-fares-tickets.html">Fares and tickets</a><span>Distance fare slabs and how tokens, QR tickets and smart cards compare.</span></li><li><a href="namma-metro-timings.html">Timings</a><span>First and last trains and the gap between trains on every line and day.</span></li></ul></section>
     <section><h2>Line guides</h2><ul class="cards">${Object.entries(LINES).map(([l, m]) => `<li><a href="${m.slug}.html">${l}</a><span>${esc(m.from)} to ${esc(m.to)}: all stations, timings and tips.</span></li>`).join('')}</ul></section>
+    <section><h2>Upcoming</h2><ul class="cards"><li><a href="pink-line.html">Pink Line opening date and stations</a><span>Kalena Agrahara to Tavarekere: 6 stations, expected around 15 Nov 2026.</span></li></ul></section>
     <section><h2>Popular routes</h2><ul class="cards">${ROUTES.map(o => `<li><a href="${o.file}">${o.short[0]} to ${o.short[1]}</a><span>Stops, fare, platform and where to change.</span></li>`).join('')}</ul></section>`
 });
 
@@ -437,9 +475,10 @@ pages.push({
 for (const p of pages) writeFileSync(join(root, p.file), page(p));
 
 const sitemapFiles = ['index.html', ...pages.map(p => p.file)];
+const lastmod = Object.fromEntries(pages.map(p => [p.file, p.updated || BUILT]));
 writeFileSync(join(root, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemapFiles.map(f => `  <url><loc>${SITE}/${f === 'index.html' ? '' : f}</loc><lastmod>${BUILT}</lastmod></url>`).join('\n')}
+${sitemapFiles.map(f => `  <url><loc>${SITE}/${f === 'index.html' ? '' : f}</loc><lastmod>${lastmod[f] || BUILT}</lastmod></url>`).join('\n')}
 </urlset>
 `);
 console.log(`Wrote ${pages.length} pages and sitemap.xml`);
