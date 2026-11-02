@@ -734,6 +734,13 @@ function findShortestPath(start, goal) {
   return null;
 }
 
+// BMRCL distance slabs from the February 2025 fare revision (same as tools/build-pages.mjs).
+function estimateFare(path) {
+  const slabs = [[2, 10], [4, 20], [6, 30], [8, 40], [10, 50], [15, 60], [20, 70], [25, 80], [Infinity, 90]];
+  const km = path.slice(1).reduce((total, station, i) => total + getDistanceInKm(STATIONS[path[i]].lat, STATIONS[path[i]].lng, STATIONS[station].lat, STATIONS[station].lng), 0);
+  return slabs.find(([max]) => km <= max)[1];
+}
+
 function renderUnselectedDualDirections(boardingStation) {
   const container = document.getElementById('unselected-dual-container');
   if (!container) return;
@@ -1124,7 +1131,7 @@ function calculateRoute(isGpsUpdate = false) {
     getLineForSegment(path[jayadevaIdx - 1], "Jayadeva Hospital") !== getLineForSegment("Jayadeva Hospital", path[jayadevaIdx + 1]);
   const isInterchange = path.includes("Nadaprabhu Kempegowda (Majestic)") || path.includes("Rashtreeya Vidyalaya Road") || changesAtJayadeva;
   const estTimeMinutes = totalStops * 2.5 + (isInterchange ? 5 : 0);
-  const calculatedFare = Math.min(90, Math.max(10, Math.ceil(totalStops * 5.2)));
+  const calculatedFare = estimateFare(path);
 
   const metricFare = document.getElementById('metric-fare');
   const metricTime = document.getElementById('metric-time');
@@ -1881,7 +1888,7 @@ function setupAutocomplete(inputId, resultsId, helperId) {
     const qLower = query.toLowerCase();
 
     // Direct Metro Station Matches
-    const directStationMatches = stationNames.filter(name => name.toLowerCase().includes(qLower));
+    const directStationMatches = stationNames.filter(name => name.toLowerCase().includes(qLower) || (qLower === 'iimb' && name === 'IIM Bangalore'));
 
     directStationMatches.forEach(st => {
       if (!STATIONS[st]) return;
