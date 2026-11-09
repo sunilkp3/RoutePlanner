@@ -394,6 +394,385 @@ pages.push({
   });
 }
 
+
+// ---------- 8 In-Depth Commuter Guides for Authority & AdSense Compliance ----------
+
+// 1. Smart Card, QR Tickets & WhatsApp Ticketing Guide
+{
+  const qa = [
+    ['What discount do you get with a Namma Metro Smart Card or QR ticket?', 'Smart card holders and mobile QR ticket users receive a 5% discount on the standard token fare on every trip across Purple, Green, and Yellow lines.'],
+    ['How do you book Namma Metro tickets on WhatsApp?', 'Save the official BMRCL WhatsApp chatbot number +91 81055 56677. Send "Hi", choose your language, select originating and destination stations, select passenger count, and complete payment via UPI. A QR code is generated instantly.'],
+    ['What is the minimum balance required on a Namma Metro smart card?', 'The minimum balance required to enter a metro station is ₹50. If your card balance drops below ₹50, the entry flap gates will not open.'],
+    ['Can I use an NCMC card from any bank on Namma Metro?', 'Yes, Namma Metro automatic fare collection (AFC) gates support all RuPay National Common Mobility Cards (NCMC) issued by Indian banks including SBI, ICICI, Canara Bank, and Paytm Payments Bank.']
+  ];
+  pages.push({
+    file: 'namma-metro-smart-card-qr-tickets-guide.html',
+    updated: '2026-11-09',
+    title: 'Namma Metro Smart Card, QR Tickets & WhatsApp Booking Guide | Bengaluru',
+    description: 'Complete guide to Namma Metro smart cards, WhatsApp QR tickets (81055 56677), NCMC open-loop cards, 5% discounts, recharge methods and refund rules.',
+    h1: 'Namma Metro Smart Cards, QR Tickets and WhatsApp Booking',
+    lede: 'Skipping ticket counter queues in Bengaluru saves 10 to 20 minutes every rush hour. Here is a complete guide to comparing Smart Cards, WhatsApp QR tickets, NCMC cards, and mobile app ticketing with fare discounts.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>5%</strong><span>discount on all trips</span></div><div><strong>₹50</strong><span>minimum card balance</span></div><div><strong>4</strong><span>ticketing options</span></div><div><strong>+91 81055 56677</strong><span>official WhatsApp bot</span></div></div>
+    <section><h2>Ticketing options compared</h2>
+      <div class="table-wrap"><table><thead><tr><th>Ticket type</th><th>Cost / Deposit</th><th>Discount</th><th>Best for</th><th>Where to buy / recharge</th></tr></thead><tbody>
+        <tr><td><strong>Contactless Smart Card (Varshik)</strong></td><td>₹50 non-refundable fee</td><td>5% off token fare</td><td>Daily office commuters</td><td>Station Customer Care, BMRCL app, Amazon Pay</td></tr>
+        <tr><td><strong>WhatsApp QR Ticket</strong></td><td>Exact fare (no deposit)</td><td>5% off token fare</td><td>Occasional riders & tourists</td><td>WhatsApp (+91 81055 56677)</td></tr>
+        <tr><td><strong>Mobile App QR (Namma Metro / Paytm)</strong></td><td>Exact fare (no deposit)</td><td>5% off token fare</td><td>Smartphone users</td><td>Namma Metro official app, Paytm, Amazon Pay</td></tr>
+        <tr><td><strong>National Common Mobility Card (NCMC)</strong></td><td>Issued by bank</td><td>5% off token fare</td><td>Inter-city travelers & transit commuters</td><td>Bank branches & online banking portals</td></tr>
+        <tr><td><strong>Single Journey Token</strong></td><td>Full distance slab fare</td><td>No discount</td><td>One-off travelers without phone</td><td>Station ticket counters & TVM machines</td></tr>
+      </tbody></table></div>
+    </section>
+    <section><h2>How to book tickets on WhatsApp (+91 81055 56677)</h2>
+      <ol class="steps">
+        <li><strong>Start the chat</strong>: Send "Hi" to <code>+91 81055 56677</code> on WhatsApp.</li>
+        <li><strong>Choose your language</strong>: Select English or Kannada.</li>
+        <li><strong>Pick stations</strong>: Tap "Buy Ticket", choose your origin station and destination station from the dropdown.</li>
+        <li><strong>Select passenger count</strong>: You can purchase single or return tickets for up to 6 passengers at once.</li>
+        <li><strong>Pay with UPI</strong>: Pay securely using Google Pay, PhonePe, Paytm, or BHIM.</li>
+        <li><strong>Scan at the gate</strong>: Your phone screen displays a dynamic QR code. Hold it 5–10 cm above the glass reader on the right-hand side of the turnstile to open the gate.</li>
+      </ol>
+    </section>
+    <section><h2>Smart Card recharge rules & Card Top-up Terminals (CTT)</h2>
+      <p>When you recharge your Varshik Smart Card online through the Namma Metro app or Amazon Pay, <strong>the balance is not written to your card immediately</strong>. You must tap your physical card on a Card Top-up Terminal (CTT) located near station customer care counters or at the entry gate within 15 days to update the electronic chip.</p>
+    </section>
+    <section><h2>Card validity and refunds</h2>
+      <p>Namma Metro smart cards remain valid for one year from the date of the last recharge. If your card expires with unspent money, visit any station customer care desk. Staff can extend card validity or transfer the remaining balance to a new card for a nominal processing fee.</p>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="namma-metro-fares-tickets.html">Distance fare slabs</a> · <a href="how-to-use-namma-metro.html">First-time rider walkthrough</a> · <a href="index.html">Open the route finder</a></p></section>`
+  });
+}
+
+// 2. Majestic Metro Interchange Guide
+{
+  const qa = [
+    ['How much time is needed to change trains at Majestic Metro station?', 'Allow between 3 to 5 minutes to change lines at Majestic. During peak rush hours (8:30 AM to 10:30 AM and 5:30 PM to 8:00 PM), allow 6 to 8 minutes due to heavier stair and escalator foot traffic.'],
+    ['Do I need to tap out or buy a new ticket when interchanging at Majestic?', 'No. You stay inside the paid concourse area. Do not tap your card or QR ticket at any gate while changing lines. Simply follow the coloured directional signs to your connecting platform.'],
+    ['How do I walk from Majestic Metro to KSR Bengaluru City Railway Station?', 'Take Exit A (towards railway station). Follow the covered pedestrian foot overbridge (FOB) that connects the metro concourse directly with Platform 10 and the main entrance of KSR Bengaluru City railway station without touching street traffic.']
+  ];
+  pages.push({
+    file: 'majestic-interchange-metro-guide.html',
+    updated: '2026-11-09',
+    title: 'Majestic Metro Interchange Guide: Changing Between Purple & Green Lines | Bengaluru',
+    description: 'Step-by-step transfer guide at Nadaprabhu Kempegowda (Majestic) station. How to switch between Purple and Green Lines, platform levels, walking times and station exits.',
+    h1: 'Majestic Metro Interchange Guide: Purple and Green Lines',
+    lede: 'Nadaprabhu Kempegowda Station (Majestic) is Bengaluru\'s central underground transit interchange where the Purple Line and Green Line cross. Here is how to navigate between levels quickly and safely.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>Underground</strong><span>multi-level interchange</span></div><div><strong>~3–5 min</strong><span>average transfer walk</span></div><div><strong>Platform 1 & 2</strong><span>Purple Line level</span></div><div><strong>Platform 3 & 4</strong><span>Green Line level</span></div></div>
+    <section><h2>Station platform layout</h2>
+      <div class="table-wrap"><table><thead><tr><th>Platform</th><th>Metro Line</th><th>Direction of Travel</th><th>Major Destinations Served</th></tr></thead><tbody>
+        <tr><td><strong>Platform 1</strong></td><td><span class="badge purple">Purple Line</span></td><td>Towards Whitefield (Kadugodi)</td><td>Vidhana Soudha, Cubbon Park, MG Road, Indiranagar, KR Pura, ITPL</td></tr>
+        <tr><td><strong>Platform 2</strong></td><td><span class="badge purple">Purple Line</span></td><td>Towards Challaghatta</td><td>Magadi Road, Vijayanagar, Deepanjali Nagar, Mysuru Road, Kengeri</td></tr>
+        <tr><td><strong>Platform 3</strong></td><td><span class="badge green">Green Line</span></td><td>Towards Madavara (BIEC)</td><td>Sampige Road, Malleshwaram, Rajajinagar, Yeshwanthpur, Peenya</td></tr>
+        <tr><td><strong>Platform 4</strong></td><td><span class="badge green">Green Line</span></td><td>Towards Silk Institute</td><td>Chickpet, KR Market, National College, Lalbagh, Jayanagar, Banashankari</td></tr>
+      </tbody></table></div>
+    </section>
+    <section><h2>How to change trains step by step</h2>
+      <ol class="steps">
+        <li><strong>Step off your train</strong>: Note whether you are on the Purple Line (upper track level) or Green Line (lower track level).</li>
+        <li><strong>Follow overhead colour markers</strong>: Look up at the illuminated direction boards. Follow the <strong>Purple signs</strong> for Whitefield/Challaghatta, or the <strong>Green signs</strong> for Madavara/Silk Institute.</li>
+        <li><strong>Use the central escalators or stairs</strong>: Walk towards the centre of the platform. Take the designated escalators directly connecting the Purple and Green track levels.</li>
+        <li><strong>Do not pass through turnstiles</strong>: Stay within the yellow tiled interchange corridors. Turnstiles will deduct an exit fare if tapped.</li>
+        <li><strong>Arrive at your connecting platform</strong>: Check the platform digital screens to confirm train arrival time (usually 3 to 6 minutes at peak hours).</li>
+      </ol>
+    </section>
+    <section><h2>Exits for trains and city buses</h2>
+      <p>Majestic has multiple numbered gates serving different transit hubs:</p>
+      <ul>
+        <li><strong>Exit A (KSR Railway Station)</strong>: Direct covered skywalk connecting directly into Platform 10 of KSR Bengaluru City Railway Station.</li>
+        <li><strong>Exit B (BMTC Bus Stand)</strong>: Opens straight into Kempegowda Bus Station (Majestic Bus Terminal) for city buses, Vayu Vajra airport buses, and suburban routes.</li>
+        <li><strong>Exit C (KSRTC Inter-state Bus Terminal)</strong>: Leads to Karnataka State Road Transport Corporation terminals for inter-city travel to Mysuru, Hassan, Mangaluru, and Tamil Nadu.</li>
+      </ul>
+    </section>
+    <section><h2>Accessibility & senior citizen transfers</h2>
+      <p>All four platform levels at Majestic are connected by high-capacity glass lifts. If travelling with heavy luggage, a wheelchair, or a stroller, locate the central elevators near the station control room rather than using crowded escalators.</p>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="purple-line.html">Purple Line guide</a> · <a href="green-line.html">Green Line guide</a> · <a href="how-to-use-namma-metro.html">First-time rider walkthrough</a> · <a href="index.html">Open route planner</a></p></section>`
+  });
+}
+
+// 3. Station Parking Directory & Charges Guide
+{
+  const qa = [
+    ['Which Namma Metro stations have car and bike parking?', 'Major terminal and suburban stations have dedicated multi-level or surface parking lots, including Whitefield (Kadugodi), Swami Vivekananda Road, Baiyappanahalli, Mysuru Road, Jnanabharathi, Kengeri, Nagasandra, Yeshwanthpur, and Silk Institute.'],
+    ['What are the parking charges at Namma Metro stations?', 'Standard two-wheeler parking is ₹15 for the first 4 hours and ₹5 for every additional hour (maximum ₹30 per day). Four-wheeler car parking is ₹30 for the first 4 hours and ₹10 per additional hour (maximum ₹60 per day).'],
+    ['Is overnight parking permitted at Namma Metro stations?', 'Overnight parking is permitted at select 24-hour lots (such as Baiyappanahalli, Swami Vivekananda Road, and Nagasandra) with overnight surcharge slips, but unattended vehicles left for more than 48 hours without prior notice may be towed for security reasons.']
+  ];
+  pages.push({
+    file: 'namma-metro-parking-stations-charges.html',
+    updated: '2026-11-09',
+    title: 'Namma Metro Station Parking Guide: Available Stations, Charges & Timings | Bengaluru',
+    description: 'Complete list of Bengaluru Metro stations with two-wheeler and four-wheeler parking facilities, daily and monthly parking tariffs, operating hours and EV charging.',
+    h1: 'Namma Metro Station Parking: Charges, Timings & Stations',
+    lede: 'Driving your bike or car to the nearest metro station and riding the train into Bengaluru city center avoids peak traffic. Here is the verified list of stations with parking lots, official BMRCL tariffs, and operating guidelines.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>₹15–₹30</strong><span>daily two-wheeler tariff</span></div><div><strong>₹30–₹60</strong><span>daily four-wheeler tariff</span></div><div><strong>20+</strong><span>stations with parking lots</span></div><div><strong>5:00 AM – 11:30 PM</strong><span>parking lot hours</span></div></div>
+    <section><h2>Official BMRCL parking tariff slabs</h2>
+      <div class="table-wrap"><table><thead><tr><th>Duration</th><th>Two-Wheelers (Bikes/Scooters)</th><th>Four-Wheelers (Cars)</th><th>Bicycles</th></tr></thead><tbody>
+        <tr><td>First 4 hours</td><td>₹15</td><td>₹30</td><td>₹5</td></tr>
+        <tr><td>Every subsequent hour</td><td>₹5 / hr</td><td>₹10 / hr</td><td>₹2 / hr</td></tr>
+        <tr><td>Full Day Maximum (daytime)</td><td>₹30</td><td>₹60</td><td>₹10</td></tr>
+        <tr><td>Monthly Parking Pass</td><td>₹750 / month</td><td>₹1,500 / month</td><td>₹150 / month</td></tr>
+        <tr><td>Overnight surcharge (after 11:30 PM)</td><td>₹50 extra</td><td>₹100 extra</td><td>₹20 extra</td></tr>
+      </tbody></table></div>
+    </section>
+    <section><h2>Stations with official parking lots</h2>
+      <h3>Purple Line parking stations</h3>
+      <ul>
+        <li><strong>Whitefield (Kadugodi)</strong>: Large surface lot for two-wheelers and cars; ideal for commuters from Hoskote and eastern outskirts.</li>
+        <li><strong>Kadugodi Tree Park & Pattandur Agrahara</strong>: Ample two-wheeler parking for Whitefield tech workers.</li>
+        <li><strong>Swami Vivekananda Road (Old Madras Road)</strong>: Dedicated multi-level automated car and two-wheeler parking facility.</li>
+        <li><strong>Baiyappanahalli</strong>: Massive ground parking area for both cars and bikes near the Sir M. Visvesvaraya Railway Terminal.</li>
+        <li><strong>Deepanjali Nagar & Mysuru Road</strong>: High-capacity two-wheeler and car parking lots serving western commuters.</li>
+        <li><strong>Jnanabharathi & Kengeri</strong>: Dedicated parking facilities for Bengaluru University students and Mysuru Road commuters.</li>
+        <li><strong>Challaghatta</strong>: Surface parking at the western terminal.</li>
+      </ul>
+      <h3>Green Line parking stations</h3>
+      <ul>
+        <li><strong>Nagasandra</strong>: Major transit hub parking serving Tumkur Road, Nelamangala, and northern commuters.</li>
+        <li><strong>Dasarahalli & Jalahalli</strong>: Two-wheeler parking facilities.</li>
+        <li><strong>Peenya Industry & Goraguntepalya</strong>: Two-wheeler lots for industrial estate and Ring Road commuters.</li>
+        <li><strong>Yeshwanthpur</strong>: High-capacity multi-modal parking facility connected to the railway station.</li>
+        <li><strong>Banashankari</strong>: Integrated parking opposite the BMTC TTMC bus terminal.</li>
+        <li><strong>Yelachenahalli, Konanakunte Cross & Silk Institute</strong>: Generous car and two-wheeler parking serving Kanakapura Road communities.</li>
+      </ul>
+    </section>
+    <section><h2>Electric vehicle (EV) charging facilities</h2>
+      <p>BMRCL has installed public EV charging stations at Baiyappanahalli, Swami Vivekananda Road, Mysuru Road, and Nagasandra stations in partnership with BESCOM. Riders can charge two-wheelers and four-wheelers during their work day using the BESCOM EV Mithra mobile app.</p>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="namma-metro-timings.html">Metro timings</a> · <a href="namma-metro-fares-tickets.html">Fares guide</a> · <a href="index.html">Find nearest station</a></p></section>`
+  });
+}
+
+// 4. Luggage Limits, Prohibited Items & Penalty Rules
+{
+  const qa = [
+    ['What is the maximum luggage allowed in Namma Metro?', 'Each passenger may carry one bag weighing up to 15 kg with maximum dimensions of 60 cm (length) x 45 cm (breadth) x 25 cm (height). Luggage exceeding these limits may be stopped at station baggage scanners.'],
+    ['Is alcohol allowed on Namma Metro?', 'No. Carrying open or sealed alcohol bottles is strictly prohibited on Namma Metro trains and inside station premises.'],
+    ['Can I carry a pet or bird on the metro in Bengaluru?', 'Pets and domestic animals are strictly prohibited on Namma Metro. Only certified service animals accompanying visually impaired passengers are permitted with prior station master approval.'],
+    ['What is the fine for travelling without a ticket on Namma Metro?', 'Travelling without a valid token, smart card tap, or QR ticket attracts a minimum fine of ₹500 plus the maximum distance fare slab (₹90), under the Metro Railways (Operations and Maintenance) Act.']
+  ];
+  pages.push({
+    file: 'namma-metro-luggage-travel-rules-penalties.html',
+    updated: '2026-11-09',
+    title: 'Namma Metro Luggage Limits, Prohibited Items & Penalty Rules | Bengaluru',
+    description: 'Official baggage dimensions, max weight limit (15 kg), prohibited items, pet policies, photography restrictions and penalty fines on Namma Metro.',
+    h1: 'Namma Metro Luggage Limits, Prohibited Items & Rules',
+    lede: 'Every Bengaluru Metro station operates security baggage scanners and metal detectors. Understanding baggage limits, restricted items, and passenger codes of conduct prevents delays at security checkpoints.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>15 kg</strong><span>maximum baggage weight</span></div><div><strong>60×45×25 cm</strong><span>maximum dimensions</span></div><div><strong>Zero</strong><span>alcohol permitted</span></div><div><strong>₹500</strong><span>standard violation fine</span></div></div>
+    <section><h2>Baggage dimensions & weight guidelines</h2>
+      <p>Passengers are permitted to carry personal luggage within the following specifications:</p>
+      <ul>
+        <li><strong>Maximum dimensions</strong>: 60 cm length × 45 cm breadth × 25 cm height.</li>
+        <li><strong>Maximum weight</strong>: 15 kilograms per ticketed passenger.</li>
+        <li><strong>Airport luggage exception</strong>: Passengers carrying standard airline check-in suitcases to or from Kempegowda Bus Station, KSR Railway Station, or airport feeder hubs are generally accommodated if baggage fits through standard X-ray scanners and does not block carriage gangways.</li>
+      </ul>
+    </section>
+    <section><h2>Strictly prohibited items</h2>
+      <div class="table-wrap"><table><thead><tr><th>Category</th><th>Prohibited Items</th><th>Enforcement Action</th></tr></thead><tbody>
+        <tr><td><strong>Weapons & Sharp Objects</strong></td><td>Knives, daggers, cleavers, scissors with blades >10 cm, firearms, ammunition, replica toys</td><td>Confiscation & handover to police</td></tr>
+        <tr><td><strong>Explosives & Flammables</strong></td><td>Firecrackers, matches, lighters, kerosene, petrol, paint thinners, fireworks</td><td>Confiscation & legal prosecution</td></tr>
+        <tr><td><strong>Gases & Chemicals</strong></td><td>Gas cylinders, chemical sprayers, corrosive acids, toxic chemicals</td><td>Strictly barred from entry</td></tr>
+        <tr><td><strong>Alcohol & Narcotics</strong></td><td>Open or sealed liquor bottles, beer cans, illicit substances</td><td>Turned away at security</td></tr>
+        <tr><td><strong>Living Animals</strong></td><td>Dogs, cats, birds, reptiles (service guide dogs exempted)</td><td>Entry denied</td></tr>
+      </tbody></table></div>
+    </section>
+    <section><h2>Code of conduct & penalty schedule</h2>
+      <p>Fines are enforced under the Metro Railways (Operation and Maintenance) Act, 2002:</p>
+      <ul>
+        <li><strong>Ticketless travel or ticket misuse</strong>: ₹500 fine plus the maximum system fare (₹90).</li>
+        <li><strong>Entering the women-only reserved coach</strong>: ₹500 fine and immediate ejection from the train (the first coach in direction of travel is reserved for women).</li>
+        <li><strong>Spitting, chewing tobacco, or littering</strong>: ₹500 spot fine.</li>
+        <li><strong>Drunken or disorderly behavior</strong>: ₹500 fine, removal from station, and transfer to police custody.</li>
+        <li><strong>Alighting on metro tracks or walking on viaducts</strong>: Up to ₹1,000 fine and imprisonment up to 6 months.</li>
+        <li><strong>Eating or drinking inside carriages</strong>: Prohibited; helps maintain train cleanliness and hygiene.</li>
+      </ul>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="how-to-use-namma-metro.html">First-time rider guide</a> · <a href="namma-metro-fares-tickets.html">Fares & tickets</a> · <a href="index.html">Route finder</a></p></section>`
+  });
+}
+
+// 5. Bengaluru Airport by Metro & Feeder Bus Guide
+{
+  const qa = [
+    ['Can I reach Bengaluru Airport directly by Namma Metro today?', 'Not yet directly by train. The dedicated Blue Line (Phase 2B) from Central Silk Board via KR Pura and Hebbal to KIA Terminal is under construction. However, you can take the Purple or Green Line to key transfer stations and board high-frequency BMTC Vayu Vajra airport buses.'],
+    ['Which is the best metro station to catch an airport bus in Bengaluru?', 'K.R. Pura (Purple Line) and Swami Vivekananda Road (Purple Line) are the two most popular transfer points. At K.R. Pura, Vayu Vajra KIA-8 and KIA-8C run every 15 to 20 minutes towards the airport.'],
+    ['How much does it cost to reach the airport via Metro + Vayu Vajra bus?', 'The total trip costs around ₹270 to ₹350 per passenger (approx ₹40 metro fare + ₹250 to ₹300 Vayu Vajra ticket), compared to ₹1,200 to ₹1,800 for a private airport cab.']
+  ];
+  pages.push({
+    file: 'bengaluru-airport-metro-feeder-bus-guide.html',
+    updated: '2026-11-09',
+    title: 'How to Reach Bengaluru Airport by Namma Metro & Vayu Vajra Buses | BLR Transit',
+    description: 'Step-by-step route guide from Namma Metro stations to Kempegowda International Airport (BLR). Purple Line connection to KR Pura / Baiyappanahalli + BMTC Vayu Vajra KIA buses.',
+    h1: 'Reaching Bengaluru Airport (BLR) by Metro and Vayu Vajra',
+    lede: 'While Bengaluru\'s direct airport metro line is being built, combining Namma Metro with BMTC\'s air-conditioned Vayu Vajra buses is the most reliable, traffic-proof, and cost-effective way to get to Kempegowda International Airport.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>₹270–₹350</strong><span>total trip cost vs ₹1,500 cab</span></div><div><strong>~75–90 min</strong><span>predictable journey time</span></div><div><strong>Every 15 min</strong><span>Vayu Vajra frequency</span></div><div><strong>Phase 2B</strong><span>direct Blue Line under build</span></div></div>
+    <section><h2>Top 3 Metro-to-Airport connection routes</h2>
+      <div class="table-wrap"><table><thead><tr><th>Starting Area</th><th>Metro Station</th><th>Connecting Vayu Vajra Bus</th><th>Transfer Walk</th><th>Typical Journey Time</th></tr></thead><tbody>
+        <tr><td><strong>East Bengaluru / IT Corridor</strong></td><td>K.R. Pura (Purple Line)</td><td><strong>KIA-8 / KIA-8C</strong></td><td>2 mins across footbridge to Tin Factory bus bay</td><td>65–75 minutes</td></tr>
+        <tr><td><strong>Central Bengaluru / Indiranagar</strong></td><td>Swami Vivekananda Road</td><td><strong>KIA-4 / KIA-6</strong></td><td>Direct bus stop at station entrance</td><td>75–85 minutes</td></tr>
+        <tr><td><strong>North / West Bengaluru</strong></td><td>Yeshwanthpur (Green Line)</td><td><strong>KIA-10</strong></td><td>1 min to Yeshwanthpur TTMC terminal</td><td>60–70 minutes</td></tr>
+        <tr><td><strong>City Centre / Railway Station</strong></td><td>Majestic (Interchange)</td><td><strong>KIA-9</strong></td><td>Direct skywalk to BMTC Terminal 1</td><td>80–95 minutes</td></tr>
+      </tbody></table></div>
+    </section>
+    <section><h2>Why metro + bus beats airport cabs during peak hours</h2>
+      <p>Bengaluru\'s central corridors—including Old Madras Road, Indiranagar 100ft Road, and Hebbal Junction—frequently experience severe road gridlock during morning and evening rush hours. Taking the Purple Line or Green Line allows you to skip 15–20 kilometers of city-center bumper-to-bumper traffic before boarding an express AC bus on the wide Ballari Road highway.</p>
+    </section>
+    <section><h2>Luggage handling on Vayu Vajra buses</h2>
+      <p>BMTC Vayu Vajra buses feature dedicated luggage bays inside the low-floor cabin and luggage racks beneath the coach. Bus conductors assist with large suitcases at no additional baggage charge.</p>
+    </section>
+    <section><h2>Upcoming Blue Line (Phase 2B) Airport Metro update</h2>
+      <p>BMRCL is actively constructing the 37-kilometer Blue Line (Phase 2B) linking Central Silk Board to Kempegowda International Airport via HSR Layout, Bellandur, Marathahalli, KR Pura, Nagawara, Hebbal, and Yelahanka. Once operational, direct trains will run between the airport and the tech corridor in under 45 minutes.</p>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="metro-feeder-buses-mf-routes-bangalore.html">Feeder bus guide</a> · <a href="namma-metro-fares-tickets.html">Metro fares</a> · <a href="index.html">Plan route</a></p></section>`
+  });
+}
+
+// 6. Metro Feeder Buses MF Series Guide
+{
+  const qa = [
+    ['What does MF stand for in BMTC bus numbers?', 'MF stands for "Metro Feeder". These are dedicated non-AC and AC bus routes operated by BMTC specifically designed to connect metro stations to residential neighborhoods and tech parks that do not have direct rail access.'],
+    ['Can I pay for Metro Feeder buses with UPI or metro smart cards?', 'BMTC conductors carry electronic ticketing machines that support dynamic UPI QR code payments (Google Pay, PhonePe, Paytm). Metro smart cards are not currently integrated with BMTC buses, but BMTC daily and monthly bus passes are accepted on non-AC feeder routes.'],
+    ['Which metro stations have the best feeder bus connectivity to Outer Ring Road tech parks?', 'K.R. Pura, Swami Vivekananda Road, and Baiyappanahalli have the highest frequency of feeder buses heading towards Marathahalli, Kadubeesanahalli, Bellandur, and Sarjapur Road.']
+  ];
+  pages.push({
+    file: 'metro-feeder-buses-mf-routes-bangalore.html',
+    updated: '2026-11-09',
+    title: 'Namma Metro Feeder Bus Guide: MF Series Routes & Tech Park Connections | Bengaluru',
+    description: 'Comprehensive directory of BMTC Metro Feeder (MF series) buses connecting Namma Metro stations to Outer Ring Road, Manyata, Electronic City and Whitefield tech parks.',
+    h1: 'Namma Metro Feeder Buses: MF Series Routes and Tech Parks',
+    lede: 'Bridging the last-mile gap between Bengaluru Metro stations and major office hubs is made simple with BMTC\'s Metro Feeder (MF) bus network. Here is a practical guide to the most essential feeder routes.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>MF Series</strong><span>dedicated feeder branding</span></div><div><strong>Every 10–15 min</strong><span>peak hour frequency</span></div><div><strong>₹6–₹25</strong><span>distance bus fare</span></div><div><strong>UPI</strong><span>accepted on all routes</span></div></div>
+    <section><h2>Popular Metro Feeder routes directory</h2>
+      <div class="table-wrap"><table><thead><tr><th>Route Number</th><th>Connecting Metro Station</th><th>Major Destination Hubs</th><th>Frequency</th></tr></thead><tbody>
+        <tr><td><strong>MF-1</strong></td><td>Swami Vivekananda Road (Purple)</td><td>Bagmane Tech Park, CV Raman Nagar, BEML Gate</td><td>Every 10 mins</td></tr>
+        <tr><td><strong>MF-2</strong></td><td>Indiranagar (Purple)</td><td>Domlur, Kodihalli, Embassy Golf Links (EGL)</td><td>Every 12 mins</td></tr>
+        <tr><td><strong>MF-3</strong></td><td>K.R. Pura (Purple)</td><td>Mahadevapura, Marathahalli Bridge, Bellandur</td><td>Every 8 mins</td></tr>
+        <tr><td><strong>MF-5</strong></td><td>Baiyappanahalli (Purple)</td><td>Kasturi Nagar, Ramamurthy Nagar, Kalyan Nagar</td><td>Every 15 mins</td></tr>
+        <tr><td><strong>MF-7</strong></td><td>Pattandur Agrahara (Purple)</td><td>ITPL, Brigade Tech Gardens, EPIP Zone, Hopefarm</td><td>Every 10 mins</td></tr>
+        <tr><td><strong>MF-9</strong></td><td>Kadugodi Tree Park (Purple)</td><td>Whitefield Railway Station, Seegehalli, Kannamangala</td><td>Every 15 mins</td></tr>
+        <tr><td><strong>MF-12</strong></td><td>Banashankari (Green)</td><td>Padmanabhanagar, Uttarahalli, Kumaraswamy Layout</td><td>Every 12 mins</td></tr>
+        <tr><td><strong>MF-15</strong></td><td>RV Road / Jayanagar (Green)</td><td>BTM Layout 2nd Stage, Silk Board Junction</td><td>Every 10 mins</td></tr>
+      </tbody></table></div>
+    </section>
+    <section><h2>Ticketing and payment on feeder buses</h2>
+      <ul>
+        <li><strong>Cash & UPI</strong>: Conductors issue printed tickets with QR codes for UPI payments (GPay, PhonePe).</li>
+        <li><strong>BMTC Daily Pass</strong>: If you hold a ₹70 standard BMTC daily bus pass, it is valid on all non-AC MF routes without paying extra.</li>
+        <li><strong>Vajra AC Pass</strong>: If travelling on air-conditioned feeder buses, a ₹120 Vajra daily pass is valid.</li>
+      </ul>
+    </section>
+    <section><h2>First and last feeder bus timings</h2>
+      <p>Most MF series buses begin operations at <strong>6:00 AM</strong> from metro station bays and run until <strong>10:30 PM</strong>, aligning with train arrival schedules at terminal and interchange stations.</p>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="how-to-use-namma-metro.html">First-time rider guide</a> · <a href="purple-line.html">Purple Line stations</a> · <a href="index.html">Plan your journey</a></p></section>`
+  });
+}
+
+// 7. Lost and Found Helpline Guide
+{
+  const qa = [
+    ['What should I do if I forget an item inside a Namma Metro train?', 'Immediately report it to the Station Controller at your destination station. Station controllers coordinate with the train operator and the terminal depot security to secure your item.'],
+    ['Where is the Central Lost Property Office for Bengaluru Metro?', 'Items unclaimed within 48 hours at local stations are deposited at the BMRCL Central Lost Property Office located at Yeshwanthpur Metro Station (Concourse level, Green Line).'],
+    ['What is the official Namma Metro customer care helpline number?', 'You can reach BMRCL customer care by calling toll-free 1800-425-12345 or landline 080-25191091, or by emailing travelhelp@bmrc.co.in.']
+  ];
+  pages.push({
+    file: 'namma-metro-lost-and-found-helpline.html',
+    updated: '2026-11-09',
+    title: 'Namma Metro Lost and Found: How to Retrieve Lost Items & Helpline Contacts | Bengaluru',
+    description: 'What to do if you lose your phone, wallet or bag on the Bengaluru Metro. Station controller contacts, Yeshwanthpur Central Lost Property Office, and BMRCL helpline.',
+    h1: 'Namma Metro Lost and Found: Retrieval Steps & Helplines',
+    lede: 'Every year thousands of wallets, laptops, umbrellas, and mobile phones are left on Bengaluru Metro seats. BMRCL operates a systematic Lost and Found cataloging procedure across all stations.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>1800-425-12345</strong><span>toll-free helpline</span></div><div><strong>080-25191091</strong><span>metro control helpline</span></div><div><strong>Yeshwanthpur</strong><span>central lost property office</span></div><div><strong>48 hours</strong><span>station holding period</span></div></div>
+    <section><h2>Step-by-step retrieval procedure</h2>
+      <ol class="steps">
+        <li><strong>Alert the nearest Station Controller</strong>: Walk to the Station Control Room (located near the customer care desk) at the station where you exited. Provide the train direction, approximate coach number (front, middle, or rear), and time of travel.</li>
+        <li><strong>Station Controller coordinates with train staff</strong>: If the train is still in transit or at the terminal loop (Whitefield, Challaghatta, Madavara, or Silk Institute), the station staff will radio train security to inspect the seat.</li>
+        <li><strong>Item logged in Station Register</strong>: If recovered, the item is logged with a unique tracking number in the station\'s official Lost and Found register.</li>
+        <li><strong>Claiming your property</strong>: Present a government photo identity card (Aadhaar, Passport, Voter ID) and verifiable proof of ownership (unlocking the smartphone, displaying matching serial numbers, or describing distinctive internal contents).</li>
+      </ol>
+    </section>
+    <section><h2>Central Lost Property Office at Yeshwanthpur</h2>
+      <p>If an item is not claimed at the local station within 48 hours, it is transferred under secure custody to the <strong>BMRCL Central Lost Property Office (LPO)</strong> located at <strong>Yeshwanthpur Metro Station</strong> (Green Line).</p>
+      <ul>
+        <li><strong>Location</strong>: Concourse Level, Yeshwanthpur Metro Station, Bengaluru - 560022.</li>
+        <li><strong>Operating Hours</strong>: Monday to Saturday, 10:00 AM to 5:30 PM (closed on Sundays and public holidays).</li>
+        <li><strong>Storage duration</strong>: Unclaimed general items are retained for up to 6 months before public auction or donation according to BMRCL regulations.</li>
+      </ul>
+    </section>
+    <section><h2>Official emergency & customer care contacts</h2>
+      <div class="table-wrap"><table><thead><tr><th>Contact Channel</th><th>Details</th><th>Operating Hours</th></tr></thead><tbody>
+        <tr><td><strong>BMRCL Toll-Free Helpline</strong></td><td><code>1800-425-12345</code></td><td>5:00 AM – 11:30 PM daily</td></tr>
+        <tr><td><strong>Central Control Room</strong></td><td><code>080-25191091</code> / <code>080-25191092</code></td><td>24/7 Operations</td></tr>
+        <tr><td><strong>Email Support</strong></td><td><code>travelhelp@bmrc.co.in</code></td><td>Replies within 2 working days</td></tr>
+        <tr><td><strong>Official BMRCL Portal</strong></td><td><a href="https://www.bmrc.co.in/" target="_blank" rel="noopener noreferrer">bmrc.co.in</a></td><td>Live notices & announcements</td></tr>
+      </tbody></table></div>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="how-to-use-namma-metro.html">First-time rider guide</a> · <a href="namma-metro-timings.html">Metro timings</a> · <a href="index.html">Route finder</a></p></section>`
+  });
+}
+
+// 8. Station-by-Station First and Last Train Timings
+{
+  const qa = [
+    ['What time does the first Namma Metro train start in the morning?', 'On Monday through Saturday, the first train departs terminal stations (Challaghatta, Whitefield, Madavara, Silk Institute) at 5:00 AM. On Sundays, services start at 7:00 AM.'],
+    ['What time does the last Namma Metro train leave at night?', 'The last trains depart from terminal stations at 11:00 PM on all days of the week. Connecting trains are coordinated at Majestic interchange until 11:25 PM.'],
+    ['Does Namma Metro run late during IPL matches or New Year celebrations?', 'Yes. BMRCL regularly extends train operations until 1:00 AM or 2:00 AM on New Year\'s Eve and during IPL cricket matches played at M. Chinnaswamy Stadium (Cubbon Park and MG Road stations).']
+  ];
+  pages.push({
+    file: 'namma-metro-first-and-last-train-timings.html',
+    updated: '2026-11-09',
+    title: 'Namma Metro First & Last Train Timings: Station-by-Station Timetable | Bengaluru',
+    description: 'Complete first and last train timings for Purple Line, Green Line, and Yellow Line. Weekday, Saturday, Sunday and holiday departure schedules across terminal stations.',
+    h1: 'Namma Metro First and Last Train Timings (Complete Timetable)',
+    lede: 'Catching an early morning train or returning from late-night work in Bengaluru requires knowing precise first and last train departure times. Here is the verified timetable across all metro corridors.',
+    schema: [faq(qa)],
+    body: `
+    <div class="stats"><div><strong>5:00 AM</strong><span>first train Mon–Sat</span></div><div><strong>7:00 AM</strong><span>first train Sunday</span></div><div><strong>11:00 PM</strong><span>last train daily</span></div><div><strong>11:25 PM</strong><span>Majestic sync connection</span></div></div>
+    <section><h2>Terminal departure timetable</h2>
+      <div class="table-wrap"><table><thead><tr><th>Metro Line</th><th>Originating Terminal</th><th>First Train (Mon–Sat)</th><th>First Train (Sunday)</th><th>Last Train (All Days)</th></tr></thead><tbody>
+        <tr><td><span class="badge purple">Purple Line</span></td><td>Challaghatta</td><td>5:00 AM</td><td>7:00 AM</td><td>11:00 PM</td></tr>
+        <tr><td><span class="badge purple">Purple Line</span></td><td>Whitefield (Kadugodi)</td><td>5:00 AM</td><td>7:00 AM</td><td>11:00 PM</td></tr>
+        <tr><td><span class="badge green">Green Line</span></td><td>Madavara (BIEC)</td><td>5:00 AM</td><td>7:00 AM</td><td>11:00 PM</td></tr>
+        <tr><td><span class="badge green">Green Line</span></td><td>Silk Institute</td><td>5:00 AM</td><td>7:00 AM</td><td>11:00 PM</td></tr>
+        <tr><td><span class="badge yellow">Yellow Line</span></td><td>Rashtreeya Vidyalaya Road</td><td>6:00 AM</td><td>7:00 AM</td><td>10:00 PM</td></tr>
+        <tr><td><span class="badge yellow">Yellow Line</span></td><td>Bommasandra</td><td>6:00 AM</td><td>7:00 AM</td><td>10:00 PM</td></tr>
+      </tbody></table></div>
+    </section>
+    <section><h2>The Majestic 11:25 PM synchronized last train</h2>
+      <p>To ensure commuters interchanging between Purple and Green Lines do not get stranded at night, BMRCL holds connecting trains at Nadaprabhu Kempegowda Station (Majestic) until <strong>11:25 PM</strong>. If you arrive at Majestic on an 11:00 PM departure from Challaghatta or Silk Institute, your connecting train towards Whitefield or Madavara will wait at the platform until all transfer passengers cross over.</p>
+    </section>
+    <section><h2>Peak vs non-peak train frequencies</h2>
+      <ul>
+        <li><strong>Morning Peak (8:30 AM – 10:30 AM)</strong>: A train arrives every <strong>3 to 5 minutes</strong> on the Purple Line central stretch (between Vijayanagar and Baiyappanahalli), and every 5 to 6 minutes on the Green Line.</li>
+        <li><strong>Midday Off-Peak (11:00 AM – 4:30 PM)</strong>: A train arrives every <strong>8 to 10 minutes</strong> across all active lines.</li>
+        <li><strong>Evening Peak (5:30 PM – 8:30 PM)</strong>: A train arrives every <strong>4 to 5 minutes</strong> on the Purple Line, and every 5 to 7 minutes on the Green Line.</li>
+        <li><strong>Late Night (after 9:30 PM)</strong>: Frequency widens to <strong>12 to 15 minutes</strong> between trains.</li>
+      </ul>
+    </section>
+    ${faqHtml(qa)}
+    <section><h2>Related guides</h2><p><a href="namma-metro-timings.html">Detailed line frequency</a> · <a href="namma-metro-fares-tickets.html">Fares & ticket slabs</a> · <a href="index.html">Route finder</a></p></section>`
+  });
+}
+
 // ---------- Guides hub ----------
 pages.push({
   file: 'guides.html',
@@ -403,7 +782,23 @@ pages.push({
   lede: 'Everything on this site in one place. Each guide uses the same station, timetable and fare data as the route finder.',
   type: 'website',
   body: `
-    <section><h2>Getting started</h2><ul class="cards"><li><a href="how-to-use-namma-metro.html">How to use Namma Metro</a><span>Tickets, security, platforms and changing lines for first-time riders.</span></li><li><a href="namma-metro-fares-tickets.html">Fares and tickets</a><span>Distance fare slabs and how tokens, QR tickets and smart cards compare.</span></li><li><a href="namma-metro-timings.html">Timings</a><span>First and last trains and the gap between trains on every line and day.</span></li></ul></section>
+    <section><h2>Essential Commuter Guides</h2><ul class="cards">
+      <li><a href="namma-metro-smart-card-qr-tickets-guide.html">Smart Cards, QR Tickets & WhatsApp Booking</a><span>Discounts, online recharge, WhatsApp bot +91 81055 56677, and NCMC cards.</span></li>
+      <li><a href="majestic-interchange-metro-guide.html">Majestic Metro Interchange Guide</a><span>Step-by-step walkthrough for changing between Purple & Green lines.</span></li>
+      <li><a href="namma-metro-first-and-last-train-timings.html">First & Last Train Timings</a><span>Station-by-station departure timetable, peak gaps, and Majestic sync.</span></li>
+      <li><a href="namma-metro-fares-tickets.html">Fares & Ticket Slabs</a><span>BMRCL distance fare slabs from ₹10 to ₹90 and payment options.</span></li>
+      <li><a href="namma-metro-timings.html">Frequency & Day-by-Day Schedules</a><span>First and last trains and the gap between trains on every line and day.</span></li>
+      <li><a href="how-to-use-namma-metro.html">First-Time Rider Guide</a><span>Tickets, security, platforms, and etiquette for beginners.</span></li>
+    </ul></section>
+
+    <section><h2>Connectivity & City Transit</h2><ul class="cards">
+      <li><a href="bengaluru-airport-metro-feeder-bus-guide.html">Bengaluru Airport by Metro & Vayu Vajra</a><span>Combining Purple/Green lines with express AC buses to save ₹1,200 on cabs.</span></li>
+      <li><a href="metro-feeder-buses-mf-routes-bangalore.html">Metro Feeder Buses (MF Series)</a><span>Connecting metro stations to Outer Ring Road, Manyata, and Whitefield tech parks.</span></li>
+      <li><a href="namma-metro-parking-stations-charges.html">Station Parking Charges & Locations</a><span>Complete directory of two-wheeler and four-wheeler parking lots and tariffs.</span></li>
+      <li><a href="namma-metro-luggage-travel-rules-penalties.html">Luggage Limits & Travel Rules</a><span>15 kg baggage rule, restricted items, alcohol prohibition, and penalty fines.</span></li>
+      <li><a href="namma-metro-lost-and-found-helpline.html">Lost and Found & Helplines</a><span>How to retrieve forgotten belongings, station registers, and official helplines.</span></li>
+    </ul></section>
+
     <section><h2>Line guides</h2><ul class="cards">${Object.entries(LINES).map(([l, m]) => `<li><a href="${m.slug}.html">${l}</a><span>${esc(m.from)} to ${esc(m.to)}: all stations, timings and tips.</span></li>`).join('')}</ul></section>
     <section><h2>Upcoming</h2><ul class="cards"><li><a href="pink-line.html">Pink Line opening date and stations</a><span>Kalena Agrahara to Tavarekere: 6 stations, expected around 15 Nov 2026.</span></li></ul></section>
     <section><h2>Popular routes</h2><ul class="cards">${ROUTES.map(o => `<li><a href="${o.file}">${o.short[0]} to ${o.short[1]}</a><span>Stops, fare, platform and where to change.</span></li>`).join('')}</ul></section>`
