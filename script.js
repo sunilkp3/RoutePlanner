@@ -141,7 +141,7 @@ const STATIONS = {
   "Biocon Hebbagodi": { line: "Yellow Line", order: 15, lat: 12.8290900, lng: 77.6813300 },
   "Delta electronics Bommasandra": { line: "Yellow Line", order: 16, lat: 12.8193300, lng: 77.6883400 },
 
-  // PINK LINE (upcoming). Jayadeva Hospital is the change to the Yellow Line.
+  // PINK LINE (opened 13 Nov 2026). Jayadeva Hospital is the change to the Yellow Line.
   "Kalena Agrahara": { line: "Pink Line", order: 1, lat: 12.8715800, lng: 77.5936300 },
   "Hulimavu": { line: "Pink Line", order: 2, lat: 12.8810800, lng: 77.5957900 },
   "IIM Bangalore": { line: "Pink Line", order: 3, lat: 12.8956378, lng: 77.5996666 },
@@ -266,12 +266,16 @@ const STATION_ALIASES = {
 
 const stationNames = Object.keys(STATIONS).sort();
 
-// Upcoming: selectable as a route preview, but never picked as a nearest station and
-// has no timetable. Remove these checks when the line opens.
-const PINK_UPCOMING_NOTE = 'Pink Line is upcoming. Opening expected around 15 Nov 2026, date not final. This route is a preview and you can\'t travel it yet. Fare and time are estimates, and train timings aren\'t published.';
+// Pink Line opened on 13 Nov 2026. Before this time Pink routes show a note instead of train times.
+const PINK_PUBLIC_START = new Date('2026-11-13T00:00:00+05:30');
+const PINK_UPCOMING_NOTE = 'Pink Line opens on 13 Nov 2026.';
+
+function isPinkBeforeStart() {
+  return Date.now() < PINK_PUBLIC_START.getTime();
+}
 
 function isUpcomingRoute(path) {
-  return Array.isArray(path) && path.some(station => STATIONS[station]?.line === "Pink Line");
+  return isPinkBeforeStart() && Array.isArray(path) && path.some(station => STATIONS[station]?.line === "Pink Line");
 }
 
 const LINE_COLORS = {
@@ -339,6 +343,14 @@ const BMRC_TIMETABLES = {
       toBommasandra: [[420, 528, 18], [528, 598, 14], [598, 646, 12], [646, 1256, 10], [1256, 1340, 12], [1340, 1370, 15], [1370, 1410, 20], [1410, 1435, 25]],
       toRvRoad: [[420, 492, 18], [492, 548, 14], [548, 620, 12], [620, 1220, 10], [1220, 1352, 12], [1352, 1362, 10]]
     }
+  },
+  // Reported timings at opening (13 Nov 2026): 6 AM to 11 PM, Sundays from 7 AM, every 8 min.
+  "Pink Line": {
+    updated: "2026-11-13",
+    monday: { toTavarekere: [[360, 1380, 8]], toKalenaAgrahara: [[360, 1380, 8]] },
+    weekday: { toTavarekere: [[360, 1380, 8]], toKalenaAgrahara: [[360, 1380, 8]] },
+    saturday: { toTavarekere: [[360, 1380, 8]], toKalenaAgrahara: [[360, 1380, 8]] },
+    sunday: { toTavarekere: [[420, 1380, 8]], toKalenaAgrahara: [[420, 1380, 8]] }
   }
 };
 
@@ -389,7 +401,7 @@ function findNearestStationForCoordinates(lat, lng) {
   let minDistance = Infinity;
 
   for (const [station, coords] of Object.entries(STATIONS)) {
-    if (!coords || coords.lat == null || coords.lng == null || coords.line === "Pink Line") continue;
+    if (!coords || coords.lat == null || coords.lng == null) continue;
     const dist = getDistanceInKm(lat, lng, coords.lat, coords.lng);
     if (dist < minDistance) {
       minDistance = dist;
@@ -552,6 +564,7 @@ function getDirectionKey(line, directionText) {
   if (line === "Purple Line") return directionText.includes("Whitefield") ? "toWhitefield" : "toChallaghatta";
   if (line === "Green Line") return directionText.includes("Silk Institute") ? "toSilkInstitute" : "toMadavara";
   if (line === "Yellow Line") return directionText.includes("Bommasandra") ? "toBommasandra" : "toRvRoad";
+  if (line === "Pink Line") return directionText.includes("Tavarekere") ? "toTavarekere" : "toKalenaAgrahara";
   return null;
 }
 
@@ -631,7 +644,9 @@ const DIRECTION_ORIGIN_TERMINALS = {
   toSilkInstitute: "Madavara",
   toMadavara: "Silk Institute",
   toBommasandra: "Rashtreeya Vidyalaya Road",
-  toRvRoad: "Delta electronics Bommasandra"
+  toRvRoad: "Delta electronics Bommasandra",
+  toTavarekere: "Kalena Agrahara",
+  toKalenaAgrahara: "Tavarekere"
 };
 
 function getMinutesFromOriginTerminal(station, directionKey) {
@@ -663,6 +678,9 @@ function getMultipleUpcomingTrainArrivals(routeInfo, count = 3) {
   const line = typeof routeInfo === "string" ? null : (routeInfo.line || null);
   const timetable = line ? BMRC_TIMETABLES[line] : null;
   const directionKey = timetable ? getDirectionKey(line, directionText) : null;
+  if (line === "Pink Line" && isPinkBeforeStart()) {
+    return [{ mins: "From 13 Nov", minsNumeric: 0, detail: "Pink Line opens on 13 Nov 2026", dateObj: null, isAvailable: false }];
+  }
   if (!directionKey) {
     return [{ mins: "See BMRCL", minsNumeric: 0, detail: `Check BMRCL official timetable (${directionText})`, dateObj: null, isAvailable: false }];
   }
@@ -756,8 +774,8 @@ function renderUnselectedDualDirections(boardingStation) {
 
   if (!boardingStation || !STATIONS[boardingStation]) return;
 
-  if (STATIONS[boardingStation].line === "Pink Line") {
-    container.innerHTML = `<div class="next-train-box"><div><div class="time-title">Upcoming station</div><div class="time-sub">${PINK_UPCOMING_NOTE}</div></div></div>`;
+  if (STATIONS[boardingStation].line === "Pink Line" && isPinkBeforeStart()) {
+    container.innerHTML = `<div class="next-train-box"><div><div class="time-title">Opens 13 Nov</div><div class="time-sub">${PINK_UPCOMING_NOTE}</div></div></div>`;
     return;
   }
 
@@ -774,6 +792,10 @@ function renderUnselectedDualDirections(boardingStation) {
     "Yellow Line": [
       { label: "Platform 2", dir: "Towards Delta electronics Bommasandra", line: "Yellow Line" },
       { label: "Platform 1", dir: "Towards Rashtreeya Vidyalaya Road", line: "Yellow Line" }
+    ],
+    "Pink Line": [
+      { label: "Platform not announced", dir: "Towards Tavarekere", line: "Pink Line" },
+      { label: "Platform not announced", dir: "Towards Kalena Agrahara", line: "Pink Line" }
     ]
   };
   const INTERCHANGE_DIRECTIONS = {
@@ -787,6 +809,10 @@ function renderUnselectedDualDirections(boardingStation) {
       { ...directionsByLine["Green Line"][0], label: "Platform 2 (Green Line)" },
       { ...directionsByLine["Green Line"][1], label: "Platform 1 (Green Line)" },
       { ...directionsByLine["Yellow Line"][0], label: "Platform 3 (Yellow Line Concourse)" }
+    ],
+    "Jayadeva Hospital": [
+      ...directionsByLine["Yellow Line"],
+      ...directionsByLine["Pink Line"]
     ]
   };
   const directions = (INTERCHANGE_DIRECTIONS[boardingStation] || directionsByLine[stationLine] || [])
@@ -962,7 +988,7 @@ function updateRouteScheduleView(schedules) {
     }
 
     const timeTagHTML = upcomingRoute
-      ? (STATIONS[station].line === "Pink Line" ? `<span class="arrival-time-tag upcoming-tag">Upcoming</span>` : '')
+      ? (STATIONS[station].line === "Pink Line" ? `<span class="arrival-time-tag upcoming-tag">From 13 Nov</span>` : '')
       : (activeSchedule && activeSchedule.isAvailable)
       ? `<span class="arrival-time-tag">${isStart ? 'Dep:' : 'Arr:'} ${runningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`
       : `<span class="arrival-time-tag no-service-tag">No Service</span>`;
@@ -1716,7 +1742,7 @@ function renderLeafletMetroMap() {
       color,
       weight: highlighted ? 6 : 3,
       opacity: highlighted ? 0.95 : 0.35,
-      dashArray: lineName === "Pink Line" ? '8 10' : null,
+      dashArray: null,
       lineCap: 'round',
       lineJoin: 'round'
     }).addTo(leafletLayerGroup);
@@ -1900,7 +1926,7 @@ function setupAutocomplete(inputId, resultsId, helperId) {
           <span>🚆 ${st}</span>
           <span class="line-badge-sm ${lineType}">${lineType}</span>
         </div>
-        <span class="station-match-badge">${STATIONS[st].line === "Pink Line" ? 'Upcoming station' : 'Direct Metro Station'}</span>
+        <span class="station-match-badge">Direct Metro Station</span>
       `;
 
       item.addEventListener('mousedown', (e) => {
