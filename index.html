@@ -312,7 +312,133 @@
       <span class="promo-bottom"><span class="promo-action">Calculate my SIP ↗</span><span class="promo-art" aria-hidden="true">₹ <i></i><i></i><i></i></span></span>
       <span class="promo-note">Illustrations only. Investment returns are not guaranteed.</span>
     </a>
+    <div class="promo promo-video">
+      <span class="promo-top"><span>BLRMETRO · WATCH</span><span class="promo-label">Video</span></span>
+      <div class="promo-video-body">
+        <div class="promo-video-text">
+          <span class="promo-headline">Six levels.<br>One station.</span>
+          <span class="promo-copy">See how Jayadeva Hospital links the new Pink Line with the Yellow Line in a 3-minute walkthrough.</span>
+          <span class="promo-bottom"><button type="button" class="promo-action promo-video-play">Play video ▶</button></span>
+        </div>
+        <button type="button" class="promo-video-frame promo-video-play" aria-label="Play video: Jayadeva Hospital interchange explained">
+          <img src="https://i.ytimg.com/vi/Z7usMtC975g/hqdefault.jpg" alt="" width="480" height="360" loading="lazy">
+          <span class="promo-play" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
   </aside>
+<style>
+  .promo-video { grid-column: 1 / -1; background: linear-gradient(130deg, #ffe4f0, #ffc9de); color: #5b1438; }
+  .promo-video .promo-action { border: 0; background: #5b1438; font-family: inherit; cursor: pointer; }
+  .promo-video-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 20px; align-items: center; }
+  .promo-video-text { display: flex; flex-direction: column; gap: 12px; }
+  .promo-video-frame { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; border-radius: 14px; overflow: hidden; background: #000; cursor: pointer; }
+  .promo-video-frame img, .promo-video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+  .promo-play { position: absolute; top: 50%; left: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(0, 0, 0, 0.65); }
+  .promo-play::before { content: ""; position: absolute; top: 50%; left: 50%; margin: -12px 0 0 -7px; border-style: solid; border-width: 12px 0 12px 20px; border-color: transparent transparent transparent #fff; }
+  .promo-video-frame:hover .promo-play { background: #ff0033; }
+  .promo-video-frame:focus-visible, .promo-video .promo-action:focus-visible { outline: 3px solid #5b1438; outline-offset: 3px; }
+  .sponsor-list.is-rotating { grid-template-columns: minmax(0, 1fr); }
+  .sponsor-list.is-rotating > .promo { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0s linear 0.5s; }
+  .sponsor-list.is-rotating > .promo.is-active { opacity: 1; visibility: visible; transition: opacity 0.5s ease; }
+  .promo-dots { display: flex; justify-content: center; gap: 2px; margin-top: 4px; }
+  .promo-dot { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; background: none; cursor: pointer; }
+  .promo-dot::before { content: ""; width: 8px; height: 8px; border-radius: 4px; background: var(--text); opacity: 0.3; transition: width 0.2s, opacity 0.2s; }
+  .promo-dot[aria-current="true"]::before { width: 22px; opacity: 0.85; }
+  .promo-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 10px; }
+  @media (max-width: 540px) {
+    .promo-video-body { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .promo-video-frame { order: -1; }
+    .promo-video .promo-copy { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sponsor-list.is-rotating > .promo, .sponsor-list.is-rotating > .promo.is-active { transition: none; }
+  }
+</style>
+<script>
+(function () {
+  var list = document.querySelector('.sponsor-list');
+  if (!list) return;
+  var cards = Array.prototype.slice.call(list.children).filter(function (el) { return el.classList.contains('promo'); });
+  var VIDEO_SRC = 'https://www.youtube-nocookie.com/embed/Z7usMtC975g?autoplay=1&playsinline=1&rel=0';
+  var stopped = false;
+
+  Array.prototype.forEach.call(list.querySelectorAll('.promo-video-play'), function (btn) {
+    btn.addEventListener('click', function () {
+      stopped = true;
+      var frame = list.querySelector('button.promo-video-frame');
+      if (!frame) return;
+      var holder = document.createElement('div');
+      holder.className = 'promo-video-frame';
+      var player = document.createElement('iframe');
+      player.src = VIDEO_SRC;
+      player.title = 'Jayadeva Hospital interchange explained';
+      player.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      player.allowFullscreen = true;
+      holder.appendChild(player);
+      frame.parentNode.replaceChild(holder, frame);
+      if (window.gtag) gtag('event', 'promo_video_play');
+    });
+  });
+
+  if (cards.length < 2) return;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = Math.floor(Math.random() * cards.length);
+  var lastChange = Date.now();
+  var held = false;
+  var onScreen = true;
+
+  var dots = document.createElement('div');
+  dots.className = 'promo-dots';
+  dots.setAttribute('role', 'group');
+  dots.setAttribute('aria-label', 'Choose an ad');
+  cards.forEach(function (card, i) {
+    var dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'promo-dot';
+    dot.setAttribute('aria-label', 'Show ' + (i + 1) + ' of ' + cards.length);
+    dot.addEventListener('click', function () { show(i); });
+    dots.appendChild(dot);
+  });
+  list.classList.add('is-rotating');
+  list.parentNode.insertBefore(dots, list.nextSibling);
+
+  function show(i) {
+    current = (i + cards.length) % cards.length;
+    lastChange = Date.now();
+    cards.forEach(function (card, j) { card.classList.toggle('is-active', j === current); });
+    Array.prototype.forEach.call(dots.children, function (dot, j) {
+      if (j === current) dot.setAttribute('aria-current', 'true'); else dot.removeAttribute('aria-current');
+    });
+  }
+  show(current);
+
+  list.addEventListener('mouseenter', function () { held = true; });
+  list.addEventListener('mouseleave', function () { held = false; lastChange = Date.now(); });
+  list.addEventListener('focusin', function () { held = true; });
+  list.addEventListener('focusout', function () { held = false; lastChange = Date.now(); });
+
+  var startX = null, startY = null;
+  list.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+  list.addEventListener('touchend', function (e) {
+    if (startX === null) return;
+    var dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
+    startX = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+    else lastChange = Date.now();
+  }, { passive: true });
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) { onScreen = entries[0].isIntersecting; if (onScreen) lastChange = Date.now(); }, { threshold: 0.5 }).observe(list);
+  }
+
+  if (reduceMotion) return;
+  setInterval(function () {
+    if (stopped || held || !onScreen || document.hidden) return;
+    if (Date.now() - lastChange >= 7000) show(current + 1);
+  }, 500);
+})();
+</script>
 
 <section class="card seo-content" aria-label="Bengaluru Metro guides">
   <h2>Bengaluru Namma Metro guides</h2>
