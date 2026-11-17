@@ -1604,9 +1604,18 @@ function startGPSLiveTracking() {
   const handleSuccess = (position) => {
     applyDetectedPosition(position, statusDiv);
   };
-  const handleError = () => {
-    isTracking = false;
-    if (statusDiv) statusDiv.innerText = 'Live location data cannot be fetched due to lack of location permission.';
+  const handleError = (error) => {
+    // Only a refusal stops tracking. A timeout or "position unavailable" is what tunnels do:
+    // keep watching and say there is no signal, so the dot moves as soon as GPS returns.
+    if (error && error.code === 1) {
+      isTracking = false;
+      if (statusDiv) statusDiv.innerText = 'Live location data cannot be fetched due to lack of location permission.';
+      return;
+    }
+    if (!showNoGpsStatus() && statusDiv) {
+      const text = 'No GPS signal right now (underground or indoors). Waiting for signal: your station updates as soon as GPS comes back.';
+      if (text !== lastRenderedLiveStatusText) { statusDiv.innerHTML = text; lastRenderedLiveStatusText = text; }
+    }
   };
 
   try {
