@@ -454,6 +454,150 @@ function findRouteRecoveryIndex(lat, lng, activeIdx) {
   return passedStation ? nearestSegment : -1;
 }
 
+// UNDERGROUND TRACKING (no GPS in tunnels)
+// Phones get no usable GPS underground, so between tunnel stations the rider's position comes from the
+// train itself: the phone's motion sensors see the train brake (a few seconds of steady deceleration)
+// and then stand still at the platform. Each such stop moves the journey one station on, but only while
+// GPS is weak, only towards an underground station, and never faster than a real station hop.
+// An accurate GPS fix above ground always takes over again.
+const UNDERGROUND_STATIONS = new Set([
+  "Krantivira Sangolli Rayanna Railway Station",
+  "Nadaprabhu Kempegowda (Majestic)",
+  "Sir M. Visvesvaraya Station, Central College",
+  "Dr. B. R. Ambedkar Station, Vidhana Soudha",
+  "Cubbon Park",
+  "Chickpet",
+  "Krishna Rajendra Market"
+]);
+const GPS_WEAK_AFTER_MS = 20000;          // No accurate fix for this long = GPS lost (tunnel)
+const MIN_STATION_HOP_MS = 50000;         // Shortest real run + dwell between two stations
+const ESTIMATE_HOLD_MS = 6 * 60000;       // How long an estimated station stands without confirmation
+const BRAKE_ACCEL = 0.35;                 // m/s², smoothed: train braking/accelerating
+const STILL_ACCEL = 0.12;                 // m/s², smoothed: train standing at a platform
+const STILL_JITTER = 0.6;                 // m/s², raw: rules out walking or shaking the phone
+const BRAKE_JITTER = 0.6;                 // m/s², average shake while braking: a train is smooth, footsteps are not
+const BRAKE_NEEDED_MS = 4000;             // Braking time needed before a stop counts
+const STILL_NEEDED_MS = 10000;            // Standing time needed to count a stop (doors open ~20-30 s)
+
+let lastAccurateFixTime = null;
+let undergroundEstimateTime = null;       // When the current station was estimated from a stop
+let lastUndergroundAdvanceTime = 0;
+let motionListening = false;
+let motionSmooth = { x: 0, y: 0, z: 0, t: null, shake: 0 };
+let motionPhase = { depart: null, braking: false, stillMs: 0, push: { ms: 0, x: 0, y: 0, z: 0, used: false } };
+
+function isUndergroundStation(station) {
+  return UNDERGROUND_STATIONS.has(station);
+}
+
+function isGpsWeak(now = Date.now()) {
+  return lastAccurateFixTime === null || now - lastAccurateFixTime > GPS_WEAK_AFTER_MS;
+}
+
+function isUndergroundEstimateActive(now = Date.now()) {
+  return undergroundEstimateTime !== null && now - undergroundEstimateTime <= ESTIMATE_HOLD_MS;
+}
+
+function resetUndergroundEstimate() {
+  undergroundEstimateTime = null;
+  lastUndergroundAdvanceTime = 0;
+  motionPhase = { depart: null, braking: false, stillMs: 0, push: { ms: 0, x: 0, y: 0, z: 0, used: false } };
+}
+
+// Feeds one accelerometer reading (gravity removed, m/s²). Returns true when a train stop is detected.
+// A steady train feels like standing still, so "still" alone proves nothing. A stop is: a departure push,
+// then a push the opposite way (braking), then standing still. Footsteps are too shaky to count as a push.
+function processMotionSample(t, ax, ay, az) {
+  const dt = motionSmooth.t === null ? 0 : Math.min(1, Math.max(0, (t - motionSmooth.t) / 1000));
+  const alpha = dt / (0.5 + dt); // ~0.3 Hz low-pass: keeps train braking, drops footsteps and rattle
+  const x = motionSmooth.x + (ax - motionSmooth.x) * alpha;
+  const y = motionSmooth.y + (ay - motionSmooth.y) * alpha;
+  const z = motionSmooth.z + (az - motionSmooth.z) * alpha;
+  // Shake: how far each reading strays from the smooth trend, averaged over about a second.
+  const stray = Math.hypot(ax - x, ay - y, az - z);
+  const shakeAlpha = dt / (1 + dt);
+  const shake = motionSmooth.t === null ? stray : motionSmooth.shake + (stray - motionSmooth.shake) * shakeAlpha;
+  motionSmooth = { x, y, z, t, shake };
+  const smooth = Math.hypot(x, y, z);
+  const raw = Math.hypot(ax, ay, az);
+
+  const m = motionPhase;
+  if (smooth > BRAKE_ACCEL && shake < BRAKE_JITTER) {
+    m.push.ms += dt * 1000; m.push.x += x * dt; m.push.y += y * dt; m.push.z += z * dt;
+    m.stillMs = 0;
+    if (m.push.ms >= BRAKE_NEEDED_MS && !m.push.used) {
+      m.push.used = true;
+      const p = [m.push.x, m.push.y, m.push.z];
+      if (!m.depart) {
+        m.depart = p; m.braking = false;                     // train pulls away
+      } else {
+        const d = m.depart;
+        const cos = (p[0] * d[0] + p[1] * d[1] + p[2] * d[2]) / ((Math.hypot(...p) * Math.hypot(...d)) || 1);
+        m.braking = cos < -0.3;                              // opposite push = braking; same way = speeding up again
+      }
+    }
+    return false;
+  }
+  m.push = { ms: 0, x: 0, y: 0, z: 0, used: false };
+  if (smooth < STILL_ACCEL && raw < STILL_JITTER) m.stillMs += dt * 1000; else m.stillMs = 0;
+  if (m.braking && m.stillMs >= STILL_NEEDED_MS) {
+    m.depart = null; m.braking = false; m.stillMs = 0;
+    return true;
+  }
+  return false;
+}
+
+// A detected train stop: move one station on if GPS is lost and the next station is underground.
+function handleTrainStop(now = Date.now()) {
+  if (!currentRoutePath || currentRoutePath.length < 2) return false;
+  if (!isGpsWeak(now)) return false;
+  if (now - lastUndergroundAdvanceTime < MIN_STATION_HOP_MS) return false;
+  const nextIdx = currentStationIndexOnRoute + 1;
+  if (nextIdx >= currentRoutePath.length) return false;
+  const nextStation = currentRoutePath[nextIdx];
+  if (!isUndergroundStation(nextStation)) return false;
+
+  currentStationIndexOnRoute = nextIdx;
+  pendingRouteRecoveryIndex = null;
+  lastRouteMovementDirection = null;
+  lastUndergroundAdvanceTime = now;
+  undergroundEstimateTime = now;
+  currentNearestStation = nextStation;
+  currentNearestStationDistanceMeters = 0;
+  currentLiveStatus = 'HERE';
+  if (typeof document !== 'undefined') {
+    updateLiveDistanceStatus('0 m', nextStation);
+    checkDestinationAlarm(currentNearestStation, 0);
+    renderMetroMap();
+    updateCurrentRouteScheduleFromSelection();
+  }
+  return true;
+}
+
+function onDeviceMotion(event) {
+  const a = event.acceleration;
+  if (!a || a.x == null) return;
+  if (processMotionSample(Date.now(), a.x, a.y || 0, a.z || 0)) handleTrainStop();
+}
+
+function startMotionTracking() {
+  if (motionListening || typeof window === 'undefined' || !('DeviceMotionEvent' in window)) return;
+  const listen = () => {
+    if (motionListening) return;
+    window.addEventListener('devicemotion', onDeviceMotion);
+    motionListening = true;
+  };
+  // iPhone asks for motion access once, and only from a tap.
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    const ask = () => {
+      DeviceMotionEvent.requestPermission().then(state => { if (state === 'granted') listen(); }).catch(() => {});
+    };
+    document.addEventListener('click', ask, { once: true });
+  } else {
+    listen();
+  }
+}
+
 // Render dynamic status tag for timeline steps
 function getLiveStatusTag(station) {
   if (!currentLiveStatus) return '';
@@ -1139,6 +1283,7 @@ function calculateRoute(isGpsUpdate = false) {
     stopActiveAlarm(); // Stop active alarm sound/modal when destination/route changes
     currentStationIndexOnRoute = 0;
     pendingRouteRecoveryIndex = null;
+    resetUndergroundEstimate();
     if (!isGpsUpdate) {
       selectedTrainIndex = 0;
       selectedTrainTimestamp = null;
@@ -1209,6 +1354,7 @@ function updateRouteFromInputs(isDynamicUpdate = false) {
   selectedTrainTimestamp = null;
   currentStationIndexOnRoute = 0;
   pendingRouteRecoveryIndex = null;
+  resetUndergroundEstimate();
   const quickContainer = document.getElementById('quick-schedules-container');
   if (quickContainer) quickContainer.style.display = 'none';
 
@@ -1222,6 +1368,7 @@ function showBoardingDirections() {
   selectedTrainTimestamp = null;
   currentStationIndexOnRoute = 0;
   pendingRouteRecoveryIndex = null;
+  resetUndergroundEstimate();
   updatePanelVisibility();
 
   const fromInput = document.getElementById('from-input');
@@ -1260,7 +1407,9 @@ function updateLiveDistanceStatus(distanceLabel, nearestStation) {
 
   if (nearestStation) {
     let statusText = 'Nearest station:';
-    if (currentLiveStatus === 'HERE') {
+    if (currentLiveStatus === 'HERE' && isUndergroundEstimateActive()) {
+      nextStatusText = `Underground, no GPS: train stopped at <strong>${nearestStation}</strong> (counted from train stops).`;
+    } else if (currentLiveStatus === 'HERE') {
       statusText = 'You are at';
     } else if (currentLiveStatus === 'LEAVING') {
       const currentStation = currentRoutePath[currentStationIndexOnRoute];
@@ -1313,6 +1462,12 @@ function applyDetectedPosition(position, statusDiv) {
     // Jumps can't be undone, so a recovery needs an accurate fix confirmed by the next one.
     const accuracy = position.coords.accuracy;
     const fixIsAccurate = accuracy == null || accuracy <= ROUTE_RECOVERY_MAX_ACCURACY_METERS;
+    if (fixIsAccurate) {
+      lastAccurateFixTime = currentTime;
+      undergroundEstimateTime = null;
+    } else if (isUndergroundEstimateActive(currentTime)) {
+      return; // A rough tunnel fix must not overwrite the station counted from train stops.
+    }
     const recoveryIdx = fixIsAccurate ? findRouteRecoveryIndex(userLat, userLng, activeIdx) : -1;
     if (recoveryIdx >= 0 && pendingRouteRecoveryIndex !== null && recoveryIdx >= pendingRouteRecoveryIndex) {
       activeIdx = recoveryIdx;
@@ -2181,6 +2336,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (yearEl) yearEl.innerText = new Date().getFullYear();
 
   startGPSLiveTracking();
+  startMotionTracking();
 });
 
 function initAudioContext() {
