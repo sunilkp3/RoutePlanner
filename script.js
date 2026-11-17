@@ -38,7 +38,8 @@ let selectedTrainTimestamp = null;
 const JOURNEY_REFRESH_INTERVAL_MS = 15000;
 const PROXIMITY_THRESHOLD_METERS = 200; // 200m threshold for APPROACHING
 const HERE_THRESHOLD_METERS = 75; // 75m threshold for YOU ARE HERE
-const ROUTE_RECOVERY_MAX_ACCURACY_METERS = 150; // Coarser fixes can't move route progress past a station
+const ROUTE_HERE_METERS = 150; // On a journey: platforms are ~140 m long and in-coach GPS is off by 50-100 m
+const ROUTE_RECOVERY_MAX_ACCURACY_METERS = 250; // Coarser fixes can't move route progress past a station
 const ROUTE_CORRIDOR_METERS = 300; // Max distance from the route line to count as riding on it
 const ROUTE_PASSED_MARGIN_METERS = 100; // Distance beyond a station before it counts as passed
 
@@ -417,7 +418,7 @@ function findNearestStationForCoordinates(lat, lng) {
 function findRouteRecoveryIndex(lat, lng, activeIdx) {
   for (let i = currentRoutePath.length - 1; i >= activeIdx + 2; i--) {
     const coords = STATIONS[currentRoutePath[i]];
-    if (coords && getDistanceInKm(lat, lng, coords.lat, coords.lng) * 1000 <= HERE_THRESHOLD_METERS) return i;
+    if (coords && getDistanceInKm(lat, lng, coords.lat, coords.lng) * 1000 <= ROUTE_HERE_METERS) return i;
   }
 
   // Otherwise locate the rider on the route line, station to station.
@@ -480,6 +481,7 @@ const BRAKE_NEEDED_MS = 4000;             // Braking time needed before a stop c
 const STILL_NEEDED_MS = 10000;            // Standing time needed to count a stop (doors open ~20-30 s)
 
 let lastAccurateFixTime = null;
+let routeReachedAt = {};                  // route index -> time the rider was actually there (re-times the rest)
 let undergroundEstimateTime = null;       // When the current station was estimated from a stop
 let lastUndergroundAdvanceTime = 0;
 let motionListening = false;
@@ -498,7 +500,12 @@ function isUndergroundEstimateActive(now = Date.now()) {
   return undergroundEstimateTime !== null && now - undergroundEstimateTime <= ESTIMATE_HOLD_MS;
 }
 
+function markRouteReached(idx, now = Date.now()) {
+  if (idx >= 0 && routeReachedAt[idx] === undefined) routeReachedAt[idx] = now;
+}
+
 function resetUndergroundEstimate() {
+  routeReachedAt = {};
   undergroundEstimateTime = null;
   lastUndergroundAdvanceTime = 0;
   motionPhase = { depart: null, braking: false, stillMs: 0, push: { ms: 0, x: 0, y: 0, z: 0, used: false } };
@@ -558,6 +565,7 @@ function handleTrainStop(now = Date.now()) {
   if (!isUndergroundStation(nextStation)) return false;
 
   currentStationIndexOnRoute = nextIdx;
+  markRouteReached(nextIdx, now);
   pendingRouteRecoveryIndex = null;
   lastRouteMovementDirection = null;
   lastUndergroundAdvanceTime = now;
@@ -1148,6 +1156,8 @@ function updateRouteScheduleView(schedules) {
       const extraMins = isPrevInterchange ? 5 : 2.5;
       runningTime = new Date(runningTime.getTime() + extraMins * 60000);
     }
+    // Once the rider has actually been at a station, its time is the real one and later stops follow from it.
+    if (i > 0 && routeReachedAt[i] !== undefined) runningTime = new Date(routeReachedAt[i]);
 
     const timeTagHTML = upcomingRoute
       ? (STATIONS[station].line === "Pink Line" ? `<span class="arrival-time-tag upcoming-tag">From 13 Nov</span>` : '')
@@ -1493,6 +1503,7 @@ function applyDetectedPosition(position, statusDiv) {
     if (recoveryIdx >= 0 && pendingRouteRecoveryIndex !== null && recoveryIdx >= pendingRouteRecoveryIndex) {
       activeIdx = recoveryIdx;
       currentStationIndexOnRoute = recoveryIdx;
+      markRouteReached(recoveryIdx, currentTime);
       lastRouteMovementDirection = 'FORWARD';
       pendingRouteRecoveryIndex = null;
     } else {
@@ -1509,13 +1520,15 @@ function applyDetectedPosition(position, statusDiv) {
     const nextDist = nextCoords ? (getDistanceInKm(userLat, userLng, nextCoords.lat, nextCoords.lng) * 1000) : Infinity;
     const movingTowardsNext = nextCoords && isMovingTowardsStation(previousUserLat, previousUserLng, userLat, userLng, nextCoords);
 
-    if (nextIdx > activeIdx && nextDist <= HERE_THRESHOLD_METERS) {
+    if (nextIdx > activeIdx && nextDist <= ROUTE_HERE_METERS) {
       currentStationIndexOnRoute = nextIdx;
+      markRouteReached(nextIdx, currentTime);
       nearestStation = nextStation;
       minDistanceMeters = nextDist;
       computedStatus = 'HERE';
       lastRouteMovementDirection = null;
-    } else if (currDist <= HERE_THRESHOLD_METERS) {
+    } else if (currDist <= ROUTE_HERE_METERS) {
+      markRouteReached(activeIdx, currentTime);
       nearestStation = currStation;
       minDistanceMeters = currDist;
 
