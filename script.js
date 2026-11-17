@@ -574,6 +574,24 @@ function handleTrainStop(now = Date.now()) {
   return true;
 }
 
+// No usable GPS on an active journey: say so plainly instead of showing a stale or wrong station.
+// The "You are here" dot moves to the right station as soon as an accurate fix comes back.
+function showNoGpsStatus(now = Date.now()) {
+  if (!currentRoutePath || currentRoutePath.length < 2 || !isTracking) return false;
+  if (!isGpsWeak(now) || isUndergroundEstimateActive(now)) return false;
+  const statusDiv = document.getElementById('gps-status');
+  if (!statusDiv) return false;
+  const here = currentRoutePath[currentStationIndexOnRoute];
+  const next = currentRoutePath[currentStationIndexOnRoute + 1];
+  const underground = isUndergroundStation(here) || (next && isUndergroundStation(next));
+  const text = `${underground ? 'Underground, no GPS signal.' : 'No GPS signal right now.'} Last seen at <strong>${here}</strong>. Waiting for signal: the "You are here" dot moves to the right station when GPS comes back.`;
+  if (text !== lastRenderedLiveStatusText) {
+    statusDiv.innerHTML = text;
+    lastRenderedLiveStatusText = text;
+  }
+  return true;
+}
+
 function onDeviceMotion(event) {
   const a = event.acceleration;
   if (!a || a.x == null) return;
@@ -1467,6 +1485,9 @@ function applyDetectedPosition(position, statusDiv) {
       undergroundEstimateTime = null;
     } else if (isUndergroundEstimateActive(currentTime)) {
       return; // A rough tunnel fix must not overwrite the station counted from train stops.
+    } else if (isGpsWeak(currentTime)) {
+      showNoGpsStatus(currentTime);
+      return; // A rough fix (tunnel, cell tower) is not trusted to place the rider.
     }
     const recoveryIdx = fixIsAccurate ? findRouteRecoveryIndex(userLat, userLng, activeIdx) : -1;
     if (recoveryIdx >= 0 && pendingRouteRecoveryIndex !== null && recoveryIdx >= pendingRouteRecoveryIndex) {
@@ -2337,6 +2358,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   startGPSLiveTracking();
   startMotionTracking();
+  setInterval(() => showNoGpsStatus(), 5000);
 });
 
 function initAudioContext() {
