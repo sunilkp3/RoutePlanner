@@ -38,6 +38,7 @@ let selectedTrainTimestamp = null;
 const JOURNEY_REFRESH_INTERVAL_MS = 15000;
 const PROXIMITY_THRESHOLD_METERS = 200; // 200m threshold for APPROACHING
 const HERE_THRESHOLD_METERS = 75; // 75m threshold for YOU ARE HERE
+const ROUTE_STOPPED_NEAR_METERS = 250; // Train standing still this close to a station = at that station
 const ROUTE_HERE_METERS = 150; // On a journey: platforms are ~140 m long and in-coach GPS is off by 50-100 m
 const ROUTE_RECOVERY_MAX_ACCURACY_METERS = 250; // Coarser fixes can't move route progress past a station
 const ROUTE_CORRIDOR_METERS = 300; // Max distance from the route line to count as riding on it
@@ -481,10 +482,12 @@ const BRAKE_NEEDED_MS = 4000;             // Braking time needed before a stop c
 const STILL_NEEDED_MS = 10000;            // Standing time needed to count a stop (doors open ~20-30 s)
 
 let lastAccurateFixTime = null;
+let departedRouteIdx = null;               // Route index the train has been sensed leaving (GPS still lags behind)
 let routeReachedAt = {};                  // route index -> time the rider was actually there (re-times the rest)
 let undergroundEstimateTime = null;       // When the current station was estimated from a stop
 let lastUndergroundAdvanceTime = 0;
 let motionListening = false;
+let motionDeparted = false;               // Set by the detector when the train pulls away
 let motionSmooth = { x: 0, y: 0, z: 0, t: null, shake: 0 };
 let motionPhase = { depart: null, braking: false, stillMs: 0, push: { ms: 0, x: 0, y: 0, z: 0, used: false } };
 
@@ -506,6 +509,7 @@ function markRouteReached(idx, now = Date.now()) {
 
 function resetUndergroundEstimate() {
   routeReachedAt = {};
+  departedRouteIdx = null;
   undergroundEstimateTime = null;
   lastUndergroundAdvanceTime = 0;
   motionPhase = { depart: null, braking: false, stillMs: 0, push: { ms: 0, x: 0, y: 0, z: 0, used: false } };
@@ -537,6 +541,7 @@ function processMotionSample(t, ax, ay, az) {
       const p = [m.push.x, m.push.y, m.push.z];
       if (!m.depart) {
         m.depart = p; m.braking = false;                     // train pulls away
+        motionDeparted = true;
       } else {
         const d = m.depart;
         const cos = (p[0] * d[0] + p[1] * d[1] + p[2] * d[2]) / ((Math.hypot(...p) * Math.hypot(...d)) || 1);
@@ -557,7 +562,7 @@ function processMotionSample(t, ax, ay, az) {
 // A detected train stop: move one station on if GPS is lost and the next station is underground.
 function handleTrainStop(now = Date.now()) {
   if (!currentRoutePath || currentRoutePath.length < 2) return false;
-  if (!isGpsWeak(now)) return false;
+  if (!isGpsWeak(now)) return markStoppedAboveGround(now);
   if (now - lastUndergroundAdvanceTime < MIN_STATION_HOP_MS) return false;
   const nextIdx = currentStationIndexOnRoute + 1;
   if (nextIdx >= currentRoutePath.length) return false;
@@ -600,10 +605,55 @@ function showNoGpsStatus(now = Date.now()) {
   return true;
 }
 
+// Above ground: the train has just stopped and the (lagging) GPS puts us near the next station = we are there.
+function markStoppedAboveGround(now = Date.now()) {
+  if (currentLiveStatus === 'HERE') return false;      // GPS already has us at a station
+  const nextIdx = currentStationIndexOnRoute + 1;
+  if (nextIdx >= currentRoutePath.length || lastUserLat == null) return false;
+  const station = currentRoutePath[nextIdx];
+  const c = STATIONS[station];
+  if (!c || getDistanceInKm(lastUserLat, lastUserLng, c.lat, c.lng) * 1000 > 450) return false;
+  currentStationIndexOnRoute = nextIdx;
+  markRouteReached(nextIdx, now);
+  departedRouteIdx = null;
+  lastRouteMovementDirection = null;
+  currentNearestStation = station;
+  currentNearestStationDistanceMeters = 0;
+  currentLiveStatus = 'HERE';
+  if (typeof document !== 'undefined') {
+    updateLiveDistanceStatus('0 m', station);
+    checkDestinationAlarm(station, 0);
+    renderMetroMap();
+    updateCurrentRouteScheduleFromSelection();
+  }
+  return true;
+}
+
+// The train has just pulled away: stop saying "You are here" even though GPS still places us at the platform.
+function handleTrainDepart() {
+  if (!currentRoutePath || currentRoutePath.length < 2 || currentLiveStatus !== 'HERE') return false;
+  const idx = currentStationIndexOnRoute;
+  if (idx >= currentRoutePath.length - 1) return false;
+  departedRouteIdx = idx;
+  lastRouteMovementDirection = 'FORWARD';
+  currentLiveStatus = 'LEAVING';
+  const next = currentRoutePath[idx + 1];
+  currentNearestStation = next;
+  const c = STATIONS[next];
+  const d = (c && lastUserLat != null) ? getDistanceInKm(lastUserLat, lastUserLng, c.lat, c.lng) * 1000 : 0;
+  currentNearestStationDistanceMeters = d;
+  if (typeof document !== 'undefined') {
+    updateLiveDistanceStatus(getDistanceLabel(d), next);
+    renderMetroMap();
+  }
+  return true;
+}
+
 function onDeviceMotion(event) {
   const a = event.acceleration;
   if (!a || a.x == null) return;
   if (processMotionSample(Date.now(), a.x, a.y || 0, a.z || 0)) handleTrainStop();
+  if (motionDeparted) { motionDeparted = false; handleTrainDepart(); }
 }
 
 function startMotionTracking() {
@@ -1520,15 +1570,26 @@ function applyDetectedPosition(position, statusDiv) {
     const nextDist = nextCoords ? (getDistanceInKm(userLat, userLng, nextCoords.lat, nextCoords.lng) * 1000) : Infinity;
     const movingTowardsNext = nextCoords && isMovingTowardsStation(previousUserLat, previousUserLng, userLat, userLng, nextCoords);
 
-    if (nextIdx > activeIdx && nextDist <= ROUTE_HERE_METERS) {
+    // GPS positions trail the train by 20-30 s, so the phone's speed (and the motion sensors, see
+    // handleTrainStop / handleTrainDepart) decide arrival and departure as they happen.
+    const speed = (position.coords.speed != null && position.coords.speed >= 0) ? position.coords.speed : null;
+    const stopped = speed !== null && speed < 1;
+    const moving = speed !== null && speed > 3;
+    const arrivedNext = nextIdx > activeIdx && ((nextDist <= ROUTE_HERE_METERS && !moving) || (stopped && nextDist <= ROUTE_STOPPED_NEAR_METERS));
+    const stillAtCurrent = (currDist <= ROUTE_HERE_METERS && !moving && departedRouteIdx !== activeIdx)
+      || (stopped && currDist <= ROUTE_STOPPED_NEAR_METERS);
+
+    if (arrivedNext) {
       currentStationIndexOnRoute = nextIdx;
       markRouteReached(nextIdx, currentTime);
+      departedRouteIdx = null;
       nearestStation = nextStation;
       minDistanceMeters = nextDist;
       computedStatus = 'HERE';
       lastRouteMovementDirection = null;
-    } else if (currDist <= ROUTE_HERE_METERS) {
+    } else if (stillAtCurrent) {
       markRouteReached(activeIdx, currentTime);
+      if (stopped) departedRouteIdx = null;
       nearestStation = currStation;
       minDistanceMeters = currDist;
 
@@ -1538,13 +1599,14 @@ function applyDetectedPosition(position, statusDiv) {
       nearestStation = nextStation;
       minDistanceMeters = nextDist;
 
-      if (movingTowardsNext) {
+      if (movingTowardsNext || (moving && currDist <= ROUTE_HERE_METERS)) {
         lastRouteMovementDirection = 'FORWARD';
       }
+      if (moving && currDist <= ROUTE_HERE_METERS) departedRouteIdx = activeIdx;
 
       // Keep a confirmed direction through GPS jitter. The active station only
       // changes after the next station's HERE threshold is reached.
-      if (lastRouteMovementDirection === 'FORWARD') {
+      if (lastRouteMovementDirection === 'FORWARD' || departedRouteIdx === activeIdx) {
         computedStatus = 'LEAVING';
       } else {
         computedStatus = null;
